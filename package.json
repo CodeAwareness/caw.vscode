@@ -1,0 +1,76 @@
+{
+	"name": "code-awareness",
+	"displayName": "Code Awareness",
+	"description": "Connect your work.",
+	"version": "0.0.1",
+	"engines": {
+		"vscode": "^1.62.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onCommand:codeAwareness.helloWorld"
+	],
+	"browser": "./dist/web/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "codeAwareness.helloWorld",
+				"title": "Hello World"
+			}
+		]
+	},
+	"scripts": {
+		"test": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js",
+		"pretest": "npm run compile-web",
+		"vscode:prepublish": "npm run package-web",
+		"compile-web": "webpack",
+		"watch-web": "webpack --watch",
+		"package-web": "webpack --mode production --devtool hidden-source-map",
+		"lint": "eslint src --ext ts",
+		"run-in-browser": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. ."
+	},
+	"devDependencies": {
+		"@types/axios": "^0.14.0",
+		"@types/dotenv": "^8.2.0",
+		"@types/jest": "^27.0.3",
+		"@types/lodash": "^4.14.177",
+		"@types/mocha": "^9.0.0",
+		"@types/vscode": "^1.62.0",
+		"@types/webpack-env": "^1.16.3",
+		"@typescript-eslint/eslint-plugin": "^5.4.0",
+		"@typescript-eslint/parser": "^5.4.0",
+		"@vscode/test-web": "^0.0.15",
+		"assert": "^2.0.0",
+		"babel-jest": "^27.4.5",
+		"eslint": "^8.2.0",
+		"eslint-config-standard": "^16.0.3",
+		"eslint-plugin-import": "^2.25.2",
+		"eslint-plugin-jest": "^25.2.2",
+		"eslint-plugin-node": "^11.1.0",
+		"eslint-plugin-promise": "^5.1.1",
+		"eslint-plugin-security": "^1.4.0",
+		"eslint-watch": "^7.0.0",
+		"husky": "^7.0.4",
+		"jest": "^27.4.5",
+		"lint-staged": "^12.1.4",
+		"mocha": "^9.1.3",
+		"path": "^0.12.7",
+		"process": "^0.11.10",
+		"ts-jest": "^27.1.2",
+		"ts-loader": "^9.2.6",
+		"tsconfig-paths": "^3.12.0",
+		"typescript": "^4.4.4",
+		"webpack": "^5.64.1",
+		"webpack-cli": "^4.9.1"
+	},
+	"dependencies": {
+		"axios": "^0.24.0",
+		"dotenv": "^10.0.0",
+		"form-data": "^4.0.0",
+		"lodash": "^4.17.21",
+		"socket.io-client": "^4.4.0",
+		"vscode-nls": "^5.0.0"
+	}
+}
