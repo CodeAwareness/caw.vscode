@@ -16,6 +16,8 @@ const SYNC_INTERVAL = 1000 * 100 // download diffs from the server every minute 
 // Diffs: SYNC_THRESHOLD gives the throttling interval for sending and receiving diffs
 const SYNC_THRESHOLD = 1000 // avoid too many send/receive requests per second
 
+const MAX_NR_OF_SHA_TO_COMPARE = 100
+
 const LOG_LEVEL = process.env.LOG_LEVEL || 'debug' // ['verbose', 'debug', 'error']
 
 // EXTRACT_BRANCH_DIR where we extract the file from a specific branch, to be compared with the activeTextEditor
@@ -33,13 +35,14 @@ const EXTRACT_PEER_DIR = 'e'
 export {
   API_URL,
   CONFIGURATION_FILE,
+  CΩ_SCHEMA,
   EXT_URL,
   EXTRACT_BRANCH_DIR,
   EXTRACT_LOCAL_DIR,
   EXTRACT_PEER_DIR,
   EXTRACT_REPO_DIR,
   LOG_LEVEL,
-  CΩ_SCHEMA,
+  MAX_NR_OF_SHA_TO_COMPARE,
   PORT_LOCAL,
   SERVER_WSS,
   SYNC_INTERVAL,

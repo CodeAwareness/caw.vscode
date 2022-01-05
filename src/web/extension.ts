@@ -1,4 +1,5 @@
 import * as vscode from 'vscode'
+import * as _ from 'lodash'
 
 import { CΩStatusbar } from '@/vscode/statusbar'
 import { setupCommands } from '@/vscode/commands'
@@ -8,7 +9,11 @@ import { initConfig, initializeFolderFromConfigurationFile } from '@/lib/setting
 import { CΩWorkspace } from '@/lib/cΩ.workspace'
 import { TDP } from '@/lib/cΩ.tdp'
 import { CΩAPI } from '@/lib/cΩ.api'
-import { CΩStore } from '@/lib/cΩ.store'
+import { CΩStore, TProject } from '@/lib/cΩ.store'
+import { CΩPanel } from '@/lib/cΩ.panel'
+import { CΩDiffs } from '@/lib/cΩ.diffs'
+import { CΩEditor } from '@/lib/cΩ.editor'
+import { CΩSCM } from '@/lib/cΩ.scm'
 
 let activated: boolean // extension activated
 const deactivateTasks: Array<any> = [] // keeping track of all the disposables
@@ -43,6 +48,7 @@ export function deactivate() {
 
 function initCodeAwareness(context: vscode.ExtensionContext) {
   // TODO: when no projects / repos available we should skip init; at the moment we are getting "cannot read property 'document' of undefined
+  console.log('INIT CODE AWARENESS')
   activated = true
   initConfig()
   CΩStatusbar.init()
@@ -130,15 +136,15 @@ function setupWatchers(context: vscode.ExtensionContext) {
    * User changing the code inside the activeTextEditor
    ************************************************************************************/
   const refreshLines = _.throttle(CΩWorkspace.refreshLines, 2000, { leading: false, trailing: true })
-  subscriptions.push(onDidChangeTextDocument(params => {
-    if (!activeTextEditor) return
+  subscriptions.push(vscode.workspace.onDidChangeTextDocument(params => {
+    if (!CΩStore.activeTextEditor) return
     refreshLines(params)
   }))
 
   /************************************************************************************
    * User saving the activeTextEditor
    ************************************************************************************/
-  subscriptions.push(onDidSaveTextDocument(e => {
+  subscriptions.push(vscode.workspace.onDidSaveTextDocument(e => {
     // TODO: some throttle mechanism to make sure we're only sending at most once per some configured interval (subscription plan related)
     // use delay to allow the system to do other things like build and stuff, and prevent excessive use (peaks) of CPU
     const project = CΩStore.projects.filter(p => e.uri.path.toLowerCase().includes(p.root.toLowerCase()))[0]
@@ -150,12 +156,12 @@ function setupWatchers(context: vscode.ExtensionContext) {
   /************************************************************************************
    * User switching to a different file
    ************************************************************************************/
-  onDidChangeActiveTextEditor((editor) => {
+  vscode.window.onDidChangeActiveTextEditor((editor: vscode.TextEditor | undefined) => {
     if (!editor || editor.document.uri.path.includes(CΩStore.tmpDir.name)) return
     CΩEditor
       .setActiveEditor(editor)
       .then(CΩWorkspace.refreshChanges)
-      .catch(err => console.log(err.toString()))
+      .catch((err: any) => console.log(err.toString()))
   })
 
   /************************************************************************************
@@ -164,19 +170,19 @@ function setupWatchers(context: vscode.ExtensionContext) {
    * Also, when closing a Diff window, VSCode triggers this event for the original source file. (!)
    * TODO: find another workaround
    ************************************************************************************/
-  subscriptions.push(onDidChangeVisibleTextEditors(params => {
-    if (!activeTextEditor) return
+  subscriptions.push(vscode.window.onDidChangeVisibleTextEditors(params => {
+    if (!CΩStore.activeTextEditor) return
     CΩWorkspace.closeTextDocument(params)
   }))
 
   /************************************************************************************
    * initial SCM setup
    ************************************************************************************/
-  const folders = workspace.workspaceFolders.map(w => w.uri.path)
+  const folders = vscode.workspace.workspaceFolders?.map(w => w.uri.path)
   if (!folders) return
 
   CΩSCM.createProjects({ folders })
-    .then(projects => projects.map(p => subscriptions.push(p)))
+    .then((projects: Array<TProject>) => projects.map(p => subscriptions.push(p)))
 
   /************************************************************************************
    * VSCode Telemetry

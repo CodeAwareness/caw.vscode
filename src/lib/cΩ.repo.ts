@@ -1,19 +1,28 @@
-import { vscodeOriginalResource } from '../vscode/vscode'
+import * as vscode from 'vscode'
+import { CΩ_SCHEMA } from '@/config'
+
+type TNamePath = {
+  name: string
+  path: string
+}
 
 const CΩRepository = {
-  createFrom(wsFolder) {
+  createFrom(wsFolder: vscode.WorkspaceFolder) {
     return new Repository(wsFolder)
   },
 }
 
 class Repository {
-  constructor(wsFolder) {
-    this.root = wsFolder
+  root: string
+
+  constructor(wsFolder: vscode.WorkspaceFolder) {
+    this.root = wsFolder.uri.path
   }
 
-  provideOriginalResource({ name, path }) {
+  provideOriginalResource(options: TNamePath) {
+    const { name, path } = options
     if (!name) return ''
-    return vscodeOriginalResource({ name, path })
+    return vscode.Uri.parse(`${CΩ_SCHEMA}:${name}/${path}`)
   }
 
   get workspaceFolder() {

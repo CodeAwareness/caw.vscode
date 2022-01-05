@@ -1,9 +1,9 @@
+import * as vscode from 'vscode'
 import axios from 'axios'
 
 // We use https for direct API calls, and WSS for local service communication
 import { API_URL, SERVER_WSS } from '../config'
 import { wsIO } from './wsio'
-import { showInformationMessage } from '../vscode/vscode'
 
 import { CΩStore } from './cΩ.store'
 
@@ -80,7 +80,7 @@ function reAuthorize(text: string) {
 function logout(reject?: any, msg?: string, err?: any) {
   CΩStore.user = undefined
   CΩStore.tokens = undefined
-  showInformationMessage(`Disconnected from CΩ. ${msg}`)
+  vscode.window.showInformationMessage(`Disconnected from CΩ. ${msg}`)
 
   if (reject) reject(err)
 }

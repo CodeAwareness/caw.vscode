@@ -10,7 +10,7 @@ type TDiffRange = {
   replaceLen: number,
 }
 
-type TChanges = {
+export type TChanges = {
   l: Array<number>, // line numbers containing changes
   s: string, // sha against which the changes are compiled
   k: string, // the peer file url (stored on S3 or something)
@@ -47,6 +47,7 @@ export type TProject = {
   selectedContributor: TContributor, // currently selected contributor for diffs
   activePath: string, // current file being worked on (active editor)
   line: number, // current cursor line
+  dispose: () => any,
 }
 
 /* peerFS: {
@@ -94,6 +95,7 @@ export const CΩStore = {
   tokens: undefined as TTokens | undefined,
   sockets: {} as any,
   panel: undefined as any,
+  activeTextEditor: null,
 
   /* tmpDir: {
    *   name: '/tmp/peer8_-12750-bA2Le6JKQ4Ad/'

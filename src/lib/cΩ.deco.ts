@@ -1,17 +1,83 @@
+import * as vscode from 'vscode'
 import * as _ from 'lodash'
-
-import { getActiveTextEditor, getEditorDocPath, setDecorations } from '../vscode/vscode'
 
 import { logger } from './logger'
 import { CΩStore } from './cΩ.store'
+import { CΩPanel } from './cΩ.panel'
 
-let lastUri
+let lastUri: string
 // TODO: make 2000 wait time into a configurable value
 const insertAfterSomeTime = _.throttle(doInsert, 2000, { trailing: true })
 const insertThenWaitSomeTime = _.throttle(doInsert, 2000, { leading: true })
+const getEditorDocPath = (editor: vscode.TextEditor) => editor.document.uri.path
 
-function insertDecorations(leading) {
-  const editor = getActiveTextEditor()
+type TEditorRanges = {
+  editor: vscode.TextEditor
+  ranges: Array<any> // TODO
+}
+
+const rulerDecorationType = vscode.window.createTextEditorDecorationType({
+  isWholeLine: true,
+  overviewRulerColor: 'red',
+  overviewRulerLane: vscode.OverviewRulerLane.Right,
+  light: {
+    borderColor: 'darkred',
+  },
+  dark: {
+    borderColor: 'lightred',
+  },
+})
+
+const changeDecorationType = vscode.window.createTextEditorDecorationType({
+  isWholeLine: true,
+  light: {
+    backgroundColor: '#00b1a420',
+  },
+  dark: {
+    backgroundColor: '#00b1a420',
+  },
+})
+
+const peerDecorationType = vscode.window.createTextEditorDecorationType({
+  isWholeLine: true,
+  light: {
+    backgroundColor: '#ffdd34',
+  },
+  dark: {
+    backgroundColor: '#1f1cc2',
+  },
+})
+
+const mergeDecorationType = vscode.window.createTextEditorDecorationType({
+  isWholeLine: true,
+  light: {
+    backgroundColor: '#ffc000',
+  },
+  dark: {
+    backgroundColor: '#141299',
+  },
+})
+
+function setDecorations(options: TEditorRanges) {
+  const { editor, ranges } = options
+  if (!ranges || !editor) return
+  const vsRanges = ranges.map(range => {
+    return new vscode.Range(
+      new vscode.Position(Math.max(0, range[0][0] - 1), 0),
+      new vscode.Position(Math.max(0, range[1][0] - 1), 180),
+    )
+  })
+
+  const isPanelOpen = !!CΩPanel.hasPanel()
+  // logger.info('setDecorations ranges', ranges, isPanelOpen)
+  editor.setDecorations(changeDecorationType, isPanelOpen ? vsRanges : [])
+  editor.setDecorations(rulerDecorationType, vsRanges)
+  if (!isPanelOpen) editor.setDecorations(mergeDecorationType, [])
+}
+
+function insertDecorations(leading: boolean) {
+  const editor = CΩStore.activeTextEditor
+  if (!editor) return
   const uri = getEditorDocPath(editor)
   logger.log('DECO: (leading, uri, lastUri)', leading, uri, lastUri)
   if (uri !== lastUri) {
@@ -23,17 +89,20 @@ function insertDecorations(leading) {
   lastUri = uri
 }
 
-function doInsert(uri) {
+function doInsert(uri: string) {
   const project = CΩStore.activeProject
+  const editor = CΩStore.activeTextEditor
+  if (!project || !editor) return
   const fpath = uri.substr(project.root.length + 1)
-  const editor = getActiveTextEditor()
   logger.log('DECO: doInsert (project, uri, fpath)', project, uri, fpath)
-  if (!project || !project.changes || !project.changes[fpath]) return setDecorations({ editor, ranges: [] })
-  const alines = project.changes[fpath].alines
+  if (!project || !project.changes || !project.changes[fpath]) {
+    return setDecorations({ editor, ranges: [] })
+  }
+  const alines: Record<string, any> = project.changes[fpath].alines
   logger.log('DECO: doInsert linesHash', alines)
   const linesHash = Object.keys(alines)
-    .reduce((acc, sha) => {
-      alines[sha].map(line => (acc[line] = 1))
+    .reduce((acc: Record<string, number>, sha: string) => {
+      alines[sha].map((line: number) => (acc[line] = 1))
       return acc
     }, {})
   const lines = Object.keys(linesHash)
@@ -42,7 +111,8 @@ function doInsert(uri) {
 }
 
 function clear() {
-  const editor = getActiveTextEditor()
+  const editor = CΩStore.activeTextEditor
+  if (!editor) return
   setDecorations({ editor, ranges: [] })
 }
 
