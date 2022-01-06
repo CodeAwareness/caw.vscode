@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { LOG_LEVEL } from '../config.js'
+import { LOG_LEVEL } from '@/config'
 
 /* eslint-disable @typescript-eslint/no-empty-function */
 if (LOG_LEVEL === 'none') {

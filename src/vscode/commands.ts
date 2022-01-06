@@ -1,15 +1,14 @@
+import * as vscode from 'vscode'
 import * as _ from 'lodash'
-import { basename } from 'path'
-
-import { registerCommand, executeCommand, getWorkspaceFolder, uriFile, uriFromPath } from './vscode'
 
 import { logger } from '@/lib/logger'
-import { EXTRACT_PEER_DIR } from '@/config'
 
-import { CΩPanel     } from '@/lib/cA.panel'
-import { CΩDiffs     } from '@/lib/cA.diffs'
+import { CΩPanel } from '@/lib/cΩ.panel'
+import { CΩDiffs } from '@/lib/cΩ.diffs'
 
-function setupCommands(context) {
+const { registerCommand } = vscode.commands
+
+function setupCommands(context: vscode.ExtensionContext) {
   context.subscriptions.push(registerCommand('CΩ.toggle', function() {
     CΩPanel.toggle(context)
   }))
@@ -19,11 +18,11 @@ function setupCommands(context) {
   }))
 
   context.subscriptions.push(registerCommand('CΩ.nextContributor', function() {
-    CΩDiffs.cycleContribution()
+    // CΩDiffs.cycleContribution()
   }))
 
   context.subscriptions.push(registerCommand('CΩ.prevContributor', function() {
-    CΩDiffs.cycleContribution(true)
+    // CΩDiffs.cycleContribution(true)
   }))
 
   context.subscriptions.push(registerCommand('CΩ.nextContribution', function(...rest) {
@@ -36,7 +35,7 @@ function setupCommands(context) {
 
   context.subscriptions.push(registerCommand('CΩ.mergeSlice', function(...rest) {
     logger.log('COMMAND: mergeSlice request received', rest)
-    CΩDiffs.mergeSlice()
+    // CΩDiffs.mergeSlice()
   }))
 
   context.subscriptions.push(registerCommand('CΩ.mergeAll', function() {
@@ -57,7 +56,7 @@ function setupCommands(context) {
 
   context.subscriptions.push(registerCommand('CΩ.openFile', function({ resourceUri }, ...rest) {
     logger.log('COMMAND: openFile request received', resourceUri, rest)
-    executeCommand('vscode.open', resourceUri)
+    vscode.commands.executeCommand('vscode.open', resourceUri)
   }))
 
   context.subscriptions.push(registerCommand('CΩ.selectRange', function() {

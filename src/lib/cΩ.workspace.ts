@@ -1,19 +1,20 @@
 import * as vscode from 'vscode'
 import * as _ from 'lodash'
+import * as fs from 'fs'
 
-import { getActiveTextEditor, getCode, setDirty, workspace } from '../vscode/vscode'
-
-import { SYNC_INTERVAL } from '../config'
+import { SYNC_INTERVAL } from '@/config'
 import { logger } from './logger'
 
-import { CΩStore, CΩWork } from './cΩ.store'
+import { CΩStore, CΩWork, TContributor, TProject } from './cΩ.store'
 
+import { CΩEditor, TCΩEditor } from './cΩ.editor'
 import { CΩDeco   } from './cΩ.deco'
 import { CΩPanel  } from './cΩ.panel'
-import { CΩEditor } from './cΩ.editor'
 import { CΩAPI    } from './cΩ.api'
+import { CΩWS     } from './cΩ.ws'
 import { CΩDiffs  } from './cΩ.diffs'
-import { CΩSCM    } from './cΩ.scm'
+
+const isWindows = !!process.env.ProgramFiles
 
 function init() {
   CΩDiffs.init()
@@ -30,7 +31,7 @@ function dispose() {
 
 function setupTempFiles() {
   // TODO: get tmpDir from localService
-  CΩAPI.localGET('/tmpDir')
+  CΩWS.transmit('repo:getTmpDir')
     .then((data: any) => {
       CΩStore.tmpDir = data.tmpDir
       logger.info('WORKSPACE: temporary folder used: ', CΩStore.tmpDir)
@@ -107,15 +108,16 @@ function syncProject() {
  *
  * Download changes from the server, update decorations, sync webview
  ************************************************************************************/
-function refreshChanges(filePath: string) {
-  if (!filePath) filePath = CΩStore.activeProject?.activePath
+function refreshChanges(filePath?: string | void) {
+  const fPath = filePath || CΩStore.activeProject?.activePath
+  if (!fPath) return // TODO: maybe handle this
   logger.log('WORKSPACE: refreshChanges (editorFilePath, activeProject, user, tmp)', filePath, CΩStore.activeProject, CΩStore.user, CΩStore.tmpDir)
   if (!CΩStore.activeProject || !CΩStore.user) return Promise.resolve()
-  if (CΩStore.tmpDir && filePath.includes(CΩStore.tmpDir)) return Promise.resolve() // Looking at a vscode.diff window
+  if (CΩStore.tmpDir && fPath.includes(CΩStore.tmpDir?.name)) return Promise.resolve() // Looking at a vscode.diff window
   const project = CΩStore.activeProject
   syncSCM(project)
   return CΩDiffs
-    .refreshChanges(project, project.activePath)
+    .refreshChanges(project, project.activePath as string)
     .then(syncProject)
 }
 
@@ -130,12 +132,16 @@ function syncSCM(project: TProject) {
   logger.log('WORKSPACE: syncSCM start', project, CΩStore.user)
   if (!project || !project.cSHA || !CΩStore.user) return Promise.resolve()
   const { origin, root } = project
+  return Promise.resolve()
+  /*
+   * TODO:
   return CΩAPI
     .getRepo(origin)
     .then(({ data }) => {
       if (!data.contribs) return
       data.contribs.map(f => CΩSCM.addFile(root, f))
     })
+   */
 }
 
 /************************************************************************************
@@ -166,11 +172,14 @@ function syncSCM(project: TProject) {
  * 4: changes: [2, 1], 2 (lines > 2 => max(2, line + 1))     Marked: 1, 2, 9, 10, 18
  * 5: changes: [12, 1], 1 (lines > 12 => max(12, line -1))   Marked: 1, 2, 9, 10, 17
  ************************************************************************************/
-function refreshLines({ contentChanges }) {
+function refreshLines(options: any) {
+  const contentChanges: any[] = options.contentChanges
+  if (!contentChanges) return // TODO: maybe handle this better
   if (!CΩStore.activeProject || !CΩStore.user || !contentChanges.length) return Promise.resolve()
   // TODO: maybe use the `document` object we receive along with contentChanges, to ensure correct project / fpath selection
   const project = CΩStore.activeProject
   const fpath = project.activePath
+  if (!fpath) return Promise.reject()
   // TODO: why sometimes we make a change, but we receive an empty contentChanges array?
   // logger.log('WORKSPACE: contentChanges', contentChanges)
   contentChanges.map(change => {
@@ -182,6 +191,7 @@ function refreshLines({ contentChanges }) {
     const endLineChar = isWindows ? '\r\n' : /\n|\r/
     const replaceLen = change.text.split(endLineChar).length - 1 // subtract 1 to eliminate the last carriage return char
     const range = {
+      // @ts-expect-error Issue with this trick i'm using
       line: startLine + 1 - (!startChar && !(endChar - startChar)), // convert from VSCode zero index line numbers; and subtract 1 if it's line 0, char 0
       len: endLine - startLine,
     }
@@ -199,6 +209,7 @@ function refreshLines({ contentChanges }) {
     }
   })
   CΩDeco.insertDecorations(true)
+  return Promise.resolve()
 }
 
 /************************************************************************************
@@ -206,7 +217,7 @@ function refreshLines({ contentChanges }) {
  *
  * (cleanup)
  ************************************************************************************/
-function closeTextDocument(params) {
+function closeTextDocument(params: any) {
   console.log('WORKSPACE: closeTextDocument', params)
 }
 
@@ -216,18 +227,20 @@ function closeTextDocument(params) {
  * @param number - cursor line number
  * @param object - the active document uri (VSCode object)
  ************************************************************************************/
-function setupRepoFrom({ line, uri }) {
+function setupRepoFrom(options: any): Promise<void> {
+  const { line, uri } = options
   const normUri = uri.toLowerCase() // TODO: is there a better way to do this for Windows? We sometimes get /c://some/dir and sometimes /C://some/dir (!)
-  const roots = _.filter(CΩStore.projects, p => normUri.includes(p.root.toLowerCase()))
+  const roots = _.filter(CΩStore.projects, p => normUri.includes(p.root.toLowerCase())) as TProject[]
   logger.info('WORKSPACE: setupRepoFrom (uri, projects)', uri, CΩStore.projects, roots)
   if (!roots || !roots.length) {
     CΩPanel.postMessage({ command: 'setMode', data: { mode: 'empty' } })
     return Promise.reject(new Error(`File is not part of any projects in your workspaces: ${uri}`))
   }
+  // Select the project with the deepest match (longest path match)
   CΩStore.activeProject = roots.reduce((r, item) => {
     if (item.root.length > r.root.length) r = item
     return r
-  }, { root: '' })
+  }, { root: '', dispose: () => {} })
   if (!CΩStore.activeProject) throw logger.error('WORKSPACE: (setupRepoFrom): File is not part of an active repository') // TODO: cleanup this repo instead ?
   CΩStore.activeProject.activePath = getRelativePath(uri)
   CΩStore.activeProject.line = line
@@ -240,7 +253,8 @@ function setupRepoFrom({ line, uri }) {
   return Promise.resolve()
 }
 
-function getRelativePath(uri) {
+function getRelativePath(uri: string) {
+  if (!CΩStore.activeProject?.root) return // TODO: maybe handle this better
   return uri.substr(CΩStore.activeProject.root.length + 1) // TODO: make a relative URI maybe ?
 }
 
@@ -257,18 +271,27 @@ function highlight() {
   // TODO: highlight changes existing at peers
 }
 
+const getCode = (editor: TCΩEditor) => editor.document.getText()
+
 function saveCode() {
-  const existingCode = getCode(getActiveTextEditor())
-  setDirty(false)
-  return writeFile(_tmpFile, existingCode)
-    .then(() => _tmpFile)
+  if (!CΩStore.activeTextEditor) return Promise.reject() // TODO:
+  const existingCode = getCode(CΩStore.activeTextEditor)
+  // TODO:
+  return Promise.resolve()
 }
 
 function getSavedCode() {
-  return readFile(_tmpFile).catch(err => null && err)
+  // TODO: return readFile(_tmpFile).catch(err => null && err)
 }
 
-function cycleThroughUsers({ users, reverse }) {
+type TUsersCycle = {
+  users: any
+  reverse: boolean
+}
+
+function cycleThroughUsers(options: TUsersCycle) {
+  const { users, reverse } = options
+  if (!users?.length) return null
   let sel = getSelectedContributor()
   if (sel) {
     let i = 0
@@ -281,12 +304,12 @@ function cycleThroughUsers({ users, reverse }) {
   } else {
     sel = users[0]
   }
-  selectContributor(sel)
+  selectContributor(sel as TContributor)
 
   return sel
 }
 
-function selectContributor(ct) {
+function selectContributor(ct: TContributor) {
   CΩStore.selectedContributor = ct
   CΩPanel.postMessage({ command: 'selectedContributor', data: { selectedContributor: ct } })
 }
@@ -296,45 +319,12 @@ function getSelectedContributor() {
 }
 
 /************************************************************************************
- * AdHoc sharing a file or the entire folder of the currently opened file.
- *
- * Share file will send the entire file, zipped, to CodeAwareness where it will be stores in an
- * S3 bucket, with a uniquely generated path that can be shared with other people.
- *
- * Share folder will first create a git archive of the folder, effectively duplicating the folder
- * into a temporary location. Then, its .git folder will be zipped and sent to CodeAwareness.
- *
- * @param Array - a list of names for the groups to be created.
- ************************************************************************************/
-function receiveShared(invitation) {
-  return CΩDiffs.receiveShared(invitation)
-}
-
-/**
- * TODO: how to decide whether it's adhoc mode or repo mode, next time when we open the same project?
- * One idea would be to store a token inside .cΩ config file. This sould be simple enough, but we're already adding a .git folder.
- * For a PowerPoint it's not even possible, because it rewrites the entire structure upon saving the file.
- */
-function shareFile({ groups }) {
-  return CΩDiffs
-    .shareFile(CΩStore.activeProject.activePath, groups)
-    .then(data => {
-      CΩPanel.postMessage({ command: 'setMode', data: { mode: 'adhoc' } })
-    })
-}
-
-function shareFolder(groups) {
-  return CΩDiffs.shareFolder(CΩStore.activeProject.root, groups, CΩStore.activeProject.activePath)
-}
-
-/************************************************************************************
  * Export module
  ************************************************************************************/
 export const CΩWorkspace = {
   closeTextDocument,
   cycleThroughUsers,
   dispose,
-  getActiveTmpFile,
   getRelativePath,
   getSavedCode,
   getSelectedContributor,
@@ -348,8 +338,6 @@ export const CΩWorkspace = {
   setupRepoFrom,
   setupWorker,
   setupTempFiles,
-  shareFile,
-  shareFolder,
   syncProject,
   syncWithServer,
 }

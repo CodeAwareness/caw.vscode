@@ -75,7 +75,7 @@ function setDecorations(options: TEditorRanges) {
   if (!isPanelOpen) editor.setDecorations(mergeDecorationType, [])
 }
 
-function insertDecorations(leading: boolean) {
+function insertDecorations(leading?: boolean) {
   const editor = CΩStore.activeTextEditor
   if (!editor) return
   const uri = getEditorDocPath(editor)

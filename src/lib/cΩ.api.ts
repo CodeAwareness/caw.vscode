@@ -2,7 +2,7 @@ import * as vscode from 'vscode'
 import axios from 'axios'
 
 // We use https for direct API calls, and WSS for local service communication
-import { API_URL, SERVER_WSS } from '../config'
+import { API_URL } from '@/config'
 import { wsIO } from './wsio'
 
 import { CΩStore } from './cΩ.store'
@@ -14,8 +14,6 @@ const API_REPO_COMMITS        = '/repos/commits'
 const API_REPO_COMMON_SHA     = '/repos/common-sha'
 const API_REPO_CONTRIB        = '/repos/contrib'
 const API_SHARE_ACCEPT        = '/share/accept'
-
-wsIO.init()
 
 axios.defaults.adapter = require('axios/lib/adapters/http')
 const axiosAPI = axios.create({ baseURL: API_URL })
@@ -101,8 +99,13 @@ const receiveShared = (link: string) => {
   return axiosAPI.get(`${API_SHARE_ACCEPT}?i=${link}`)
 }
 
+function init() {
+  wsIO.init()
+}
+
 const CΩAPI = {
   clearAuth,
+  init,
   login,
   logout,
   receiveShared,

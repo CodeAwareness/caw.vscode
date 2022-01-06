@@ -26,6 +26,7 @@ function init() {
     reconnectionDelayMax: 10000,
     timestampRequests: true,
   })
+  CΩStore.sockets.rootSocket = rootSocket
 
   console.log('initializing sockets')
   rootSocket.on('connect', () => {

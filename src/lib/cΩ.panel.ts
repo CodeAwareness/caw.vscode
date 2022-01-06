@@ -2,10 +2,9 @@ import axios from 'axios'
 import * as vscode from 'vscode'
 import * as path from 'path'
 
-import { EXT_URL } from '../config'
+import { EXT_URL } from '@/config'
 import { logger } from './logger'
 import { locale } from './locale'
-import { setupIPC } from './ipc'
 
 import { CΩStore } from './cΩ.store'
 import { CΩWorkspace } from './cΩ.workspace'
@@ -86,7 +85,6 @@ function toggle(context: vscode.ExtensionContext) {
   return getWebviewContent(panel.webview, EXT_URL)
     .then(() => {
       CΩEditor.focusTextEditor()
-      setupIPC(panel.webview, context)
       panel.onDidDispose(dispose, undefined, context.subscriptions)
       panel.onDidChangeViewState((state: vscode.WindowState) => CΩPanel.didChangeViewState(state), undefined, context.subscriptions)
     })

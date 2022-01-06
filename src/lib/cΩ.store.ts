@@ -1,19 +1,22 @@
 import * as vscode from 'vscode'
+import * as fs from 'fs'
+
+import { TCΩEditor } from '@/lib/cΩ.editor'
 
 let panel: vscode.WebviewPanel | undefined
 
 type TDiffRange = {
   range: {
-    range: number,
+    line: number,
     len: number, // len: 0 indicates an insert op
   },
   replaceLen: number,
 }
 
 export type TChanges = {
-  l: Array<number>, // line numbers containing changes
-  s: string, // sha against which the changes are compiled
-  k: string, // the peer file url (stored on S3 or something)
+  l?: Array<number>, // line numbers containing changes
+  s?: string, // sha against which the changes are compiled
+  k?: string, // the peer file url (stored on S3 or something)
 }
 
 export type TContributor = {
@@ -28,25 +31,25 @@ export type TContributor = {
 }
 
 export type TProject = {
-  name: string,
+  name?: string,
   root: string,
-  origin: string,
-  repo: any, // TODO: TRepo
-  branch: string,
-  branches: Array<string>,
-  scm: vscode.SourceControl,
-  scIndex: any, // TODO: type of VSCode SCM index
-  team: string, // team name
-  head: string, // HEAD sha
-  cSHA: string, // common SHA
-  contributors: Array<string>, // list of repo contributors
-  pendingGitDiff: boolean, // indicates when the local git diff operation is pending
-  gitDiff: Record<string, TDiffRange>, // caching here the git diffs
-  editorDiff: Record<string, Array<TDiffRange>>, // the editor diffs
-  changes: Record<string, Record<string, TChanges>>, // peer diffs
-  selectedContributor: TContributor, // currently selected contributor for diffs
-  activePath: string, // current file being worked on (active editor)
-  line: number, // current cursor line
+  origin?: string,
+  repo?: any, // TODO: TRepo
+  branch?: string,
+  branches?: Array<string>,
+  scm?: vscode.SourceControl,
+  scIndex?: any, // TODO: type of VSCode SCM index
+  team?: string, // team name
+  head?: string, // HEAD sha
+  cSHA?: string, // common SHA
+  contributors?: Record<string, TContributor[]>, // list of repo contributors
+  pendingGitDiff?: boolean, // indicates when the local git diff operation is pending
+  gitDiff?: Record<string, TDiffRange>, // caching here the git diffs
+  editorDiff?: Record<string, Array<TDiffRange>>, // the editor diffs
+  changes?: Record<string, Record<string, TChanges>>, // peer diffs as changes[uri]
+  selectedContributor?: TContributor, // currently selected contributor for diffs
+  activePath?: string, // current file being worked on (active editor)
+  line?: number, // current cursor line
   dispose: () => any,
 }
 
@@ -93,9 +96,17 @@ export const CΩStore = {
   colorTheme: 1 as 1 | 2 | 3, // 1 = Light, 2 = Dark, 3 = High Contrast
   user: undefined as TUser | undefined,
   tokens: undefined as TTokens | undefined,
-  sockets: {} as any,
+  sockets: {
+    userSocket: undefined as any | undefined,
+    repoSocket: undefined as any | undefined,
+    rootSocket: undefined as any | undefined,
+  },
   panel: undefined as any,
-  activeTextEditor: null,
+  activeTextEditor: null as TCΩEditor | null,
+  activeContext: {
+    uri: '',
+    dirty: false,
+  },
 
   /* tmpDir: {
    *   name: '/tmp/peer8_-12750-bA2Le6JKQ4Ad/'

@@ -55,7 +55,7 @@ function removeProject(wsFolder: vscode.WorkspaceFolder) {
   if (!project) return
 
   CΩStore.projects = CΩStore.projects.filter(m => m.origin !== project.origin)
-  project.scm.dispose()
+  project.scm?.dispose()
   project.scIndex.dispose()
 
   TDP.removePeerWorkspace(wsFolder)
@@ -70,8 +70,8 @@ function clearProject(project: TProject) {
  * CΩ SCM only has one resource group, which contains all changes.
  * There are no commits, as we always handle merging manually.
  */
-function createProjects(folders: Array<vscode.WorkspaceFolder>) {
-  if (!folders) return CΩStore.projects
+function createProjects(folders: Array<vscode.WorkspaceFolder>): Promise<TProject[]> {
+  if (!folders) return Promise.resolve(CΩStore.projects)
   const promises = folders.map(addProject)
   promises.concat(folders.map(addSubmodules))
   return Promise.all(promises)

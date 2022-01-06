@@ -4,7 +4,7 @@ import * as _ from 'lodash'
 
 import {  MAX_NR_OF_SHA_TO_COMPARE, SYNC_THRESHOLD } from '@/config'
 import { logger } from './logger'
-import { CΩStore, TChanges, TProject } from './cΩ.store'
+import { CΩStore, TChanges, TProject, TTmpDir } from './cΩ.store'
 
 const PENDING_DIFFS: Record<string, boolean> = {}
 const isWindows = !!process.env.ProgramFiles
@@ -15,14 +15,10 @@ const isWindows = !!process.env.ProgramFiles
  * At this time we're only setting up one thing: an empty file that we'll use to
  * create unified diffs against untracked git files.
  ************************************************************************************/
-let emptyFile: string
-let tmpDir: string
-let adhocDir: string
+let tmpDir: TTmpDir
 
 function init() {
-  tmpDir = CΩStore.tmpDir.name
-  emptyFile = path.join(tmpDir, 'empty.p8')
-  adhocDir = path.join(tmpDir, 'adhoc')
+  tmpDir = CΩStore.tmpDir
 }
 
 /************************************************************************************
@@ -118,7 +114,7 @@ function refreshChanges(project: TProject, fpath: string) {
       return getLinesChangedLocaly(project, fpath)
     })
     .then(() => {
-      logger.log('DIFFS: will shift markers (changes)', project.changes[fpath])
+      logger.log('DIFFS: will shift markers (changes)', project.changes && project.changes[fpath])
       shiftWithGitDiff(project, fpath)
       shiftWithLiveEdits(project, fpath) // include editing operations since the git diff was initiated
       delete PENDING_DIFFS[fpath] // pending diffs complete
@@ -167,7 +163,10 @@ function getLinesChangedLocaly(project: TProject, fpath: string) {
  */
 function shiftWithGitDiff(project: TProject, fpath: string) {
   // logger.log('DIFFS: shiftWithGitDiff (project.gitDiff, fpath, project.changes)', project.gitDiff, fpath, project.changes[fpath])
-  if (!project.gitDiff || !project.gitDiff[fpath] || !project.changes[fpath]) return
+  if (
+    !project.gitDiff || !Object.keys(project.gitDiff[fpath]).length
+    || !project.changes || !Object.keys(project.changes[fpath]).length
+  ) return
 
   const shas = Object.keys(project.changes[fpath].l).slice(0, MAX_NR_OF_SHA_TO_COMPARE)
   shas.map((sha: string) => {
@@ -175,23 +174,25 @@ function shiftWithGitDiff(project: TProject, fpath: string) {
     const gitDiff: Record<string, any> = project.gitDiff && project.gitDiff[fpath] || {}
     const lines = changes.filter((change: TChanges) => change.s === sha)[0]?.l || []
     const localLines = gitDiff[sha] || []
-    project.changes[fpath][sha].l = shiftLineMarkers(lines, localLines)
+    if (!project.changes![fpath][sha]) project.changes![fpath][sha] = {}
+    project.changes![fpath][sha].l = shiftLineMarkers(lines, localLines)
     // logger.log('DIFFS: shiftWithGitDiff (localLines, alines, fpath)', localLines, project.changes[fpath].alines, fpath)
   })
 }
 
 function shiftWithLiveEdits(project: TProject, fpath: string) {
-  if (!project.changes || !project.changes[fpath]) return
+  if (!project.changes || !Object.keys(project.changes[fpath]).length) return
   const shas = Object.keys(project.changes[fpath].alines).slice(0, MAX_NR_OF_SHA_TO_COMPARE)
   const { editorDiff } = project
   if (!editorDiff || !editorDiff[fpath]) return
 
   const liveLines = editorDiff[fpath]
   shas.map(sha => {
-    const lines = project.changes[fpath][sha].l || []
+    if (!project.changes![fpath][sha]) project.changes![fpath][sha] = {}
+    const lines = project.changes![fpath][sha]?.l || []
     editorDiff[fpath] = []
-    project.changes[fpath][sha].l = shiftLineMarkers(lines, liveLines)
-    // logger.log('DIFFS: shiftWithLiveEdits (liveLines, alines)', liveLines, project.changes[fpath].alines)
+    project.changes![fpath][sha].l = shiftLineMarkers(lines, liveLines)
+    // logger.log('DIFFS: shiftWithLiveEdits (liveLines, alines)', liveLines, project.changes![fpath])
   })
 }
 

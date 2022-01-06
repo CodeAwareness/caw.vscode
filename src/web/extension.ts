@@ -4,30 +4,25 @@ import * as _ from 'lodash'
 import { CΩStatusbar } from '@/vscode/statusbar'
 import { setupCommands } from '@/vscode/commands'
 
-import { CΩ_SCHEMA } from '@/config'
 import { initConfig, initializeFolderFromConfigurationFile } from '@/lib/settings'
 import { CΩWorkspace } from '@/lib/cΩ.workspace'
 import { TDP } from '@/lib/cΩ.tdp'
 import { CΩAPI } from '@/lib/cΩ.api'
 import { CΩStore, TProject } from '@/lib/cΩ.store'
 import { CΩPanel } from '@/lib/cΩ.panel'
-import { CΩDiffs } from '@/lib/cΩ.diffs'
-import { CΩEditor } from '@/lib/cΩ.editor'
+import { CΩEditor, TCΩEditor } from '@/lib/cΩ.editor'
 import { CΩSCM } from '@/lib/cΩ.scm'
 
-let activated: boolean // extension activated
+let activated: boolean // extension activated !
 const deactivateTasks: Array<any> = [] // keeping track of all the disposables
 const logger = console
 
+console.log('EXTENSION HERE')
+
 export function activate(context: vscode.ExtensionContext) {
+  console.log('ACTIVATED EXTENSION CODE AWARENESS')
   // The commandId parameter must match the command field in package.json
-  const disposable = vscode.commands.registerCommand('codeAwareness.helloWorld', () => {
-
-    // Display a message box to the user
-    // vscode.window.showInformationMessage('Hello World from Code Awareness in a web extension host!')
-  })
-
-  context.subscriptions.push(disposable)
+  initCodeAwareness(context)
 }
 
 // this method is called when your extension is deactivated
@@ -51,6 +46,7 @@ function initCodeAwareness(context: vscode.ExtensionContext) {
   console.log('INIT CODE AWARENESS')
   activated = true
   initConfig()
+  CΩAPI.init()
   CΩStatusbar.init()
   CΩWorkspace.init()
   setupCommands(context)
@@ -148,9 +144,12 @@ function setupWatchers(context: vscode.ExtensionContext) {
     // TODO: some throttle mechanism to make sure we're only sending at most once per some configured interval (subscription plan related)
     // use delay to allow the system to do other things like build and stuff, and prevent excessive use (peaks) of CPU
     const project = CΩStore.projects.filter(p => e.uri.path.toLowerCase().includes(p.root.toLowerCase()))[0]
+    // TODO:
+    /*
     CΩDiffs
       .sendDiffs(project)
       .then(CΩWorkspace.refreshChanges)
+      */
   }))
 
   /************************************************************************************
@@ -158,8 +157,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
    ************************************************************************************/
   vscode.window.onDidChangeActiveTextEditor((editor: vscode.TextEditor | undefined) => {
     if (!editor || editor.document.uri.path.includes(CΩStore.tmpDir.name)) return
-    CΩEditor
-      .setActiveEditor(editor)
+    CΩEditor.setActiveEditor(editor as TCΩEditor)
       .then(CΩWorkspace.refreshChanges)
       .catch((err: any) => console.log(err.toString()))
   })
@@ -178,11 +176,11 @@ function setupWatchers(context: vscode.ExtensionContext) {
   /************************************************************************************
    * initial SCM setup
    ************************************************************************************/
-  const folders = vscode.workspace.workspaceFolders?.map(w => w.uri.path)
+  const folders = vscode.workspace.workspaceFolders as vscode.WorkspaceFolder[]
   if (!folders) return
 
-  CΩSCM.createProjects({ folders })
-    .then((projects: Array<TProject>) => projects.map(p => subscriptions.push(p)))
+  CΩSCM.createProjects(folders)
+    .then((projects: Array<TProject>) => projects.map((p: TProject) => subscriptions.push(p)))
 
   /************************************************************************************
    * VSCode Telemetry
