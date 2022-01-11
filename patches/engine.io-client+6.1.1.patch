@@ -1,0 +1,31 @@
+diff --git a/node_modules/engine.io-client/build/cjs/socket.js b/node_modules/engine.io-client/build/cjs/socket.js
+index 70bc48a..d058bfe 100644
+--- a/node_modules/engine.io-client/build/cjs/socket.js
++++ b/node_modules/engine.io-client/build/cjs/socket.js
+@@ -85,26 +85,6 @@ class Socket extends component_emitter_1.Emitter {
+         this.pingTimeout = null;
+         // set on heartbeat
+         this.pingTimeoutTimer = null;
+-        if (typeof addEventListener === "function") {
+-            if (this.opts.closeOnBeforeunload) {
+-                // Firefox closes the connection when the "beforeunload" event is emitted but not Chrome. This event listener
+-                // ensures every browser behaves the same (no "disconnect" event at the Socket.IO level when the page is
+-                // closed/reloaded)
+-                addEventListener("beforeunload", () => {
+-                    if (this.transport) {
+-                        // silently close the transport
+-                        this.transport.removeAllListeners();
+-                        this.transport.close();
+-                    }
+-                }, false);
+-            }
+-            if (this.hostname !== "localhost") {
+-                this.offlineEventListener = () => {
+-                    this.onClose("transport close");
+-                };
+-                addEventListener("offline", this.offlineEventListener, false);
+-            }
+-        }
+         this.open();
+     }
+     /**

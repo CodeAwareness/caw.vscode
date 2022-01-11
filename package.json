@@ -260,6 +260,7 @@
     "axios": "^0.24.0",
     "form-data": "^4.0.0",
     "lodash": "^4.17.21",
+    "patch-package": "^6.4.7",
     "socket.io-client": "^4.4.1",
     "vscode-nls": "^5.0.0"
   }
