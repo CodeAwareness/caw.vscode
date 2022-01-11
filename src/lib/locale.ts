@@ -1,10 +1,12 @@
+import * as vscode from 'vscode'
 import { config as nlsConfig, MessageFormat as nlsMessageFormat } from 'vscode-nls'
 
 function getLocale() {
-  return JSON.parse(process.env.VSCODE_NLS_CONFIG as string).locale || 'en'
+  // console.log('vscode locale', vscode.env?.language, vscode.env)
+  return vscode.env.language || 'en'
 }
 
-const localize = nlsConfig({ messageFormat: nlsMessageFormat.file })()
+const localize = nlsConfig({ messageFormat: nlsMessageFormat.file, locale: getLocale() })()
 
 const AVAILABLE_LOCALES = ['en', 'ja'] // TODO: add more (server side translations)
 const editorLocale = getLocale()
