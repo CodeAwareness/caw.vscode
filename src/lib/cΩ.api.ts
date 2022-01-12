@@ -3,7 +3,7 @@ import axios from 'axios'
 
 // We use https for direct API calls, and WSS for local service communication
 import { API_URL } from '@/config'
-import { wsIO } from './cΩ.ws'
+import { CΩWS } from './cΩ.ws'
 
 import { CΩStore } from './cΩ.store'
 
@@ -100,7 +100,7 @@ const receiveShared = (link: string) => {
 }
 
 function init() {
-  wsIO.init()
+  CΩWS.init()
 }
 
 const CΩAPI = {

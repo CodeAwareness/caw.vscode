@@ -3,11 +3,12 @@ import * as path from 'path'
 const DEBUG = !process.argv?.length
 console.log('CONFIG PROCESS ARGV (DEBUG)', DEBUG, process.argv, process)
 
-const PORT_LOCAL = 8886
+const PORT_GARDENER_LOCAL = 8886
+const PORT_WEB_LOCAL = 8887
 const CONFIGURATION_FILE = '.CΩ'
 const CΩ_SCHEMA = 'codeAwareness'
-const EXT_URL = DEBUG ? `http://localhost:${PORT_LOCAL}` : 'https://ext.codeawareness.com' // CΩ Webview server
-const API_URL = DEBUG ? `http://localhost:${PORT_LOCAL}/api/v1` : 'https://api.codeawareness.com/v1'
+const EXT_URL = DEBUG ? `https://codeawareness.local:${PORT_WEB_LOCAL}` : 'https://ext.codeawareness.com' // CΩ Webview server
+const API_URL = DEBUG ? `http://localhost:${PORT_GARDENER_LOCAL}/api/v1` : 'https://api.codeawareness.com/v1'
 const SERVER_WSS = DEBUG ? 'ws://localhost:48408' : 'wss://api.codeawareness.com'
 const SERVER_VERSION = 'v1'
 
@@ -44,7 +45,8 @@ export {
   EXTRACT_REPO_DIR,
   LOG_LEVEL,
   MAX_NR_OF_SHA_TO_COMPARE,
-  PORT_LOCAL,
+  PORT_GARDENER_LOCAL,
+  PORT_WEB_LOCAL,
   SERVER_VERSION,
   SERVER_WSS,
   SYNC_INTERVAL,

@@ -109,11 +109,11 @@ function init() {
   })
 }
 
-const wsIO = {
+const CΩWS = {
   init,
   transmit,
 }
 
 export {
-  wsIO,
+  CΩWS,
 }
