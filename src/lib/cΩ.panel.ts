@@ -95,6 +95,7 @@ const axiosEXT = axios.create({ baseURL: EXT_URL })
 
 function getWebviewContent(webview: vscode.Webview, extURL: string) {
   webview.html = '<h1>Loading...</h1>'
+  console.log('WEBVIEW', extURL)
   return axiosEXT.get(extURL + `/index.${locale}.html`)
     .then(response => (webview.html = response.data))
     .catch(err => {

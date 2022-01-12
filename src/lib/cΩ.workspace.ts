@@ -31,6 +31,7 @@ function dispose() {
 
 function setupTempFiles() {
   // TODO: get tmpDir from localService
+  console.log('setupTempFiles (repo:getTmpDir)')
   CΩWS.transmit('repo:getTmpDir')
     .then((data: any) => {
       CΩStore.tmpDir = data.tmpDir

@@ -2,7 +2,8 @@ import * as vscode from 'vscode'
 import { config as nlsConfig, MessageFormat as nlsMessageFormat } from 'vscode-nls'
 
 function getLocale() {
-  // console.log('vscode locale', vscode.env?.language, vscode.env)
+  console.log('vscode locale', vscode.env?.language, vscode.env)
+  console.log('vscode process', process)
   return vscode.env.language || 'en'
 }
 

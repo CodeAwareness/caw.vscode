@@ -1,7 +1,8 @@
 import io from 'socket.io-client'
+import { SERVER_VERSION, SERVER_WSS } from '@/config'
 
+import { logger } from './logger'
 import { CΩStore } from './cΩ.store'
-import { SERVER_WSS } from '@/config'
 
 /*
  * Exponential wait for connection ready
@@ -14,6 +15,17 @@ const expDelay = () => {
 
 const resetDelay = () => {
   _delay = 200
+}
+
+const socketOptions = {
+  reconnectionDelayMax: 10000,
+  forceNew: true,
+  transports: ['websocket'],
+  // @ts-ignore: No overload matches this call.
+  origins: ['*'],
+  withCredentials: true,
+  timestampRequests: true,
+  auth: { token: CΩStore.tokens?.access?.token },
 }
 
 /*
@@ -56,93 +68,52 @@ const transmit = (action: string, data = undefined) => {
   })
 }
 
-const authRoute = {
-  init: (): void => {
-    /* TODO:
-    const socket = CΩStore.sockets.userSocket
-    socket.on('auth:info', authController.info)
-    socket.on('auth:logout', authController.logout)
-    // TODO: direct sync (without roundtrip to API)
-    socket.on('local:auth:sync', authController.sync)
-    */
-  },
-}
+function connectNamespace(nsp: any) {
+  socketOptions.auth = { token: CΩStore.tokens?.access?.token }
+  const socket = io(`${SERVER_WSS}/${nsp}`, socketOptions )
 
-const repoRoute = {
-  init: (): void => {
-    /* TODO:
-    const socket = CΩStore.sockets.repoSocket
-    socket.on('repo:add', repoController.add)
-    socket.on('repo:remove', repoController.remove)
-    socket.on('repo:add-submodules', repoController.addSubmodules)
-    socket.on('repo:remove-submodules', repoController.removeSubmodules)
-    */
-  },
-}
-
-const router = {
-  init: (): void => {
-    authRoute.init()
-    repoRoute.init()
-  },
-}
-
-const init = (): Promise<void> => {
-  const rootSocket = CΩStore.sockets.rootSocket || CΩWS.reconnect()
-
-  return new Promise((resolve, reject) => {
-    let connected: boolean
-    setTimeout(() => {
-      if (!connected) reject(new Error('Could not connect to websocket for 5 seconds'))
-    }, 5000)
-
-    rootSocket.on('connect', () => {
-      console.log('Websocket CONNECT. Assigning to rootSocket', rootSocket.auth)
-      // auth(socket) // TODO: secure this server connection a bit more than just CORS
-      router.init()
-      connected = true
-      resolve()
-    })
-
-    // TODO: type reason
-    rootSocket.on('disconnect', (reason: any) => {
-      console.log('WSIO rootSocket DISCONNECT', reason)
-      return CΩWS.reconnect()
-    })
-
-    rootSocket.onAny((ev: any) => console.log('SOCKET DATA', ev))
-    rootSocket.prependAny((ev: any) => console.log('SOCKET WILL EMIT', ev))
-
-    rootSocket.on('CΩ', (e: any) => console.log('CODE_AWARENESS EVENT', e))
-    rootSocket.on('error', (err: any) => console.error(err.description?.message))
-    rootSocket.on('connect_error', (e: any) => console.log('WSIO ERROR rootSocket', e))
-  })
-}
-
-const reconnect = (): any => {
-  console.log('WSIO RECONNECT')
-  // TODO: SECURITY: origin: [SERVER_WSS],
-  const rootSocket = io(SERVER_WSS, {
-    reconnectionDelayMax: 10000,
-    forceNew: true,
-    transports: ['websocket'],
-    // @ts-ignore: No overload matches this call.
-    origins: ['*'],
-    withCredentials: true,
-    timestampRequests: true,
-    auth: { token: CΩStore.tokens?.access?.token },
+  socket.on('connection', () => {
+    console.log(`${nsp} socket connection ready`)
   })
 
+  socket.on('reconnect', () => {
+    console.log(`${nsp} socket reconnected`, socket)
+  })
+
+  socket.on('error', console.error)
+
+  return Promise.resolve(socket)
+}
+
+function init() {
+  socketOptions.auth = { token: CΩStore.tokens?.access?.token }
+  const rootSocket = io(`${SERVER_WSS}/${SERVER_VERSION}`, socketOptions)
   CΩStore.sockets.rootSocket = rootSocket
-  return rootSocket
+
+  console.log('initializing sockets on', SERVER_WSS, SERVER_VERSION)
+  rootSocket.on('connect', () => {
+    console.log('rootSocket CONNECT received')
+    connectNamespace('users')
+      .then(socket => {
+        socket.on('connect', () => { logger.log('socketUser connected') })
+        socket.on('cameOnline', ev => logger.log('USER cameOnline', ev))
+        CΩStore.sockets.userSocket = socket
+      })
+
+    connectNamespace('repos')
+      .then(socket => {
+        socket.on('connect', () => { logger.log('socketRepo connected') })
+        socket.on('updateAvailable', m => console.log('repoSocket update available', m))
+        CΩStore.sockets.repoSocket = socket
+      })
+  })
 }
 
-export const CΩWS = {
+const wsIO = {
   init,
-  reconnect,
   transmit,
+}
 
-  reqHandler: (_req: any, _res: any, next: any): void => {
-    next()
-  },
+export {
+  wsIO,
 }

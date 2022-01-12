@@ -17,10 +17,7 @@ let activated: boolean // extension activated !
 const deactivateTasks: Array<any> = [] // keeping track of all the disposables
 const logger = console
 
-console.log('EXTENSION HERE')
-
 export function activate(context: vscode.ExtensionContext) {
-  console.log('ACTIVATED EXTENSION CODE AWARENESS')
   // The commandId parameter must match the command field in package.json
   initCodeAwareness(context)
 }
@@ -43,7 +40,6 @@ export function deactivate() {
 
 function initCodeAwareness(context: vscode.ExtensionContext) {
   // TODO: when no projects / repos available we should skip init; at the moment we are getting "cannot read property 'document' of undefined
-  console.log('INIT CODE AWARENESS')
   activated = true
   initConfig()
   CΩAPI.init()
@@ -51,7 +47,7 @@ function initCodeAwareness(context: vscode.ExtensionContext) {
   CΩWorkspace.init()
   setupCommands(context)
   setupWatchers(context)
-  logger.info('PEER8_EXTENSION: extension activated (workspaceFolders)', vscode.workspace.workspaceFolders)
+  logger.info('CODEAWARENESS_EXTENSION: extension activated (workspaceFolders)', vscode.workspace.workspaceFolders)
 }
 
 /************************************************************************************
@@ -90,7 +86,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
   // Sync workspace folders
   subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(e => {
     if (!activated) initCodeAwareness(context)
-    logger.info('PEER8_EXTENSION: onDidChangeWorkspaceFolders (events)', e)
+    logger.info('CODEAWARENESS_EXTENSION: onDidChangeWorkspaceFolders (events)', e)
     // TODO: can we not mix promises and try catch?
     try {
       e.added.forEach(folder => {
@@ -98,10 +94,10 @@ function setupWatchers(context: vscode.ExtensionContext) {
         /*
         CΩSCM.addProject(folder) // TODO: check to see if adding a new workspace folder will properly initialize the sync process
           .then(p => p && subscriptions.push(p.scm))
-          .catch(err => logger.error('PEER8_EXTENSION: Not a git repository (folder, err)', folder, err))
+          .catch(err => logger.error('CODEAWARENESS_EXTENSION: Not a git repository (folder, err)', folder, err))
         CΩSCM.addSubmodules(folder)
           .then(p => p && subscriptions.push(p.scm))
-          .catch(err => logger.error('PEER8_EXTENSION: failed to add git submodule (folder, err)', folder, err))
+          .catch(err => logger.error('CODEAWARENESS_EXTENSION: failed to add git submodule (folder, err)', folder, err))
         window.registerTreeDataProvider('cΩFiles', TDP.addPeerWorkspace(folder))
         */
       })
