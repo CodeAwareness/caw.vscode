@@ -1,6 +1,8 @@
 import * as vscode from 'vscode'
 import axios from 'axios'
 
+import type { AxiosResponse } from 'axios'
+
 // We use https for direct API calls, and WSS for local service communication
 import { API_URL } from '@/config'
 import { CΩWS } from './cΩ.ws'
@@ -8,12 +10,16 @@ import { CΩWS } from './cΩ.ws'
 import { CΩStore } from './cΩ.store'
 
 const API_AUTH_LOGIN          = '/auth/login'
+const API_AUTH_SEND_PASS      = '/auth/send-pass'
+const API_AUTH_REGISTER       = '/auth/register'
 const API_AUTH_REFRESH_TOKENS = '/auth/refresh-tokens'
 const API_REPO_SWARM_AUTH     = '/repos/swarm-auth'
 const API_REPO_COMMITS        = '/repos/commits'
 const API_REPO_COMMON_SHA     = '/repos/common-sha'
 const API_REPO_CONTRIB        = '/repos/contrib'
 const API_SHARE_ACCEPT        = '/share/accept'
+
+let tokenInterval: any
 
 axios.defaults.adapter = require('axios/lib/adapters/http')
 const axiosAPI = axios.create({ baseURL: API_URL })
@@ -62,11 +68,6 @@ axiosAPI.interceptors.response.use(
   },
 )
 
-function clearAuth() {
-  // TODO
-  return Promise.resolve()
-}
-
 /**
  * reAuthorize: fetch and send the latest SHA
  */
@@ -91,9 +92,31 @@ function refreshToken(refreshToken: string) {
 export type TCredentials = {
   email: string
   password: string
+  language?: string
 }
 
-const login = (cred: TCredentials) => axiosAPI.post(API_AUTH_LOGIN, cred)
+export type TAuth = {
+  user: any
+  tokens: any
+}
+
+const login = (cred: TCredentials) => {
+  return axiosAPI.post(API_AUTH_LOGIN, cred)
+    .then((res: AxiosResponse<TAuth>) => {
+      console.log('LOGIN response', res)
+      CΩStore.user = res.data.user
+      CΩStore.tokens = res.data.tokens
+      const period = new Date(res.data.tokens.access.expires).valueOf() - new Date().valueOf() - 60000 // TODO: make this configurable
+      tokenInterval = setInterval(() => {
+        refreshToken(res.data.tokens.refresh.token)
+      }, period)
+      return res.data
+    })
+}
+
+const sendPass = (email: string) => axiosAPI.post(API_AUTH_SEND_PASS, email)
+
+const register = (cred: TCredentials) => axiosAPI.post(API_AUTH_REGISTER, cred)
 
 const receiveShared = (link: string) => {
   return axiosAPI.get(`${API_SHARE_ACCEPT}?i=${link}`)
@@ -103,13 +126,19 @@ function init() {
   CΩWS.init()
 }
 
+function dispose() {
+  if (tokenInterval) clearInterval(tokenInterval)
+}
+
 const CΩAPI = {
-  clearAuth,
+  dispose,
   init,
   login,
   logout,
   receiveShared,
+  register,
   refreshToken,
+  sendPass,
   API_AUTH_LOGIN,
   API_REPO_COMMITS,
   API_REPO_COMMON_SHA,

@@ -24,7 +24,7 @@ function dispose() {
   logger.info('WORKSPACE: dispose')
   // TODO: cleanup temp files
   if (CΩWork.syncTimer) clearInterval(CΩWork.syncTimer)
-  if (CΩWork.tokenInterval) clearInterval(CΩWork.tokenInterval)
+  CΩAPI.dispose()
   CΩStore.panel?.dispose()
   CΩStore.panel = undefined
 }
@@ -37,19 +37,6 @@ function setupTempFiles() {
       CΩStore.tmpDir = data.tmpDir
       logger.info('WORKSPACE: temporary folder used: ', CΩStore.tmpDir)
     })
-}
-
-type AuthSetupType = {
-  access: Record<string, any>,
-  refresh: Record<string, any>,
-  preEmpt: number,
-}
-
-function setupAuth({ access, refresh, preEmpt }: AuthSetupType) {
-  const period = new Date(access.expires).valueOf() - new Date().valueOf() - (preEmpt || 60000)
-  CΩWork.tokenInterval = setInterval(() => {
-    CΩAPI.refreshToken(refresh.token)
-  }, period)
 }
 
 /************************************************************************************
@@ -335,7 +322,6 @@ export const CΩWorkspace = {
   refreshLines,
   saveCode,
   selectContributor,
-  setupAuth,
   setupRepoFrom,
   setupWorker,
   setupTempFiles,

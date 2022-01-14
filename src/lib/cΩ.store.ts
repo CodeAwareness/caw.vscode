@@ -1,3 +1,6 @@
+/**
+ * Non reactive simple store. We don't need reactivity for this project, so this is more of a collection of variables.
+ */
 import * as vscode from 'vscode'
 import * as fs from 'fs'
 

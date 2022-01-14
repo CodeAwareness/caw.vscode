@@ -6,6 +6,7 @@ import { EXT_URL } from '@/config'
 import { logger } from './logger'
 import { locale } from './locale'
 
+import { CΩIPC } from './cΩ.ipc'
 import { CΩStore } from './cΩ.store'
 import { CΩWorkspace } from './cΩ.workspace'
 import { CΩEditor } from './cΩ.editor'
@@ -85,6 +86,7 @@ function toggle(context: vscode.ExtensionContext) {
   return getWebviewContent(panel.webview, EXT_URL)
     .then(() => {
       CΩEditor.focusTextEditor()
+      CΩIPC.setupIPC(panel.webview, context)
       panel.onDidDispose(dispose, undefined, context.subscriptions)
       panel.onDidChangeViewState((state: vscode.WindowState) => CΩPanel.didChangeViewState(state), undefined, context.subscriptions)
     })
@@ -94,7 +96,6 @@ axios.defaults.adapter = require('axios/lib/adapters/http')
 const axiosEXT = axios.create({ baseURL: EXT_URL })
 
 function getWebviewContent(webview: vscode.Webview, extURL: string) {
-  console.log('PANEL VIEW', webview, extURL)
   webview.html = '<h1>Loading...</h1>'
   return axiosEXT.get(extURL + `/index.${locale}.html`)
     .then(response => (webview.html = response.data))
@@ -127,7 +128,7 @@ function postMessage(data: any) {
  * (sorry for those people with portrait monitors... I'll figure something out later)
  ************************************************************************************/
 function didChangeViewState(state: any) {
-  logger.log('PANEL didChangeViewState', state)
+  logger.info('PANEL didChangeViewState', state)
   if (hasPanel()) {
     moveEditor(state.webviewPanel)
   }
