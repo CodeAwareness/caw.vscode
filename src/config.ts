@@ -1,14 +1,12 @@
-import * as path from 'path'
-
 const DEBUG = !process.argv?.length
 console.log('CONFIG PROCESS ARGV (DEBUG)', DEBUG, process.argv, process)
 
-const PORT_LOCAL = 8887
+const PORT_LOCAL = 8885
 const CONFIGURATION_FILE = '.CΩ'
 const CΩ_SCHEMA = 'codeAwareness'
-const EXT_URL = DEBUG ? `https://codeawareness.local:${PORT_LOCAL}` : 'https://ext.codeawareness.com' // CΩ Webview server
-const API_URL = DEBUG ? `https://codeawareness.local:${PORT_LOCAL}/api/v1` : 'https://api.codeawareness.com/v1'
-const SERVER_WSS = DEBUG ? 'ws://localhost:48408' : 'wss://api.codeawareness.com'
+const EXT_URL = DEBUG ? `https://localhost:${PORT_LOCAL}` : 'https://ext.codeawareness.com' // CΩ Webview server
+const API_URL = DEBUG ? `https://localhost:${PORT_LOCAL}/api/v1` : 'https://api.codeawareness.com/v1'
+const SERVER_WSS = 'wss://localhost:48408'
 const SERVER_VERSION = 'v1'
 
 // Workspace: SYNC_INTERVAL gives the timer for syncing with the server

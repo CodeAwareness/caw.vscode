@@ -28,7 +28,7 @@ const postBack = (command: string) => (res: any) => {
 
 const ipcTable: Record<string, any> = {}
 
-ipcTable['initialized'] = init
+ipcTable.initialized = init
 
 ipcTable['auth:login'] = (data: TCredentials) => {
   CΩAPI.login(data)

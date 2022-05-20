@@ -2,11 +2,8 @@
  * Non reactive simple store. We don't need reactivity for this project, so this is more of a collection of variables.
  */
 import * as vscode from 'vscode'
-import * as fs from 'fs'
 
 import { TCΩEditor } from '@/lib/cΩ.editor'
-
-let panel: vscode.WebviewPanel | undefined
 
 type TDiffRange = {
   range: {
@@ -96,7 +93,7 @@ export type TTmpDir = {
 }
 
 export const CΩStore = {
-  colorTheme: 1 as 1 | 2 | 3, // 1 = Light, 2 = Dark, 3 = High Contrast
+  colorTheme: 1 as vscode.ColorThemeKind, // 1 = Light, 2 = Dark, 3 = High Contrast
   user: undefined as TUser | undefined,
   tokens: undefined as TTokens | undefined,
   sockets: {
