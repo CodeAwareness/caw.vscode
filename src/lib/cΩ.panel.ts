@@ -97,7 +97,8 @@ const axiosEXT = axios.create({ baseURL: EXT_URL })
 
 function getWebviewContent(webview: vscode.Webview, extURL: string) {
   webview.html = '<h1>Loading...</h1>'
-  return axiosEXT.get(extURL + `/index.${locale}.html`)
+  console.log('WEBVIEW: ', extURL, locale)
+  return axiosEXT.get(extURL + `/index.html?l=${locale}`)
     .then(response => (webview.html = response.data))
     .catch(err => {
       webview.html = '<h1>Offline</h1><p>You are either offline or the CodeAwareness server is down.</p></h1>'

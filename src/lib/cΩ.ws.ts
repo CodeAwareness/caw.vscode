@@ -87,7 +87,7 @@ function connectNamespace(nsp: any) {
 
 function init() {
   socketOptions.auth = { token: CΩStore.tokens?.access?.token }
-  const rootSocket = io(`${SERVER_WSS}/${SERVER_VERSION}`, socketOptions)
+  const rootSocket = io(`${SERVER_WSS}`, socketOptions)
   CΩStore.sockets.rootSocket = rootSocket
 
   console.log('initializing sockets on', SERVER_WSS, SERVER_VERSION)

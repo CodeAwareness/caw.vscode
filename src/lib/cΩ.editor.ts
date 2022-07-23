@@ -115,8 +115,8 @@ function closeDiffEditor() {
  *
  * When we open the CΩ panel, we need to re-focus on our editor (not stealing focus)
  ************************************************************************************/
-function focusTextEditor() {
-  if (CΩStore.activeTextEditor) return
+function focusTextEditor(): Promise<void> {
+  if (CΩStore.activeTextEditor) return Promise.resolve()
   const editors = vscode.window.visibleTextEditors as Array<TCΩEditor>
   return setActiveEditor(editors[0])
 }

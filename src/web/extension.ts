@@ -155,7 +155,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
     if (!editor || editor.document.uri.path.includes(CΩStore.tmpDir.name)) return
     CΩEditor.setActiveEditor(editor as TCΩEditor)
       .then(CΩWorkspace.refreshChanges)
-      .catch((err: any) => console.log(err.toString()))
+      .catch((err: any) => console.log('ERROR setting the active editor', err.toString()))
   })
 
   /************************************************************************************
