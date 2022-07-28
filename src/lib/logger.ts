@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
-import { LOG_LEVEL } from '@/config'
+import config from '@/config'
 
 /* eslint-disable @typescript-eslint/no-empty-function */
-if (LOG_LEVEL === 'none') {
+if (config.LOG_LEVEL === 'none') {
   // test env
   console.log = () => {}
   console.info = () => {}
@@ -12,12 +12,12 @@ if (LOG_LEVEL === 'none') {
   console.dir = () => {}
 }
 
-if (LOG_LEVEL === 'log') {
+if (config.LOG_LEVEL === 'log') {
   console.info = () => {}
   console.debug = () => {}
 }
 
-if (LOG_LEVEL === 'error') {
+if (config.LOG_LEVEL === 'error') {
   console.log = () => {}
   console.info = () => {}
   console.dir = () => {}
@@ -95,6 +95,4 @@ const logger = {
   },
 }
 
-export {
-  logger,
-}
+export default logger

@@ -4,6 +4,7 @@
 import * as vscode from 'vscode'
 
 import { TCΩEditor } from '@/lib/cΩ.editor'
+import CΩWS from '@/lib/cΩ.ws'
 
 type TDiffRange = {
   range: {
@@ -96,11 +97,7 @@ export const CΩStore = {
   colorTheme: 1 as vscode.ColorThemeKind, // 1 = Light, 2 = Dark, 3 = High Contrast
   user: undefined as TUser | undefined,
   tokens: undefined as TTokens | undefined,
-  sockets: {
-    userSocket: undefined as any | undefined,
-    repoSocket: undefined as any | undefined,
-    rootSocket: undefined as any | undefined,
-  },
+  ws: undefined as CΩWS | undefined,
   panel: undefined as any,
   activeTextEditor: null as TCΩEditor | null,
   activeContext: {
@@ -234,6 +231,8 @@ export const CΩStore = {
     CΩStore.line = 0
   },
 }
+
+export default CΩStore
 
 let tokenInterval: ReturnType<typeof setTimeout>|undefined
 let syncTimer: ReturnType<typeof setTimeout>|undefined

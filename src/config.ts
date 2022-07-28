@@ -33,7 +33,7 @@ const EXTRACT_REPO_DIR = 'r'
 // EXTRACT_PEER_DIR where we have the peer versions for the files touched by a single peer
 const EXTRACT_PEER_DIR = 'e'
 
-export {
+export default {
   API_URL,
   CONFIGURATION_FILE,
   CΩ_SCHEMA,

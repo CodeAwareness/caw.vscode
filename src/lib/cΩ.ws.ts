@@ -1,119 +1,120 @@
+import type { Socket } from 'socket.io-client'
 import io from 'socket.io-client'
-import { SERVER_VERSION, SERVER_WSS } from '@/config'
+import config from '@/config'
 
-import { logger } from './logger'
-import { CΩStore } from './cΩ.store'
+import logger from './logger'
+import CΩStore from './cΩ.store'
 
-/*
- * Exponential wait for connection ready
- */
-let _delay: number
-const expDelay = () => {
-  _delay = _delay * 2
-  return _delay
+export type CΩSocket = Socket & {
+  transmit: (action: string, data?: any, options?: any) => Promise<any>
 }
 
-const resetDelay = () => {
-  _delay = 200
-}
+export type Class<T> = new (...args: any[]) => T
 
-const socketOptions = {
-  reconnectionDelayMax: 10000,
-  forceNew: true,
-  transports: ['websocket'],
-  // @ts-ignore: No overload matches this call.
-  origins: ['*'],
-  withCredentials: true,
-  timestampRequests: true,
-  auth: { token: CΩStore.tokens?.access?.token },
-}
+export class CΩWS {
+  public rootSocket: CΩSocket | null
+  public uSocket: CΩSocket | null
+  public rSocket: CΩSocket | null
 
-/*
- * Transmit an action, and perhaps some data, to CodeAwareness API
- * The response from the API comes in the form of `res:<action>` with the `action` being the same as the transmitted one.
- */
-const transmit = (action: string, data = undefined) => {
-  const domain = action.split(':')[0]
-  let socket: any
-  switch (domain) {
-    case 'user':
-      socket = CΩStore.sockets.userSocket
-      break
-
-    case 'repo':
-      socket = CΩStore.sockets.repoSocket
-      break
-
-    default:
-      throw new Error('invalid action trying to send to local service')
-      // TODO: show error message instead?
+  private _delay: number
+  private expDelay(): number {
+    this._delay = this._delay * 2
+    return this._delay
   }
-  return new Promise((resolve, reject) => {
-    if (!socket) {
-      console.log('While trying to transmit', action)
-      return reject(new Error('no socket connection'))
-    }
-    resetDelay()
-    const pendingConnection = (): any => {
-      console.log('pendingConnection', _delay, socket.connected)
-      if (!socket.connected) return setTimeout(pendingConnection, expDelay())
-      resetDelay()
-      console.log('Will emit user (action, data)', action, data)
-      socket.emit(action, data)
-      socket.on(`res:${action}`, resolve)
-      socket.on(`error:${action}`, reject)
-    }
 
-    pendingConnection()
-  })
+  private resetDelay() {
+    this._delay = 200
+  }
+
+  public constructor() {
+    this._delay = 200
+    this.rootSocket = null
+    this.uSocket = null
+    this.rSocket = null
+    this.init()
+  }
+
+  public init(): void {
+    this.rootSocket = io(config.SERVER_WSS, {
+      reconnectionDelayMax: 10000,
+      timestampRequests: true,
+      transports: ['websocket'],
+    }) as CΩSocket
+
+    logger.log('initializing sockets')
+    this.rootSocket.on('connect', () => {
+      logger.log('rootSocket connected')
+      connectNamespace('users')
+        .then((socket: CΩSocket) => {
+          socket.on('connect', () => { logger.log('socketUser connected') })
+          socket.transmit = this.transmit(socket)
+          this.uSocket = socket
+        })
+
+      connectNamespace('repos')
+        .then((socket: CΩSocket) => {
+          socket.on('connect', () => { logger.log('socketRepo connected') })
+          socket.transmit = this.transmit(socket)
+          this.rSocket = socket
+        })
+    })
+  }
+
+  /*
+   * Transmit an action, and perhaps some data. Recommend a namespacing format for the action, something like `<domain>:<action>`, e.g. `auth:login` or `users:query`.
+   * The response from Transient.server comes in the form of `res:<domain>:<action>` with the `domain` and `action` being the same as the transmitted ones.
+   *
+   * TODO: prevent multiple transmit requests to overload the system with pendingConnection (consider reconnect fn too)
+   */
+  private transmit(wsocket: CΩSocket) {
+    return (action: string, data?: any, options?: any) => {
+      let handled = false
+      return new Promise((resolve, reject) => {
+        this.resetDelay()
+        const pendingConnection: any = () => {
+          logger.info(`Transient.client: pending connection (delay: ${this._delay})`)
+          setTimeout(() => {
+            if (!handled) reject({ message: 'Request timed out' })
+          }, options?.timeout || 3000)
+          if (!wsocket.connected) {
+            setTimeout(pendingConnection, this.expDelay())
+            return
+          }
+          this.resetDelay()
+          logger.info(`Transient.client: will emit action: ${action}`)
+          wsocket.emit(action, data)
+          wsocket.on(`res:${action}`, data => {
+            handled = true
+            resolve(data)
+          })
+          wsocket.on(`error:${action}`, err => {
+            logger.log('wsocket error', action, err)
+            handled = true
+            reject(err)
+          })
+        }
+
+        pendingConnection()
+      })
+    }
+  }
 }
 
-function connectNamespace(nsp: any) {
-  socketOptions.auth = { token: CΩStore.tokens?.access?.token }
-  const socket = io(`${SERVER_WSS}/${nsp}`, socketOptions )
+function connectNamespace(nsp: string): Promise<CΩSocket> {
+  logger.log(`will setup namespace ${nsp}`)
+  const socket = io(`${config.SERVER_WSS}/${nsp}`) as CΩSocket
 
   socket.on('connection', () => {
-    console.log(`${nsp} socket connection ready`)
+    logger.log(`${nsp} socket connection ready`)
   })
 
   socket.on('reconnect', () => {
-    console.log(`${nsp} socket reconnected`, socket)
+    logger.log(`${nsp} socket reconnected`, socket)
   })
 
-  socket.on('error', console.error)
+  socket.on('error', logger.error)
 
   return Promise.resolve(socket)
 }
 
-function init() {
-  socketOptions.auth = { token: CΩStore.tokens?.access?.token }
-  const rootSocket = io(`${SERVER_WSS}`, socketOptions)
-  CΩStore.sockets.rootSocket = rootSocket
-
-  console.log('initializing sockets on', SERVER_WSS, SERVER_VERSION)
-  rootSocket.on('connect', () => {
-    console.log('rootSocket CONNECT received')
-    connectNamespace('users')
-      .then(socket => {
-        socket.on('connect', () => { logger.log('socketUser connected') })
-        socket.on('cameOnline', ev => logger.log('USER cameOnline', ev))
-        CΩStore.sockets.userSocket = socket
-      })
-
-    connectNamespace('repos')
-      .then(socket => {
-        socket.on('connect', () => { logger.log('socketRepo connected') })
-        socket.on('updateAvailable', m => console.log('repoSocket update available', m))
-        CΩStore.sockets.repoSocket = socket
-      })
-  })
-}
-
-const CΩWS = {
-  init,
-  transmit,
-}
-
-export {
-  CΩWS,
-}
+export default CΩWS

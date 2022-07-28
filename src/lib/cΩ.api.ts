@@ -4,8 +4,8 @@ import axios from 'axios'
 import type { AxiosResponse } from 'axios'
 
 // We use https for direct API calls, and WSS for local service communication
-import { API_URL } from '@/config'
-import { CΩWS } from './cΩ.ws'
+import config from '@/config'
+import WSIO from './cΩ.ws'
 
 import { CΩStore } from './cΩ.store'
 
@@ -19,10 +19,11 @@ const API_REPO_COMMON_SHA     = '/repos/common-sha'
 const API_REPO_CONTRIB        = '/repos/contrib'
 const API_SHARE_ACCEPT        = '/share/accept'
 
+let wsEngine: any
 let tokenInterval: any
 
 axios.defaults.adapter = require('axios/lib/adapters/http')
-const axiosAPI = axios.create({ baseURL: API_URL })
+const axiosAPI = axios.create({ baseURL: config.API_URL })
 
 axiosAPI.interceptors.request.use(config => {
   const access = CΩStore.tokens?.access
@@ -123,7 +124,13 @@ const receiveShared = (link: string) => {
 }
 
 function init() {
-  CΩWS.init()
+  wsEngine = new WSIO()
+  wsEngine.init()
+  CΩStore.sockets = {
+    uSocket: wsEngine.uSocket,
+    rSocket: wsEngine.rSocket,
+    rootSocket: wsEngine,
+  }
 }
 
 function dispose() {
@@ -145,7 +152,7 @@ const CΩAPI = {
   API_REPO_CONTRIB,
   API_AUTH_REFRESH_TOKENS,
   API_REPO_SWARM_AUTH,
-  API_URL,
+  API_URL: config.API_URL,
 }
 
 export {

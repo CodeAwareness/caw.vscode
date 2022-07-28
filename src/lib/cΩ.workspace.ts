@@ -2,8 +2,8 @@ import * as vscode from 'vscode'
 import * as _ from 'lodash'
 import * as fs from 'fs'
 
-import { SYNC_INTERVAL } from '@/config'
-import { logger } from './logger'
+import config from '@/config'
+import logger from './logger'
 
 import { CΩStore, CΩWork, TContributor, TProject } from './cΩ.store'
 
@@ -11,7 +11,6 @@ import { CΩEditor, TCΩEditor } from './cΩ.editor'
 import { CΩDeco   } from './cΩ.deco'
 import { CΩPanel  } from './cΩ.panel'
 import { CΩAPI    } from './cΩ.api'
-import { CΩWS     } from './cΩ.ws'
 import { CΩDiffs  } from './cΩ.diffs'
 
 const isWindows = !!process.env.ProgramFiles
@@ -32,7 +31,7 @@ function dispose() {
 function setupTempFiles() {
   // TODO: get tmpDir from localService
   console.log('setupTempFiles (repo:getTmpDir)')
-  CΩWS.transmit('repo:getTmpDir')
+  CΩStore.ws.rSocket.transmit('repo:getTmpDir')
     .then((data: any) => {
       CΩStore.tmpDir = data.tmpDir
       logger.info('WORKSPACE: temporary folder used: ', CΩStore.tmpDir)
@@ -50,7 +49,7 @@ function setupWorker() {
   if (CΩWork.syncTimer) clearInterval(CΩWork.syncTimer)
   const syncInterval: number = vscode.workspace
     .getConfiguration('codeAwareness')
-    .get('syncInterval') || SYNC_INTERVAL
+    .get('syncInterval') || config.SYNC_INTERVAL
   logger.info('WORKSPACE: setupWorker (syncInterval)', syncInterval)
   // TODO: maybe we don't need this anymore, since we're doing syncWithServer every time the user saves a document;
   // on second thought, syncWithServer also downloads new diffs, so it's important we do it periodically;
@@ -309,7 +308,7 @@ function getSelectedContributor() {
 /************************************************************************************
  * Export module
  ************************************************************************************/
-export const CΩWorkspace = {
+const CΩWorkspace = {
   closeTextDocument,
   cycleThroughUsers,
   dispose,
@@ -328,3 +327,5 @@ export const CΩWorkspace = {
   syncProject,
   syncWithServer,
 }
+
+export default CΩWorkspace

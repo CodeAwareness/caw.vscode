@@ -5,13 +5,14 @@ import { CΩStatusbar } from '@/vscode/statusbar'
 import { setupCommands } from '@/vscode/commands'
 
 import { initConfig, initializeFolderFromConfigurationFile } from '@/lib/settings'
-import { CΩWorkspace } from '@/lib/cΩ.workspace'
+import CΩWorkspace from '@/lib/cΩ.workspace'
 import { TDP } from '@/lib/cΩ.tdp'
-import { CΩAPI } from '@/lib/cΩ.api'
 import { CΩStore, TProject } from '@/lib/cΩ.store'
 import { CΩPanel } from '@/lib/cΩ.panel'
 import { CΩEditor, TCΩEditor } from '@/lib/cΩ.editor'
 import { CΩSCM } from '@/lib/cΩ.scm'
+
+import CΩWS from '@/lib/cΩ.ws'
 
 let activated: boolean // extension activated !
 const deactivateTasks: Array<any> = [] // keeping track of all the disposables
@@ -24,7 +25,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 // this method is called when your extension is deactivated
 export function deactivate() {
-  CΩAPI.logout()
   const promises = [
     CΩStatusbar.dispose(),
     CΩWorkspace.dispose(),
@@ -42,7 +42,7 @@ function initCodeAwareness(context: vscode.ExtensionContext) {
   // TODO: when no projects / repos available we should skip init; at the moment we are getting "cannot read property 'document' of undefined
   activated = true
   initConfig()
-  CΩAPI.init()
+  CΩStore.ws = new CΩWS()
   CΩStatusbar.init()
   CΩWorkspace.init()
   setupCommands(context)

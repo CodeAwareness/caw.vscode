@@ -2,8 +2,8 @@ import * as path from 'path'
 import * as _ from 'lodash'
 // import replaceStream from 'replacestream' // doesn't work (!)
 
-import {  MAX_NR_OF_SHA_TO_COMPARE, SYNC_THRESHOLD } from '@/config'
-import { logger } from './logger'
+import config from '@/config'
+import logger from './logger'
 import { CΩStore, TChanges, TProject, TTmpDir } from './cΩ.store'
 
 const PENDING_DIFFS: Record<string, boolean> = {}
@@ -103,7 +103,7 @@ function refreshChanges(project: TProject, fpath: string) {
 
   logger.log('DIFFS: downloadDiffs (origin, fpath, user)', project.origin, fpath, CΩStore.user)
   PENDING_DIFFS[fpath] = true // this operation can take a while, so we don't want to start it several times per second
-  if (lastDownloadDiff[wsPath] && new Date().valueOf() - lastDownloadDiff[wsPath] < SYNC_THRESHOLD) {
+  if (lastDownloadDiff[wsPath] && new Date().valueOf() - lastDownloadDiff[wsPath] < config.SYNC_THRESHOLD) {
     return Promise.resolve()
   }
 
@@ -168,7 +168,7 @@ function shiftWithGitDiff(project: TProject, fpath: string) {
     || !project.changes || !Object.keys(project.changes[fpath]).length
   ) return
 
-  const shas = Object.keys(project.changes[fpath].l).slice(0, MAX_NR_OF_SHA_TO_COMPARE)
+  const shas = Object.keys(project.changes[fpath].l).slice(0, config.MAX_NR_OF_SHA_TO_COMPARE)
   shas.map((sha: string) => {
     const changes: Record<string, any> = project.changes && project.changes[fpath] || {}
     const gitDiff: Record<string, any> = project.gitDiff && project.gitDiff[fpath] || {}
@@ -182,7 +182,7 @@ function shiftWithGitDiff(project: TProject, fpath: string) {
 
 function shiftWithLiveEdits(project: TProject, fpath: string) {
   if (!project.changes || !Object.keys(project.changes[fpath]).length) return
-  const shas = Object.keys(project.changes[fpath].alines).slice(0, MAX_NR_OF_SHA_TO_COMPARE)
+  const shas = Object.keys(project.changes[fpath].alines).slice(0, config.MAX_NR_OF_SHA_TO_COMPARE)
   const { editorDiff } = project
   if (!editorDiff || !editorDiff[fpath]) return
 
