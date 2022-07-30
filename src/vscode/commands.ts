@@ -1,10 +1,10 @@
 import * as vscode from 'vscode'
 import * as _ from 'lodash'
 
-import { logger } from '@/lib/logger'
+import logger from '@/lib/logger'
 
-import { CΩPanel } from '@/lib/cΩ.panel'
-import { CΩDiffs } from '@/lib/cΩ.diffs'
+import CΩPanel from '@/lib/cΩ.panel'
+import CΩDiffs from '@/lib/cΩ.diffs'
 
 const { registerCommand } = vscode.commands
 

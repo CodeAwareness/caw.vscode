@@ -2,14 +2,15 @@ import axios from 'axios'
 import * as vscode from 'vscode'
 import * as path from 'path'
 
-import { EXT_URL } from '@/config'
-import { logger } from './logger'
+import config from '@/config'
+import logger from './logger'
+
+import { CΩStore } from './cΩ.store'
 import { locale } from './locale'
 
-import { CΩIPC } from './cΩ.ipc'
-import { CΩStore } from './cΩ.store'
-import { CΩWorkspace } from './cΩ.workspace'
-import { CΩEditor } from './cΩ.editor'
+import CΩIPC from './cΩ.ipc'
+import CΩWorkspace from './cΩ.workspace'
+import CΩEditor from './cΩ.editor'
 
 let panelColumn: vscode.ViewColumn = vscode.ViewColumn.Two
 
@@ -83,17 +84,17 @@ function toggle(context: vscode.ExtensionContext) {
 
   if (!panel.webview) return
 
-  return getWebviewContent(panel.webview, EXT_URL)
+  return getWebviewContent(panel.webview, config.EXT_URL)
     .then(() => {
       CΩEditor.focusTextEditor()
-      CΩIPC.setupIPC(panel.webview, context)
+      CΩIPC.setup(panel.webview, context)
       panel.onDidDispose(dispose, undefined, context.subscriptions)
       panel.onDidChangeViewState((state: vscode.WindowState) => CΩPanel.didChangeViewState(state), undefined, context.subscriptions)
     })
 }
 
 axios.defaults.adapter = require('axios/lib/adapters/http')
-const axiosEXT = axios.create({ baseURL: EXT_URL })
+const axiosEXT = axios.create({ baseURL: config.EXT_URL })
 
 function getWebviewContent(webview: vscode.Webview, extURL: string) {
   webview.html = '<h1>Loading...</h1>'
@@ -135,7 +136,7 @@ function didChangeViewState(state: any) {
   }
 }
 
-export const CΩPanel = {
+const CΩPanel = {
   createPanel,
   didChangeViewState,
   dispose,
@@ -144,3 +145,5 @@ export const CΩPanel = {
   postMessage,
   toggle,
 }
+
+export default CΩPanel

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import { CΩ_SCHEMA } from '@/config'
+import config from '@/config'
 
 type TNamePath = {
   name: string
@@ -22,7 +22,7 @@ class Repository {
   provideOriginalResource(options: TNamePath) {
     const { name, path } = options
     if (!name) return ''
-    return vscode.Uri.parse(`${CΩ_SCHEMA}:${name}/${path}`)
+    return vscode.Uri.parse(`${config.CΩ_SCHEMA}:${name}/${path}`)
   }
 
   get workspaceFolder() {

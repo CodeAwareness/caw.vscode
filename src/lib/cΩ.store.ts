@@ -14,6 +14,11 @@ type TDiffRange = {
   replaceLen: number,
 }
 
+export type TAuth = {
+  user: any
+  tokens: any
+}
+
 export type TChanges = {
   l?: Array<number>, // line numbers containing changes
   s?: string, // sha against which the changes are compiled
@@ -212,11 +217,11 @@ export const CΩStore = {
   doc: undefined as any | undefined, // active document (specific doc format for Atom, VSCode)
   line: 0, // cursor line nr in document
 
-  clear: () => {
+  unselectContributor: () => {
     CΩStore.selectedContributor = undefined
   },
 
-  emtpy: () => {
+  clear: () => {
     CΩStore.tokens = undefined as unknown as TTokens
     CΩStore.user = undefined as unknown as TUser
     CΩStore.panel = undefined

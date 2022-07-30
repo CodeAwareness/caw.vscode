@@ -5,13 +5,15 @@ import * as fs from 'fs'
 import config from '@/config'
 import logger from './logger'
 
-import { CΩStore, CΩWork, TContributor, TProject } from './cΩ.store'
+import type { TContributor, TProject } from './cΩ.store'
+import { CΩStore, CΩWork } from './cΩ.store'
 
-import { CΩEditor, TCΩEditor } from './cΩ.editor'
-import { CΩDeco   } from './cΩ.deco'
-import { CΩPanel  } from './cΩ.panel'
-import { CΩAPI    } from './cΩ.api'
-import { CΩDiffs  } from './cΩ.diffs'
+import type { TCΩEditor } from './cΩ.editor'
+
+import CΩEditor from './cΩ.editor'
+import CΩDeco   from './cΩ.deco'
+import CΩPanel  from './cΩ.panel'
+import CΩDiffs  from './cΩ.diffs'
 
 const isWindows = !!process.env.ProgramFiles
 
@@ -23,7 +25,6 @@ function dispose() {
   logger.info('WORKSPACE: dispose')
   // TODO: cleanup temp files
   if (CΩWork.syncTimer) clearInterval(CΩWork.syncTimer)
-  CΩAPI.dispose()
   CΩStore.panel?.dispose()
   CΩStore.panel = undefined
 }
@@ -31,7 +32,9 @@ function dispose() {
 function setupTempFiles() {
   // TODO: get tmpDir from localService
   console.log('setupTempFiles (repo:getTmpDir)')
-  CΩStore.ws.rSocket.transmit('repo:getTmpDir')
+  if (!CΩStore.ws?.rSocket) return
+  CΩStore.ws.rSocket
+    .transmit('repo:getTmpDir')
     .then((data: any) => {
       CΩStore.tmpDir = data.tmpDir
       logger.info('WORKSPACE: temporary folder used: ', CΩStore.tmpDir)

@@ -1,9 +1,9 @@
 import * as vscode from 'vscode'
 import * as _ from 'lodash'
 
-import { logger } from './logger'
 import { CΩStore } from './cΩ.store'
-import { CΩPanel } from './cΩ.panel'
+import logger from './logger'
+import CΩPanel from './cΩ.panel'
 
 let lastUri: string
 // TODO: make 2000 wait time into a configurable value
@@ -121,4 +121,4 @@ const CΩDeco = {
   insertDecorations,
 }
 
-export { CΩDeco }
+export default CΩDeco

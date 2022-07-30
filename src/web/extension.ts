@@ -4,19 +4,22 @@ import * as _ from 'lodash'
 import { CΩStatusbar } from '@/vscode/statusbar'
 import { setupCommands } from '@/vscode/commands'
 
-import { initConfig, initializeFolderFromConfigurationFile } from '@/lib/settings'
-import CΩWorkspace from '@/lib/cΩ.workspace'
-import { TDP } from '@/lib/cΩ.tdp'
-import { CΩStore, TProject } from '@/lib/cΩ.store'
-import { CΩPanel } from '@/lib/cΩ.panel'
-import { CΩEditor, TCΩEditor } from '@/lib/cΩ.editor'
-import { CΩSCM } from '@/lib/cΩ.scm'
+import type { TCΩEditor } from '@/lib/cΩ.editor'
+import type { TProject } from '@/lib/cΩ.store'
 
+import { initConfig, initializeFolderFromConfigurationFile } from '@/lib/settings'
+import { CΩStore } from '@/lib/cΩ.store'
+
+import logger from '@/lib/logger'
+import TDP from '@/lib/cΩ.tdp'
+import CΩPanel from '@/lib/cΩ.panel'
+import CΩEditor from '@/lib/cΩ.editor'
+import CΩSCM from '@/lib/cΩ.scm'
+import CΩWorkspace from '@/lib/cΩ.workspace'
 import CΩWS from '@/lib/cΩ.ws'
 
 let activated: boolean // extension activated !
 const deactivateTasks: Array<any> = [] // keeping track of all the disposables
-const logger = console
 
 export function activate(context: vscode.ExtensionContext) {
   // The commandId parameter must match the command field in package.json

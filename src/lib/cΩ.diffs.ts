@@ -281,4 +281,4 @@ const CΩDiffs = {
   PENDING_DIFFS,
 }
 
-export { CΩDiffs }
+export default CΩDiffs

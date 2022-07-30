@@ -4,7 +4,7 @@ import * as vscode from 'vscode'
  * TODO: separate these from the general settings, which may be applicable to Atom
  */
 
-import { logger } from './logger'
+import logger from './logger'
 import { CΩStore } from './cΩ.store'
 
 /**

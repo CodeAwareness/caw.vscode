@@ -1,10 +1,11 @@
 import * as vscode from 'vscode'
 import { basename } from 'path'
 
-import { logger } from './logger'
+import type { TProject } from './cΩ.store'
+import { CΩStore } from './cΩ.store'
 
-import { CΩStore, TProject } from './cΩ.store'
-import { TDP } from './cΩ.tdp'
+import logger from './logger'
+import TDP from './cΩ.tdp'
 
 function setupSCM(wsFolder: vscode.WorkspaceFolder) {
   const name = basename(wsFolder.uri.path)
@@ -123,4 +124,4 @@ const CΩSCM = {
   getFiles,
 }
 
-export { CΩSCM }
+export default CΩSCM

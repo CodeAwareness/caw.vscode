@@ -1,11 +1,12 @@
 import * as vscode from 'vscode'
-import { logger } from './logger'
+import logger from './logger'
 
-import { CΩStore, TChanges } from './cΩ.store'
-import { CΩWorkspace } from './cΩ.workspace'
-import { CΩDeco } from './cΩ.deco'
-import { CΩDiffs } from './cΩ.diffs'
-import { CΩPanel } from './cΩ.panel'
+import type { TChanges } from './cΩ.store'
+import { CΩStore } from './cΩ.store'
+import CΩWorkspace from './cΩ.workspace'
+import CΩDeco from './cΩ.deco'
+import CΩDiffs from './cΩ.diffs'
+import CΩPanel from './cΩ.panel'
 
 const isWindows = !!process.env.ProgramFiles
 
@@ -189,10 +190,12 @@ function syncWebview() {
     */
 }
 
-export const CΩEditor = {
+const CΩEditor = {
   closeDiffEditor,
   focusTextEditor,
   setActiveEditor,
   syncWebview,
   updateDecorations,
 }
+
+export default CΩEditor

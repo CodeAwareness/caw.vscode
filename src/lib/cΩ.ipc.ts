@@ -1,17 +1,16 @@
 import * as vscode from 'vscode'
 
-import { logger } from './logger'
+import type { TAuth } from './cΩ.store'
+
 import { localize } from './locale'
-
-import type { TAuth, TCredentials } from './cΩ.api'
-
-import { CΩAPI } from './cΩ.api'
 import { CΩStore } from './cΩ.store'
-import { CΩEditor } from './cΩ.editor'
-import { CΩDeco } from './cΩ.deco'
-import { CΩDiffs } from './cΩ.diffs'
-import { CΩPanel } from './cΩ.panel'
-import { CΩWorkspace } from './cΩ.workspace'
+
+import logger from './logger'
+import CΩEditor from './cΩ.editor'
+import CΩDeco from './cΩ.deco'
+import CΩDiffs from './cΩ.diffs'
+import CΩPanel from './cΩ.panel'
+import CΩWorkspace from './cΩ.workspace'
 
 function init() {
   CΩStore.colorTheme = vscode.window.activeColorTheme.kind
@@ -28,28 +27,16 @@ const postBack = (command: string) => (res: any) => {
 
 const ipcTable: Record<string, any> = {}
 
-ipcTable.initialized = init
-
-ipcTable['auth:login'] = (data: TCredentials) => {
-  CΩAPI.login(data)
-    .then((res: TAuth) => {
-      init()
-      CΩWorkspace.setupWorker()
-      postBack('auth:login')
-    })
+ipcTable['auth:login'] = (data: TAuth) => {
+  init()
+  CΩStore.user = data?.user
+  CΩStore.tokens = data?.tokens
+  CΩWorkspace.setupWorker()
 }
 
-ipcTable['auth:logout'] = (data: TCredentials) => {
-  CΩAPI.logout()
+ipcTable['auth:logout'] = () => {
+  CΩStore.clear()
   CΩDeco.clear()
-}
-
-ipcTable['auth:sendPass'] = (email: string) => {
-  CΩAPI.sendPass(email).then(postBack('auth:sendPass'))
-}
-
-ipcTable['auth:register'] = (cred: TCredentials) => {
-  CΩAPI.register(cred).then(postBack('auth:register'))
 }
 
 ipcTable['adhoc:receiveShared'] = (data: any) => {
@@ -71,7 +58,6 @@ ipcTable['branch:select'] = (data: any) => {
 }
 
 ipcTable['branch:refresh'] = (data: any) => {
-  // eslint-disable-next-line
   const promises = CΩStore.projects.map(p => p.repo.refreshGit())
   Promise.all(promises)
     .then(() => {
@@ -117,12 +103,12 @@ function processSystemEvent(key: string, data: any) {
 }
 
 /************************************************************************************
- * setupIPC
+ * setup
  *
  * @param object - webview: the webview object
  * @param object - context: used for continuation of subscriptions
  ************************************************************************************/
-function setupIPC(webview: any, context: any) {
+function setup(webview: any, context: any) {
   webview.onDidReceiveMessage(
     (message: any) => {
       switch (message.command) {
@@ -150,6 +136,8 @@ function setupIPC(webview: any, context: any) {
   )
 }
 
-export const CΩIPC = {
-  setupIPC,
+const CΩIPC = {
+  setup,
 }
+
+export default CΩIPC

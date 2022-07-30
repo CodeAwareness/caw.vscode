@@ -3,7 +3,7 @@ import { EventEmitter, TreeItem, TreeItemCollapsibleState } from 'vscode'
 import * as path from 'path'
 
 import { CΩStore } from './cΩ.store'
-import { logger } from './logger'
+import logger from './logger'
 
 const dataChangeEvent = new EventEmitter()
 let folders: Record<string, any> = {}
@@ -89,7 +89,7 @@ const TDP = {
   },
 }
 
-class TDItem extends TreeItem {
+export class TDItem extends TreeItem {
   wsFolder: vscode.WorkspaceFolder
   fpath: string
 
@@ -104,7 +104,4 @@ class TDItem extends TreeItem {
   }
 }
 
-export {
-  TDP,
-  TDItem,
-}
+export default TDP
