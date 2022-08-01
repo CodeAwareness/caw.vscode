@@ -5,6 +5,7 @@ import * as fs from 'fs'
 import config from '@/config'
 import logger from './logger'
 
+import type { TAuth } from './cΩ.store'
 import type { TContributor, TProject } from './cΩ.store'
 import { CΩStore, CΩWork } from './cΩ.store'
 
@@ -17,8 +18,13 @@ import CΩDiffs  from './cΩ.diffs'
 
 const isWindows = !!process.env.ProgramFiles
 
-function init() {
-  CΩDiffs.init()
+function init(data?: TAuth) {
+  console.log('Workspace: init', data)
+  setupTempFiles()
+  if (data?.user) {
+    syncProject()
+    CΩDiffs.init()
+  }
 }
 
 function dispose() {
@@ -31,12 +37,12 @@ function dispose() {
 
 function setupTempFiles() {
   // TODO: get tmpDir from localService
-  console.log('setupTempFiles (repo:getTmpDir)')
+  console.log('setupTempFiles (repo:get-tmp-dir)')
   if (!CΩStore.ws?.rSocket) return
   CΩStore.ws.rSocket
-    .transmit('repo:getTmpDir')
-    .then((data: any) => {
-      CΩStore.tmpDir = data.tmpDir
+    .transmit('repo:get-tmp-dir')
+    .then((data: string) => {
+      CΩStore.tmpDir = data
       logger.info('WORKSPACE: temporary folder used: ', CΩStore.tmpDir)
     })
 }
@@ -103,7 +109,7 @@ function refreshChanges(filePath?: string | void) {
   if (!fPath) return // TODO: maybe handle this
   logger.log('WORKSPACE: refreshChanges (editorFilePath, activeProject, user, tmp)', filePath, CΩStore.activeProject, CΩStore.user, CΩStore.tmpDir)
   if (!CΩStore.activeProject || !CΩStore.user) return Promise.resolve()
-  if (CΩStore.tmpDir && fPath.includes(CΩStore.tmpDir?.name)) return Promise.resolve() // Looking at a vscode.diff window
+  if (CΩStore.tmpDir && fPath.includes(CΩStore.tmpDir)) return Promise.resolve() // Looking at a vscode.diff window
   const project = CΩStore.activeProject
   syncSCM(project)
   return CΩDiffs
@@ -211,14 +217,17 @@ function closeTextDocument(params: any) {
   console.log('WORKSPACE: closeTextDocument', params)
 }
 
+type TypeCursorInFile = {
+  line: number
+  uri: string
+}
 /************************************************************************************
  * setupRepoFrom
  *
  * @param number - cursor line number
  * @param object - the active document uri (VSCode object)
  ************************************************************************************/
-function setupRepoFrom(options: any): Promise<void> {
-  const { line, uri } = options
+function setupRepoFrom({ line, uri }: TypeCursorInFile): Promise<void> {
   const normUri = uri.toLowerCase() // TODO: is there a better way to do this for Windows? We sometimes get /c://some/dir and sometimes /C://some/dir (!)
   const roots = _.filter(CΩStore.projects, p => normUri.includes(p.root.toLowerCase())) as TProject[]
   logger.info('WORKSPACE: setupRepoFrom (uri, projects)', uri, CΩStore.projects, roots)
@@ -234,9 +243,9 @@ function setupRepoFrom(options: any): Promise<void> {
   if (!CΩStore.activeProject) throw logger.error('WORKSPACE: (setupRepoFrom): File is not part of an active repository') // TODO: cleanup this repo instead ?
   CΩStore.activeProject.activePath = getRelativePath(uri)
   CΩStore.activeProject.line = line
-  const reOrigin = CΩStore.activeProject.origin
+  const repoOrigin = CΩStore.activeProject.origin
   logger.log('WORKSPACE: setupRepoFrom (active project origin)', CΩStore.activeProject.origin)
-  if (!reOrigin) {
+  if (!repoOrigin) {
     logger.error('WORKSPACE: setupRepoFrom(): Project is not a cloud git repository (local only git repo?)')
     return Promise.reject(new Error(`File is not a part of a cloud repository: ${CΩStore.activeProject.root}`))
   }

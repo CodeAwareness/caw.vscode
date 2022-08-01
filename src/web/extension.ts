@@ -44,10 +44,10 @@ export function deactivate() {
 function initCodeAwareness(context: vscode.ExtensionContext) {
   // TODO: when no projects / repos available we should skip init; at the moment we are getting "cannot read property 'document' of undefined
   activated = true
+  console.log('Extension: initCodeAwareness')
   initConfig()
   CΩStore.ws = new CΩWS()
   CΩStatusbar.init()
-  CΩWorkspace.init()
   setupCommands(context)
   setupWatchers(context)
   logger.info('CODEAWARENESS_EXTENSION: extension activated (workspaceFolders)', vscode.workspace.workspaceFolders)
@@ -60,7 +60,7 @@ function initCodeAwareness(context: vscode.ExtensionContext) {
 /*
   const { name, version, aiKey } = require('../package.json') // !! TODO: Won't work with vscode web
   const telemetryReporter = new TelemetryReporter(name, version, aiKey)
-  logger.info('deactivateTasks', deactivateTasks)
+  logger.info('CODEAWARENESS_EXTENSION: deactivateTasks', deactivateTasks)
   deactivateTasks.push(() => telemetryReporter.dispose())
  */
 
@@ -155,7 +155,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
    * User switching to a different file
    ************************************************************************************/
   vscode.window.onDidChangeActiveTextEditor((editor: vscode.TextEditor | undefined) => {
-    if (!editor || editor.document.uri.path.includes(CΩStore.tmpDir.name)) return
+    if (!editor || editor.document.uri.path.includes(CΩStore.tmpDir)) return
     CΩEditor.setActiveEditor(editor as TCΩEditor)
       .then(CΩWorkspace.refreshChanges)
       .catch((err: any) => console.log('ERROR setting the active editor', err.toString()))
@@ -188,7 +188,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
   /*
   const { name, version, aiKey } = require('../package.json')
   const telemetryReporter = new TelemetryReporter(name, version, aiKey)
-  logger.info('deactivateTasks', deactivateTasks)
+  logger.info('CODEAWARENESS_EXTENSION: deactivateTasks', deactivateTasks)
   deactivateTasks.push(() => telemetryReporter.dispose())
   */
 }

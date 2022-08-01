@@ -50,7 +50,7 @@ function setActiveEditor(editor: TCΩEditor): Promise<void> {
   const line = getSelectedLine(editor)
   const filePath = editor.document.fileName
   const uri = getEditorDocPath(editor)
-  if (filePath.includes(CΩStore.tmpDir.name)) return Promise.reject() // Looking at a vscode.diff window
+  if (filePath.includes(CΩStore.tmpDir)) return Promise.reject() // Looking at a vscode.diff window
   if (CΩStore.activeContext.uri === uri) return Promise.reject() // already synced this
   // TODO: (maybe) should be able to get rid of activeContext and work only through CΩStore
   CΩStore.activeContext.uri = uri
@@ -83,7 +83,7 @@ function closeDiffEditor() {
   const { tmpDir } = CΩStore
   /*
   const editors = window.visibleTextEditors
-  editors.map(editor => (editor._documentData._document.uri.path.includes(tmpDir.name) && closeEditor(editor)))
+  editors.map(editor => (editor._documentData._document.uri.path.includes(tmpDir) && closeEditor(editor)))
   */
   setTimeout(() => {
     const editor = vscode.window.activeTextEditor as TCΩEditor
@@ -104,7 +104,7 @@ function closeDiffEditor() {
     tryingToClose = false
     const fileName = getEditorDocFileName(editor)
     try {
-      if (fileName.toLowerCase().includes(tmpDir.name.toLowerCase())) closeActiveEditor()
+      if (fileName.toLowerCase().includes(tmpDir.toLowerCase())) closeActiveEditor()
     } catch {}
 
     return true

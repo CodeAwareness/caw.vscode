@@ -94,10 +94,6 @@ export type TUser = {
   avatar: string,
 }
 
-export type TTmpDir = {
-  name: string,
-}
-
 export const CΩStore = {
   colorTheme: 1 as vscode.ColorThemeKind, // 1 = Light, 2 = Dark, 3 = High Contrast
   user: undefined as TUser | undefined,
@@ -115,7 +111,7 @@ export const CΩStore = {
    *   ... // see npm tmp package
    * }
    */
-  tmpDir: undefined as unknown as TTmpDir,
+  tmpDir: '/tmp/cΩ.vscode',
 
   /* projects: [{
    *   name, // convenience property = basename(root)
@@ -226,7 +222,7 @@ export const CΩStore = {
     CΩStore.user = undefined as unknown as TUser
     CΩStore.panel = undefined
     CΩStore.colorTheme = 1
-    CΩStore.tmpDir = undefined as unknown as TTmpDir
+    CΩStore.tmpDir = '/tmp/cΩ.vscode'
     CΩStore.projects = []
     CΩStore.activeProject = undefined
     CΩStore.selectedBranch = undefined

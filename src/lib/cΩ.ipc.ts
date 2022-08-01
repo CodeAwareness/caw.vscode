@@ -11,6 +11,7 @@ import CΩDeco from './cΩ.deco'
 import CΩDiffs from './cΩ.diffs'
 import CΩPanel from './cΩ.panel'
 import CΩWorkspace from './cΩ.workspace'
+import CΩWS from './cΩ.ws'
 
 function init() {
   CΩStore.colorTheme = vscode.window.activeColorTheme.kind
@@ -21,8 +22,8 @@ function init() {
   CΩPanel.postMessage({ command: 'setColorTheme', data })
 }
 
-const postBack = (command: string) => (res: any) => {
-  CΩPanel.postMessage({ command, res })
+const postBack = (command: string) => (data: any) => {
+  CΩPanel.postMessage({ command, data })
 }
 
 const ipcTable: Record<string, any> = {}
@@ -31,7 +32,7 @@ ipcTable['auth:login'] = (data: TAuth) => {
   init()
   CΩStore.user = data?.user
   CΩStore.tokens = data?.tokens
-  CΩWorkspace.setupWorker()
+  if (data?.user) CΩWorkspace.setupWorker()
 }
 
 ipcTable['auth:logout'] = () => {
@@ -109,6 +110,7 @@ function processSystemEvent(key: string, data: any) {
  * @param object - context: used for continuation of subscriptions
  ************************************************************************************/
 function setup(webview: any, context: any) {
+  postBack('wss-guid')(CΩStore.ws?.guid) // TODO: exponential delay checking until .ws exists
   webview.onDidReceiveMessage(
     (message: any) => {
       switch (message.command) {

@@ -4,7 +4,7 @@ import * as _ from 'lodash'
 
 import config from '@/config'
 import logger from './logger'
-import { CΩStore, TChanges, TProject, TTmpDir } from './cΩ.store'
+import { CΩStore, TChanges, TProject } from './cΩ.store'
 
 const PENDING_DIFFS: Record<string, boolean> = {}
 const isWindows = !!process.env.ProgramFiles
@@ -15,10 +15,8 @@ const isWindows = !!process.env.ProgramFiles
  * At this time we're only setting up one thing: an empty file that we'll use to
  * create unified diffs against untracked git files.
  ************************************************************************************/
-let tmpDir: TTmpDir
 
 function init() {
-  tmpDir = CΩStore.tmpDir
 }
 
 /************************************************************************************

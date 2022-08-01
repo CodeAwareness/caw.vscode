@@ -48,6 +48,12 @@ Added features X, Y, and Z.
 
 -----------------------------------------------------------------------------------------------------------
 
+## Setup git to work with unicode in your filenames
+
+`git config core.quotepath off`
+
+After which a `git ls-files` will list the files with the approriate characters.
+
 ## Working with Markdown
 
 **Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
