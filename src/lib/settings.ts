@@ -18,12 +18,12 @@ function checkConfigurationFile(/* context */) {
   logger.info('SETTINGS configuration', vscodeConfig) // TODO: add settings
 
   if (!vscode.workspace.workspaceFolders) return Promise.resolve()
-  const configPromises = vscode.workspace.workspaceFolders.map(folder => initializeFolderFromConfigurationFile(folder))
+  const configPromises = vscode.workspace.workspaceFolders.map(folder => initializeFromConfigurationFile(folder))
 
   return Promise.all(configPromises)
 }
 
-function initializeFolderFromConfigurationFile(folder: vscode.WorkspaceFolder) {
+function initializeFromConfigurationFile(folder: vscode.WorkspaceFolder) {
   return Promise.resolve()
   // TODO
   /*
@@ -53,5 +53,5 @@ function initConfig() {
 export {
   initConfig,
   checkConfigurationFile,
-  initializeFolderFromConfigurationFile,
+  initializeFromConfigurationFile,
 }

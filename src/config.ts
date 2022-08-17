@@ -6,7 +6,7 @@ const CONFIGURATION_FILE = '.CΩ'
 const CΩ_SCHEMA = 'codeAwareness'
 const SERVER_VERSION = 'v1'
 const EXT_URL = DEBUG ? `https://localhost:${PORT_LOCAL}` : 'https://ext.codeawareness.com' // CΩ Webview server
-const API_URL = DEBUG ? `https://localhost:${PORT_LOCAL}/api/${SERVER_VERSION}` : `https://api.codeawareness.com/${SERVER_VERSION}`
+const API_URL = `https://api.codeawareness.com/${SERVER_VERSION}`
 const SERVER_WSS = 'wss://localhost:48408'
 
 console.log('CONFIG', EXT_URL, API_URL, SERVER_WSS)

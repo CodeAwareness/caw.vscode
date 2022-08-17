@@ -7,7 +7,7 @@ import { setupCommands } from '@/vscode/commands'
 import type { TCΩEditor } from '@/lib/cΩ.editor'
 import type { TProject } from '@/lib/cΩ.store'
 
-import { initConfig, initializeFolderFromConfigurationFile } from '@/lib/settings'
+import { initConfig, initializeFromConfigurationFile } from '@/lib/settings'
 import { CΩStore } from '@/lib/cΩ.store'
 
 import logger from '@/lib/logger'
@@ -73,10 +73,9 @@ function initCodeAwareness(context: vscode.ExtensionContext) {
 function setupWatchers(context: vscode.ExtensionContext) {
   const { subscriptions } = context
   TDP.clearWorkspace()
-  vscode.workspace.workspaceFolders
-    ?.map(folder => subscriptions.push(
-      vscode.window.registerTreeDataProvider('cΩFiles', TDP.addPeerWorkspace(folder))
-    ))
+  vscode.workspace.workspaceFolders?.map(folder => subscriptions.push(
+    vscode.window.registerTreeDataProvider('cΩFiles', TDP.addPeerWorkspace(folder))
+  ))
   // TODO:
   subscriptions.push(
     // vscode.workspace.registerTextDocumentContentProvider(CΩ_SCHEMA, CΩDocumentContentProvider)
@@ -93,24 +92,20 @@ function setupWatchers(context: vscode.ExtensionContext) {
     // TODO: can we not mix promises and try catch?
     try {
       e.added.forEach(folder => {
-        initializeFolderFromConfigurationFile(folder)
-        /*
+        initializeFromConfigurationFile(folder)
         CΩSCM.addProject(folder) // TODO: check to see if adding a new workspace folder will properly initialize the sync process
-          .then(p => p && subscriptions.push(p.scm))
+          .then(p => p && subscriptions.push(p.scm as vscode.SourceControl))
           .catch(err => logger.error('CODEAWARENESS_EXTENSION: Not a git repository (folder, err)', folder, err))
         CΩSCM.addSubmodules(folder)
-          .then(p => p && subscriptions.push(p.scm))
+          .then(projects => projects?.map(p => subscriptions.push(p.scm as vscode.SourceControl)))
           .catch(err => logger.error('CODEAWARENESS_EXTENSION: failed to add git submodule (folder, err)', folder, err))
-        window.registerTreeDataProvider('cΩFiles', TDP.addPeerWorkspace(folder))
-        */
+        vscode.window.registerTreeDataProvider('cΩFiles', TDP.addPeerWorkspace(folder))
       })
-      /*
       e.removed.forEach(folder => {
         CΩSCM.removeSubmodules(folder)
         CΩSCM.removeProject(folder) // TODO: check to see if adding a new workspace folder will properly initialize the sync process
         TDP.removePeerWorkspace(folder)
       })
-      */
     } catch (ex) {
       // showErrorMessage(ex.message)
     } finally {

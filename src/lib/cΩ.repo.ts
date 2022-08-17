@@ -30,6 +30,4 @@ class Repository {
   }
 }
 
-export {
-  CΩRepository,
-}
+export default CΩRepository

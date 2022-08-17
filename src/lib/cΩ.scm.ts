@@ -5,7 +5,9 @@ import type { TProject } from './cΩ.store'
 import { CΩStore } from './cΩ.store'
 
 import logger from './logger'
+import CΩRepository from './cΩ.repo'
 import TDP from './cΩ.tdp'
+import CΩWS from '@/lib/cΩ.ws'
 
 function setupSCM(wsFolder: vscode.WorkspaceFolder) {
   const name = basename(wsFolder.uri.path)
@@ -35,9 +37,10 @@ function getProject(options: TOriginFolder): TProject | null {
   return null
 }
 
-function addSubmodules(wsFolder: vscode.WorkspaceFolder) {
-  // TODO
-  return Promise.resolve()
+function addSubmodules(wsFolder: vscode.WorkspaceFolder): Promise<TProject[]> {
+  if (!CΩStore.ws?.rSocket) return Promise.resolve([])
+  return CΩStore.ws.rSocket
+    .transmit('repo:add-submodules', wsFolder)
 }
 
 function removeSubmodules(wsFolder: vscode.WorkspaceFolder) {
@@ -45,9 +48,29 @@ function removeSubmodules(wsFolder: vscode.WorkspaceFolder) {
   return Promise.resolve()
 }
 
-function addProject(wsFolder: vscode.WorkspaceFolder) {
-  // TODO
-  return Promise.resolve()
+function addProject(workspaceFolder: any): Promise<void | TProject> {
+  logger.info('SCM: addProject workspaceFolder', workspaceFolder)
+  const wsFolder = workspaceFolder.uri ? workspaceFolder.uri.path : workspaceFolder
+  if (!CΩStore.ws?.rSocket) return Promise.resolve()
+  return CΩStore.ws.rSocket
+    .transmit('repo:add', wsFolder)
+    .then((project: TProject) => {
+      if (!project) {
+        logger.log('SCM: Not a git folder', wsFolder)
+        return // TODO: maybe allow other source control tools, besides git?
+      }
+
+      // TODO: pull changes to local workspace
+      const { scm, scIndex } = setupSCM(wsFolder)
+      project.repo = CΩRepository.createFrom(wsFolder)
+      project.scm = scm
+      project.scIndex = scIndex
+      CΩStore.projects.push(project)
+      TDP.addPeerWorkspace(workspaceFolder)
+      logger.log('SCM: project', project)
+
+      return project
+    })
 }
 
 function removeProject(wsFolder: vscode.WorkspaceFolder) {
@@ -73,7 +96,7 @@ function clearProject(project: TProject) {
  */
 function createProjects(folders: Array<vscode.WorkspaceFolder>): Promise<TProject[]> {
   if (!folders) return Promise.resolve(CΩStore.projects)
-  const promises = folders.map(addProject)
+  const promises: Promise<any>[] = folders.map(addProject)
   promises.concat(folders.map(addSubmodules))
   return Promise.all(promises)
     .then(() => CΩStore.projects)
