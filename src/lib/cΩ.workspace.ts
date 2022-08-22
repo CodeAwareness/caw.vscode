@@ -6,7 +6,7 @@ import config from '@/config'
 import logger from './logger'
 
 import type { TAuth } from './cΩ.store'
-import type { TContributor, TProject } from './cΩ.store'
+import type { TContributor } from './cΩ.store'
 import { CΩStore, CΩWork } from './cΩ.store'
 
 import type { TCΩEditor } from './cΩ.editor'
@@ -60,84 +60,12 @@ function setupWorker() {
     .getConfiguration('codeAwareness')
     .get('syncInterval') || config.SYNC_INTERVAL
   logger.info('WORKSPACE: setupWorker (syncInterval)', syncInterval)
-  // TODO: maybe we don't need this anymore, since we're doing syncWithServer every time the user saves a document;
-  // on second thought, syncWithServer also downloads new diffs, so it's important we do it periodically;
-  // however, uploading diffs every time is a waste of traffic and local resources too,
-  // so let's sync downloadDiffs periodically and uploadDiffs upon save document only;
-  CΩWork.syncTimer = setInterval(syncWithServer, syncInterval)
-
-  return sendAllProjects()
-    .then(syncWithServer)
+  // TODO: download diffs periodically
 }
 
-function sendAllProjects() {
-  const { projects } = CΩStore
-  return Promise.all(projects.map(CΩDiffs.sendDiffs))
-}
-
-/* Syncing workspace on a timer, as well as each time a file is saved. */
-/* TODO: maybe add a parameter to only send the active file? (needs more work both on client and server) */
-function syncWithServer() {
-  const { projects } = CΩStore
-  logger.log('WORKSPACE: Syncing with server (projects, user)', projects, CΩStore.user)
-  if (!CΩStore.user || !projects.length) return
-  // throttling functionality is in CΩDiffs
-  return Promise.resolve()
-    .then(() => {
-      return Promise.all(projects.map(syncSCM))
-    })
-    .then(() => {
-      // also wait for swarm auth to complete
-      return CΩStore.swarmAuthStatus
-    })
-}
 
 function syncProject() {
-  CΩEditor.syncWebview()
   CΩEditor.updateDecorations()
-}
-
-/************************************************************************************
- * refreshChanges
- *
- * @param Object - VSCode editor
- *
- * Download changes from the server, update decorations, sync webview
- ************************************************************************************/
-function refreshChanges(filePath?: string | void) {
-  const fPath = filePath || CΩStore.activeProject?.activePath
-  if (!fPath) return // TODO: maybe handle this
-  logger.log('WORKSPACE: refreshChanges (editorFilePath, activeProject, user, tmp)', filePath, CΩStore.activeProject, CΩStore.user, CΩStore.tmpDir)
-  if (!CΩStore.activeProject || !CΩStore.user) return Promise.resolve()
-  if (CΩStore.tmpDir && fPath.includes(CΩStore.tmpDir)) return Promise.resolve() // Looking at a vscode.diff window
-  const project = CΩStore.activeProject
-  syncSCM(project)
-  return CΩDiffs
-    .refreshChanges(project, project.activePath as string)
-    .then(syncProject)
-}
-
-/************************************************************************************
- * syncSCM
- *
- * @param Object - project object (in CΩStore)
- *
- * We sync the contributions with the VSCode TDP
- ************************************************************************************/
-function syncSCM(project: TProject) {
-  logger.log('WORKSPACE: syncSCM start', project, CΩStore.user)
-  if (!project || !project.cSHA || !CΩStore.user) return Promise.resolve()
-  const { origin, root } = project
-  return Promise.resolve()
-  /*
-   * TODO:
-  return CΩAPI
-    .getRepo(origin)
-    .then(({ data }) => {
-      if (!data.contribs) return
-      data.contribs.map(f => CΩSCM.addFile(root, f))
-    })
-   */
 }
 
 /************************************************************************************
@@ -171,10 +99,9 @@ function syncSCM(project: TProject) {
 function refreshLines(options: any) {
   const contentChanges: any[] = options.contentChanges
   if (!contentChanges) return // TODO: maybe handle this better
-  if (!CΩStore.activeProject || !CΩStore.user || !contentChanges.length) return Promise.resolve()
+  if (!CΩStore.activeFile || !CΩStore.user || !contentChanges.length) return Promise.resolve()
   // TODO: maybe use the `document` object we receive along with contentChanges, to ensure correct project / fpath selection
-  const project = CΩStore.activeProject
-  const fpath = project.activePath
+  const fpath = CΩStore.activeFile
   if (!fpath) return Promise.reject()
   // TODO: why sometimes we make a change, but we receive an empty contentChanges array?
   // logger.log('WORKSPACE: contentChanges', contentChanges)
@@ -193,16 +120,7 @@ function refreshLines(options: any) {
     }
     const changes = { range, replaceLen }
     logger.log('WORKSPACE: refreshLines', range, replaceLen)
-
-    project.editorDiff = project.editorDiff || {}
-    const editorDiff = project.editorDiff
-    editorDiff[fpath] = editorDiff[fpath] || []
-    editorDiff[fpath].push(changes)
-
-    if (!CΩDiffs.PENDING_DIFFS[fpath]) {
-      CΩDiffs.shiftWithLiveEdits(project, fpath)
-      delete editorDiff[fpath]
-    }
+    // TODO: deal with live changes in the editor
   })
   CΩDeco.insertDecorations(true)
   return Promise.resolve()
@@ -229,32 +147,19 @@ type TypeCursorInFile = {
  ************************************************************************************/
 function setupRepoFrom({ line, uri }: TypeCursorInFile): Promise<void> {
   const normUri = uri.toLowerCase() // TODO: is there a better way to do this for Windows? We sometimes get /c://some/dir and sometimes /C://some/dir (!)
-  const roots = _.filter(CΩStore.projects, p => normUri.includes(p.root.toLowerCase())) as TProject[]
-  logger.info('WORKSPACE: setupRepoFrom (uri, projects)', uri, CΩStore.projects, roots)
-  if (!roots || !roots.length) {
-    CΩPanel.postMessage({ command: 'setMode', data: { mode: 'empty' } })
-    return Promise.reject(new Error(`File is not part of any projects in your workspaces: ${uri}`))
-  }
-  // Select the project with the deepest match (longest path match)
-  CΩStore.activeProject = roots.reduce((r, item) => {
-    if (item.root.length > r.root.length) r = item
-    return r
-  }, { root: '', dispose: () => {} })
-  if (!CΩStore.activeProject) throw logger.error('WORKSPACE: (setupRepoFrom): File is not part of an active repository') // TODO: cleanup this repo instead ?
-  CΩStore.activeProject.activePath = getRelativePath(uri)
-  CΩStore.activeProject.line = line
-  const repoOrigin = CΩStore.activeProject.origin
-  logger.log('WORKSPACE: setupRepoFrom (active project origin)', CΩStore.activeProject.origin)
-  if (!repoOrigin) {
-    logger.error('WORKSPACE: setupRepoFrom(): Project is not a cloud git repository (local only git repo?)')
-    return Promise.reject(new Error(`File is not a part of a cloud repository: ${CΩStore.activeProject.root}`))
-  }
-  return Promise.resolve()
-}
+  if (!CΩStore.ws?.rSocket) return Promise.reject(new Error('Local service not running. Cannot setup repo.'))
 
-function getRelativePath(uri: string) {
-  if (!CΩStore.activeProject?.root) return // TODO: maybe handle this better
-  return uri.substr(CΩStore.activeProject.root.length + 1) // TODO: make a relative URI maybe ?
+  return CΩStore.ws.rSocket
+    .transmit('repo:switched-file', { uri })
+    .then(data => {
+      logger.info('WORKSPACE: switched file: ', uri, data)
+      if (!data?.repo) {
+        CΩPanel.postMessage({ command: 'setMode', data: { mode: 'empty' } })
+        throw new Error(`File is not part of any projects in your workspaces: ${uri}`)
+      }
+      CΩStore.activeFile = data.filePath
+      CΩStore.activeLine = line
+    })
 }
 
 /************************************************************************************
@@ -283,61 +188,42 @@ function getSavedCode() {
   // TODO: return readFile(_tmpFile).catch(err => null && err)
 }
 
-type TUsersCycle = {
-  users: any
-  reverse: boolean
+function addProject(folder: string): Promise<void> {
+  logger.log('WORKSPACE: addProject', folder)
+  if (!CΩStore?.ws?.rSocket) return Promise.reject()
+  return CΩStore.ws.rSocket
+    .transmit('repo:add')
+    .then(() => {
+      logger.info('WORKSPACE: Folder added to workspace: ', folder)
+    })
 }
 
-function cycleThroughUsers(options: TUsersCycle) {
-  const { users, reverse } = options
-  if (!users?.length) return null
-  let sel = getSelectedContributor()
-  if (sel) {
-    let i = 0
-    const inc = reverse ? -1 : 1
-    // find the selected user in the list
-    while (users[i].user.toString() !== sel.user.toString() && i < users.length) i++
-    // TODO: if sel user is not found (not in the list) --> trigger error ?
-    // for now we simply select the next user in the list
-    sel = users[i + inc] ? users[i + inc] : reverse ? users[users.length - 1] : users[0]
-  } else {
-    sel = users[0]
-  }
-  selectContributor(sel as TContributor)
-
-  return sel
-}
-
-function selectContributor(ct: TContributor) {
-  CΩStore.selectedContributor = ct
-  CΩPanel.postMessage({ command: 'selectedContributor', data: { selectedContributor: ct } })
-}
-
-function getSelectedContributor() {
-  return CΩStore.selectedContributor
+function removeProject(folder: string): Promise<void> {
+  if (!CΩStore?.ws?.rSocket) return Promise.reject()
+  return CΩStore.ws.rSocket
+    .transmit('repo:remove', { folder })
+    .then(() => {
+      logger.info('WORKSPACE: Folder removed from workspace: ', folder)
+    })
 }
 
 /************************************************************************************
  * Export module
  ************************************************************************************/
 const CΩWorkspace = {
+  addProject,
   closeTextDocument,
-  cycleThroughUsers,
   dispose,
-  getRelativePath,
   getSavedCode,
-  getSelectedContributor,
   highlight,
   init,
-  refreshChanges,
   refreshLines,
+  removeProject,
   saveCode,
-  selectContributor,
   setupRepoFrom,
   setupWorker,
   setupTempFiles,
   syncProject,
-  syncWithServer,
 }
 
 export default CΩWorkspace

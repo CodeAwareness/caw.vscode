@@ -32,7 +32,13 @@ ipcTable['auth:login'] = (data: TAuth) => {
   init()
   CΩStore.user = data?.user
   CΩStore.tokens = data?.tokens
-  if (data?.user) CΩWorkspace.setupWorker()
+  if (data?.user) {
+    CΩWorkspace.setupWorker()
+    CΩStore?.ws?.rSocket?.transmit('repo:active-path', {
+      fpath: CΩStore.activeTextEditor?.document?.uri?.path,
+      doc: CΩStore.activeTextEditor?.document?.getText()
+    })
+  }
 }
 
 ipcTable['auth:logout'] = () => {
@@ -40,56 +46,24 @@ ipcTable['auth:logout'] = () => {
   CΩDeco.clear()
 }
 
-ipcTable['adhoc:receiveShared'] = (data: any) => {
-  // TODO:
-  // CΩWorkspace.receiveShared(data)
-}
-ipcTable['adhoc:shareFile'] = (data: any) => {
-  // TODO:
-  // CΩWorkspace.shareFile(data)
-}
-
-ipcTable['adhoc:shareFolder'] = (data: any) => {
-  // TODO:
-  // CΩWorkspace.shareFolder(data)
-}
-
 ipcTable['branch:select'] = (data: any) => {
-  CΩDiffs.diffWithBranch(data)
+  // TODO: CΩDiffs.diffWithBranch(data)
 }
 
 ipcTable['branch:refresh'] = (data: any) => {
-  const promises = CΩStore.projects.map(p => p.repo.refreshGit())
-  Promise.all(promises)
-    .then(() => {
-      CΩPanel.postMessage({
-        command: 'branch:refresh',
-        data: CΩStore.activeProject?.repo.git,
-      })
-    })
+  // refresh branches using git and display in CΩPanel
 }
 
 ipcTable['branch:unselect'] = () => {
-  CΩStore.selectedBranch = undefined
   CΩEditor.closeDiffEditor()
 }
 
 ipcTable['contrib:select'] = () => {
-  CΩDiffs.diffWithContributor()
+  // TODO: CΩDiffs.diffWithContributor()
 }
 
 ipcTable['contrib:unselect'] = () => {
-  CΩStore.selectedContributor = undefined
   CΩEditor.closeDiffEditor()
-}
-
-ipcTable['repo:updateAvailable'] = (data: any) => {
-  logger.log('IPC: repo:updateAvailable', data)
-  if (!CΩStore.activeProject) return
-  // eslint-disable-next-line
-  const { activePath } = CΩStore.activeProject
-  /* swarm auth success will trigger repo:updateAvailable with no activePath (complete refresh) */
-  if (!data.activePath || activePath === data.activePath) CΩWorkspace.refreshChanges(activePath)
 }
 
 /************************************************************************************

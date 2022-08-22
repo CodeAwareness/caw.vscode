@@ -100,7 +100,7 @@
     "views": {
       "explorer": [
         {
-          "id": "cΩFiles",
+          "id": "codeAwareness",
           "name": "Peer Changes",
           "icon": "media/code.svg",
           "contextualTitle": "Files changed at peers.",

@@ -81,9 +81,9 @@ export class CΩWS {
       return new Promise((resolve, reject) => {
         this.resetDelay()
         const pendingConnection: any = () => {
-          logger.info(`WSS: pending connection (delay: ${this._delay})`)
+          logger.info(`WSS: pending connection (delay: ${this._delay})`, action)
           setTimeout(() => {
-            if (!handled) reject({ message: 'Request timed out' })
+            if (!handled) reject({ message: `Request timed out: ${action}` })
           }, options?.timeout || 3000)
           if (!wsocket.connected) {
             setTimeout(pendingConnection, this.expDelay())

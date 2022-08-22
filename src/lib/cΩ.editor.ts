@@ -41,21 +41,11 @@ const getSelections = (ev: any) => {
  * We're setting up the workspace everytime a new editor is activated,
  * because the user may have several repositories open, or a file outside any repo.
  ************************************************************************************/
-function setActiveEditor(editor: TCΩEditor): Promise<void> {
+function setActiveEditor(editor: TCΩEditor) {
   CΩStore.clear()
   CΩDiffs.clear()
-  logger.log('EDITOR: setActiveEditor', editor)
-  if (!editor) return Promise.reject()// TODO: figure out how to detect when first opening the panel (for some reason VSCode sends null as active text editor)
   CΩStore.activeTextEditor = editor
-  const line = getSelectedLine(editor)
-  const filePath = editor.document.fileName
-  const uri = getEditorDocPath(editor)
-  if (filePath.includes(CΩStore.tmpDir)) return Promise.reject() // Looking at a vscode.diff window
-  if (CΩStore.activeContext.uri === uri) return Promise.reject() // already synced this
-  // TODO: (maybe) should be able to get rid of activeContext and work only through CΩStore
-  CΩStore.activeContext.uri = uri
-  CΩStore.activeContext.dirty = true
-  return CΩWorkspace.setupRepoFrom({ uri, line })
+  logger.info('EDITOR: set active editor', editor)
 }
 
 /************************************************************************************
@@ -67,8 +57,6 @@ function updateDecorations() {
   logger.log('EDITOR: syncing webview')
   const editor = CΩStore.activeTextEditor
   if (!editor) return logger.error('EDITOR trying to setup editor failed; no active text editor.')
-  if (!CΩStore.projects.length) return logger.info('EDITOR: No projects registered')
-  if (!CΩStore.activeProject) return logger.info('EDITOR: No active project / no file selected')
   CΩDeco.insertDecorations()
 }
 
@@ -116,85 +104,27 @@ function closeDiffEditor() {
  *
  * When we open the CΩ panel, we need to re-focus on our editor (not stealing focus)
  ************************************************************************************/
-function focusTextEditor(): Promise<void> {
-  if (CΩStore.activeTextEditor) return Promise.resolve()
+function focusTextEditor() {
+  if (CΩStore.activeTextEditor) return
   const editors = vscode.window.visibleTextEditors as Array<TCΩEditor>
-  return setActiveEditor(editors[0])
+  setActiveEditor(editors[0])
 }
 
 /************************************************************************************
  * getActiveContributors
  *
  * Retrieve all users who have touched the file since the common SHA.
- * The file in question is the activePath, showing in the focussed editor.
+ * The file in question is the activeFile, showing in the focussed editor.
  ************************************************************************************/
 function getActiveContributors(): Record<string, TChanges> {
-  const ap = CΩStore.activeProject
-  if (!ap) return {}
-
-  const wsFolder = CΩStore.activeProject?.root
-  const editor = CΩStore.activeTextEditor as TCΩEditor
-  const uri = getEditorDocFileName(editor)
-  // @ts-expect-error Issue with the trick i'm using
-  const relativePath = uri.substr(wsFolder.length + !isWindows).replace(/\\/g, '/')
-
-  if (!ap.changes) return {}
-  logger.log('EDITOR: getActiveContributors (wsFolder, uri, relativePath, ap.changes, fileChanges, contributors)', wsFolder, uri, relativePath, ap.changes, ap.changes[relativePath], ap.contributors)
-  return ap.changes[relativePath]
-}
-
-/************************************************************************************
- * syncWebview
- *
- * We sync the data in VSCode with the CodeAwareness webview,
- * in order to display the contributors for the activePath,
- * the local branche names, etc.
- ************************************************************************************/
-function syncWebview() {
-  if (!CΩPanel.hasPanel()) return false
-  const editor = CΩStore.activeTextEditor
-  const data = editor ? getSelections(editor) : {}
-  setTimeout(() => { // because we don't get any close event from the webview, yeah, figures
-    CΩPanel.postMessage(data)
-  }, 10)
-  const ap = CΩStore.activeProject
-  if (!ap) return false
-
-  return true
   // TODO
-  /*
-  git
-    .gitBranches(CΩStore.activeProject.root)
-    .then(({ branch, branches }) => {
-      ap.branch = branch
-      ap.branches = branches
-      const activeProject = {
-        activePath: ap.activePath,
-        line: ap.line,
-        name: ap.name,
-        branch: ap.branch,
-        branches: ap.branches,
-        origin: ap.origin,
-        root: ap.root,
-      }
-      const data = {
-        user: CΩStore.user,
-        tokens: CΩStore.tokens,
-        contributors: getActiveContributors(),
-        selectedContributor: CΩStore.selectedContributor,
-        colorTheme: CΩStore.colorTheme,
-        activeProject,
-      }
-      CΩPanel.postMessage({ command: 'initWithData', data })
-    })
-    */
+  return {}
 }
 
 const CΩEditor = {
   closeDiffEditor,
   focusTextEditor,
   setActiveEditor,
-  syncWebview,
   updateDecorations,
 }
 

@@ -89,6 +89,35 @@ const TDP = {
   },
 }
 
+/************************************************************************************
+ * addFile = registerWithTDP
+ *
+ * DESIGN:
+ * We're adding files to the CΩ repository, but the user may have multiple repositories open, and we need to show diffs coresponding to multiple contributors.
+ * Our CΩ repository looks like this (where searchLib, microPost are just examples of repo names)
+
+ * searchLib -> aliceId -> [ services/utils.js, main.js ]
+ * searchLib -> bobId ->   [ services/logger.js, main.js ]
+ * microPost -> bobId ->   [ settings/app.js, components/crispy.js ]
+
+ * When we're adding files from downloadDiff, we store them in this format, and we combine all the file paths into a list for VSCode Source Control Manager.
+ ************************************************************************************/
+export function addFile(wsFolder: vscode.WorkspaceFolder, fpath: string) {
+  const wsPath = wsFolder.uri.path
+  const parts = fpath.split('/').filter(a => a)
+  let prevObj = CΩStore.peerFS[wsPath]
+  if (!prevObj) prevObj = {}
+  CΩStore.peerFS[wsPath] = prevObj
+  let leaf
+  for (const name of parts) {
+    if (!prevObj[name]) prevObj[name] = {}
+    leaf = { name, prevObj }
+    prevObj = prevObj[name]
+  }
+  if (leaf) leaf.prevObj[leaf.name] = 1
+  TDP.refresh()
+}
+
 export class TDItem extends TreeItem {
   wsFolder: vscode.WorkspaceFolder
   fpath: string

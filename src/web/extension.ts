@@ -5,21 +5,21 @@ import { CΩStatusbar } from '@/vscode/statusbar'
 import { setupCommands } from '@/vscode/commands'
 
 import type { TCΩEditor } from '@/lib/cΩ.editor'
-import type { TProject } from '@/lib/cΩ.store'
 
-import { initConfig, initializeFromConfigurationFile } from '@/lib/settings'
+import { initConfig } from '@/lib/settings'
 import { CΩStore } from '@/lib/cΩ.store'
 
 import logger from '@/lib/logger'
 import TDP from '@/lib/cΩ.tdp'
 import CΩPanel from '@/lib/cΩ.panel'
 import CΩEditor from '@/lib/cΩ.editor'
-import CΩSCM from '@/lib/cΩ.scm'
 import CΩWorkspace from '@/lib/cΩ.workspace'
 import CΩWS from '@/lib/cΩ.ws'
 
 let activated: boolean // extension activated !
 const deactivateTasks: Array<any> = [] // keeping track of all the disposables
+
+export const SCM_PEER_FILES_VIEW = 'codeAwareness'
 
 export function activate(context: vscode.ExtensionContext) {
   // The commandId parameter must match the command field in package.json
@@ -54,17 +54,6 @@ function initCodeAwareness(context: vscode.ExtensionContext) {
 }
 
 /************************************************************************************
- * VSCode Telemetry
- * TODO: create ApplicationInsights Key for Telemetry
- ************************************************************************************/
-/*
-  const { name, version, aiKey } = require('../package.json') // !! TODO: Won't work with vscode web
-  const telemetryReporter = new TelemetryReporter(name, version, aiKey)
-  logger.info('CODEAWARENESS_EXTENSION: deactivateTasks', deactivateTasks)
-  deactivateTasks.push(() => telemetryReporter.dispose())
- */
-
-/************************************************************************************
  * Watch the workspace folder list, and register / unregister as projects.
  *
  * TDP: CodeAwareness Explorer panel: showing all files affected by changes at peers.
@@ -74,17 +63,16 @@ function setupWatchers(context: vscode.ExtensionContext) {
   const { subscriptions } = context
   TDP.clearWorkspace()
   vscode.workspace.workspaceFolders?.map(folder => subscriptions.push(
-    vscode.window.registerTreeDataProvider('cΩFiles', TDP.addPeerWorkspace(folder))
-  ))
-  // TODO:
+      vscode.window.registerTreeDataProvider(SCM_PEER_FILES_VIEW, TDP.addPeerWorkspace(folder))
+    ))
+  // TODO: SCM files
   subscriptions.push(
     // vscode.workspace.registerTextDocumentContentProvider(CΩ_SCHEMA, CΩDocumentContentProvider)
   )
-  // TODO:
+  // TODO: Code Lenses
   subscriptions.push(
     // peer8CodeLensProvider()
   )
-
   // Sync workspace folders
   subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(e => {
     if (!activated) initCodeAwareness(context)
@@ -92,18 +80,11 @@ function setupWatchers(context: vscode.ExtensionContext) {
     // TODO: can we not mix promises and try catch?
     try {
       e.added.forEach(folder => {
-        initializeFromConfigurationFile(folder)
-        CΩSCM.addProject(folder) // TODO: check to see if adding a new workspace folder will properly initialize the sync process
-          .then(p => p && subscriptions.push(p.scm as vscode.SourceControl))
-          .catch(err => logger.error('CODEAWARENESS_EXTENSION: Not a git repository (folder, err)', folder, err))
-        CΩSCM.addSubmodules(folder)
-          .then(projects => projects?.map(p => subscriptions.push(p.scm as vscode.SourceControl)))
-          .catch(err => logger.error('CODEAWARENESS_EXTENSION: failed to add git submodule (folder, err)', folder, err))
-        vscode.window.registerTreeDataProvider('cΩFiles', TDP.addPeerWorkspace(folder))
+        CΩWorkspace.addProject(folder.uri.path)
+        vscode.window.registerTreeDataProvider(SCM_PEER_FILES_VIEW, TDP.addPeerWorkspace(folder))
       })
       e.removed.forEach(folder => {
-        CΩSCM.removeSubmodules(folder)
-        CΩSCM.removeProject(folder) // TODO: check to see if adding a new workspace folder will properly initialize the sync process
+        CΩWorkspace.removeProject(folder.uri.path)
         TDP.removePeerWorkspace(folder)
       })
     } catch (ex) {
@@ -137,7 +118,6 @@ function setupWatchers(context: vscode.ExtensionContext) {
   subscriptions.push(vscode.workspace.onDidSaveTextDocument(e => {
     // TODO: some throttle mechanism to make sure we're only sending at most once per some configured interval (subscription plan related)
     // use delay to allow the system to do other things like build and stuff, and prevent excessive use (peaks) of CPU
-    const project = CΩStore.projects.filter(p => e.uri.path.toLowerCase().includes(p.root.toLowerCase()))[0]
     // TODO:
     /*
     CΩDiffs
@@ -150,10 +130,10 @@ function setupWatchers(context: vscode.ExtensionContext) {
    * User switching to a different file
    ************************************************************************************/
   vscode.window.onDidChangeActiveTextEditor((editor: vscode.TextEditor | undefined) => {
-    if (!editor || editor.document.uri.path.includes(CΩStore.tmpDir)) return
+    logger.info('CODEAWARENESS_EXTENSION: onDidChangeActiveTextEditor', editor)
+    if (!editor) return
     CΩEditor.setActiveEditor(editor as TCΩEditor)
-      .then(CΩWorkspace.refreshChanges)
-      .catch((err: any) => console.log('ERROR setting the active editor', err.toString()))
+    CΩStore?.ws?.rSocket?.transmit('repo:active-path', { fpath: editor.document.uri.path, doc: editor.document.getText() })
   })
 
   /************************************************************************************
@@ -172,9 +152,6 @@ function setupWatchers(context: vscode.ExtensionContext) {
    ************************************************************************************/
   const folders = vscode.workspace.workspaceFolders as vscode.WorkspaceFolder[]
   if (!folders) return
-
-  CΩSCM.createProjects(folders)
-    .then((projects: Array<TProject>) => projects.map((p: TProject) => subscriptions.push(p)))
 
   /************************************************************************************
    * VSCode Telemetry
