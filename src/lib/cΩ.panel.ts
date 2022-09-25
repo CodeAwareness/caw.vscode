@@ -19,7 +19,6 @@ function getPanel() {
 }
 
 function hasPanel() {
-  // console.log('trying to access PANEL', !!CΩStore.panel, this)
   return !!CΩStore.panel
 }
 
@@ -57,12 +56,13 @@ function createPanel(extensionPath: string) {
 }
 
 /************************************************************************************
- * toggle
- *
- * @param Object - context object from VSCode
+ * toggle cΩ panel on and off
  *
  * When toggling the CodeAwareness webview panel on and off,
  * we load the svelte app into the webview and show or hide the panel.
+ *
+ * @param Object - context object from VSCode
+ *
  ************************************************************************************/
 function toggle(context: vscode.ExtensionContext) {
   const { extensionPath } = context
@@ -107,7 +107,7 @@ function getWebviewContent(webview: vscode.Webview, extURL: string) {
 }
 
 /************************************************************************************
- * postMessage
+ * post a message back to VSCode API
  *
  * @param Object - data to be sent to the webview
  ************************************************************************************/
@@ -119,20 +119,36 @@ function postMessage(data: any) {
 }
 
 /************************************************************************************
- * didChangeViewState
- *
- * @param Object - the state object received from VSCode API
+ * ensure we're not focusing the cΩ panel
  *
  * We have to find a way to avoid opening a file in the same window group as the webview.
  * From what I could find, VSCode does not provide any means to doing that,
  * so I'm instead using this trick, of moving the code to the left.
  * (sorry for those people with portrait monitors... I'll figure something out later)
+ *
+ * @param Object - the state object received from VSCode API
+ *
  ************************************************************************************/
 function didChangeViewState(state: any) {
   logger.info('PANEL didChangeViewState', state)
   if (hasPanel()) {
     moveEditor(state.webviewPanel)
   }
+}
+
+/************************************************************************************
+ * update contributor information
+ *
+ * We have to find a way to avoid opening a file in the same window group as the webview.
+ * From what I could find, VSCode does not provide any means to doing that,
+ * so I'm instead using this trick, of moving the code to the left.
+ * (sorry for those people with portrait monitors... I'll figure something out later)
+ *
+ * @param Object - the project (received from VSCode API)
+ *
+ ************************************************************************************/
+function updateProject(data: any) {
+  postMessage({ command: 'setProject', data })
 }
 
 const CΩPanel = {
@@ -143,6 +159,7 @@ const CΩPanel = {
   hasPanel,
   postMessage,
   toggle,
+  updateProject,
 }
 
 export default CΩPanel

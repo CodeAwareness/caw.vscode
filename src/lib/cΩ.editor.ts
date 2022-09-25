@@ -34,22 +34,23 @@ const getSelections = (ev: any) => {
 }
 
 /************************************************************************************
- * setActiveEditor
- *
- * @param Object - editor object from VSCode
+ * Mark the currently active editor in the global state
  *
  * We're setting up the workspace everytime a new editor is activated,
  * because the user may have several repositories open, or a file outside any repo.
+ *
+ * @param Object - editor object from VSCode
+ *
  ************************************************************************************/
 function setActiveEditor(editor: TCΩEditor) {
-  CΩStore.clear()
+  CΩStore.reset()
   CΩDiffs.clear()
   CΩStore.activeTextEditor = editor
   logger.info('EDITOR: set active editor', editor)
 }
 
 /************************************************************************************
- * updateDecorations
+ * Mark peer changes within the current editor (gutter only when cΩ panel is not active)
  *
  * CΩWorkspace calls this function when we have a change or a new file open.
  ************************************************************************************/
@@ -60,10 +61,12 @@ function updateDecorations(project: any) {
   if (!editor) return logger.error('EDITOR trying to setup editor failed; no active text editor.')
   // TODO: project now contains the line changes from peers;
   CΩDeco.insertDecorations()
+
+  return project
 }
 
 /************************************************************************************
- * closeDiffEditor
+ * trying to close the diff window.
  *
  * A workaround attempt, trying to close the diff window when the user clicks the
  * same selected contributor in CodeAwareness WebView
@@ -102,7 +105,7 @@ function closeDiffEditor() {
 }
 
 /************************************************************************************
- * focusTextEditor
+ * try to focus the active editor window
  *
  * When we open the CΩ panel, we need to re-focus on our editor (not stealing focus)
  ************************************************************************************/
@@ -113,7 +116,7 @@ function focusTextEditor() {
 }
 
 /************************************************************************************
- * getActiveContributors
+ * retrieve all contributors for the file in the active editor
  *
  * Retrieve all users who have touched the file since the common SHA.
  * The file in question is the activeFile, showing in the focussed editor.

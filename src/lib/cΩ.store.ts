@@ -119,6 +119,7 @@ export const CΩStore = {
   ws: undefined as CΩWS | undefined,
 
   clear: () => {
+    console.log('STORE CLEAR')
     CΩStore.tokens = undefined as unknown as TTokens
     CΩStore.user = undefined as unknown as TUser
     CΩStore.panel = undefined
@@ -128,6 +129,13 @@ export const CΩStore = {
     CΩStore.doc = undefined
     CΩStore.line = 0
   },
+
+  reset: () => {
+    console.log('STORE RESET')
+    CΩStore.peerFS = {}
+    CΩStore.doc = undefined
+    CΩStore.line = 0
+  }
 }
 
 export default CΩStore

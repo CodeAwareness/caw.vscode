@@ -135,6 +135,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
     CΩEditor.setActiveEditor(editor as TCΩEditor)
     CΩStore?.ws?.rSocket?.transmit('repo:active-path', { fpath: editor.document.uri.path, doc: editor.document.getText() })
       .then(CΩEditor.updateDecorations)
+      .then(CΩPanel.updateProject)
   })
 
   /************************************************************************************

@@ -36,6 +36,7 @@ ipcTable['auth:login'] = (data: TAuth) => {
       doc: CΩStore.activeTextEditor?.document?.getText()
     })
     .then(CΩEditor.updateDecorations)
+    .then(CΩPanel.updateProject)
   }
 }
 
