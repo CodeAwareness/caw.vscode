@@ -53,10 +53,12 @@ function setActiveEditor(editor: TCΩEditor) {
  *
  * CΩWorkspace calls this function when we have a change or a new file open.
  ************************************************************************************/
-function updateDecorations() {
-  logger.log('EDITOR: syncing webview')
+function updateDecorations(project: any) {
+  logger.log('EDITOR: syncing webview (project)', project)
   const editor = CΩStore.activeTextEditor
+  CΩStore.activeProject = project
   if (!editor) return logger.error('EDITOR trying to setup editor failed; no active text editor.')
+  // TODO: project now contains the line changes from peers;
   CΩDeco.insertDecorations()
 }
 

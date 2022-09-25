@@ -22,7 +22,6 @@ function init(data?: TAuth) {
   console.log('Workspace: init', data)
   setupTempFiles()
   if (data?.user) {
-    syncProject()
     CΩDiffs.init()
   }
 }
@@ -63,10 +62,6 @@ function setupWorker() {
   // TODO: download diffs periodically
 }
 
-
-function syncProject() {
-  CΩEditor.updateDecorations()
-}
 
 /************************************************************************************
  * refreshLines
@@ -223,7 +218,6 @@ const CΩWorkspace = {
   setupRepoFrom,
   setupWorker,
   setupTempFiles,
-  syncProject,
 }
 
 export default CΩWorkspace

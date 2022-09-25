@@ -90,7 +90,6 @@ function insertDecorations(leading?: boolean) {
 }
 
 function doInsert(uri: string) {
-  /*
   const project = CΩStore.activeProject
   const editor = CΩStore.activeTextEditor
   if (!project || !editor) return
@@ -109,7 +108,6 @@ function doInsert(uri: string) {
   const lines = Object.keys(linesHash)
   const ranges = lines.map(l => [[l, 0], [l, 256]])
   setDecorations({ editor, ranges })
-  */
 }
 
 function clear() {

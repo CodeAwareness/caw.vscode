@@ -15,9 +15,6 @@ import CΩWS from './cΩ.ws'
 
 function init() {
   CΩStore.colorTheme = vscode.window.activeColorTheme.kind
-  if (CΩStore.tokens) {
-    CΩWorkspace.syncProject()
-  }
   const data = { colorTheme: CΩStore.colorTheme }
   CΩPanel.postMessage({ command: 'setColorTheme', data })
 }
@@ -38,6 +35,7 @@ ipcTable['auth:login'] = (data: TAuth) => {
       fpath: CΩStore.activeTextEditor?.document?.uri?.path,
       doc: CΩStore.activeTextEditor?.document?.getText()
     })
+    .then(CΩEditor.updateDecorations)
   }
 }
 

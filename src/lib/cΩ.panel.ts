@@ -25,7 +25,6 @@ function hasPanel() {
 
 function dispose() {
   if (CΩStore.panel) {
-    CΩWorkspace.syncProject()
     CΩWorkspace.dispose()
   }
 }

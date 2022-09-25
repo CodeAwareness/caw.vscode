@@ -79,6 +79,7 @@ export const CΩStore = {
   activeFile: undefined as string | undefined,
   activeLine: undefined as number | undefined,
   activeTextEditor: null as TCΩEditor | null,
+  activeProject: undefined as any,
 
   colorTheme: 1 as vscode.ColorThemeKind, // 1 = Light, 2 = Dark, 3 = High Contrast
 

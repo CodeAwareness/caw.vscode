@@ -67,6 +67,10 @@ export class CΩWS {
           this.rSocket = socket
         })
     })
+
+    this.rootSocket.on('disconnect', () => {
+      this.rootSocket!.connect()
+    })
   }
 
   /*
@@ -95,6 +99,7 @@ export class CΩWS {
           data.cΩ = this.guid
           wsocket.emit(action, data)
           wsocket.on(`res:${action}`, data => {
+            console.log('ACTION COMPLETE', action, data)
             handled = true
             resolve(data)
           })
@@ -104,7 +109,6 @@ export class CΩWS {
             reject(err)
           })
         }
-        logger.info('WSS: attempting to transmit', action, data)
 
         pendingConnection()
       })
