@@ -115,17 +115,6 @@ function focusTextEditor() {
   setActiveEditor(editors[0])
 }
 
-/************************************************************************************
- * retrieve all contributors for the file in the active editor
- *
- * Retrieve all users who have touched the file since the common SHA.
- * The file in question is the activeFile, showing in the focussed editor.
- ************************************************************************************/
-function getActiveContributors(): Record<string, TChanges> {
-  // TODO
-  return {}
-}
-
 const CΩEditor = {
   closeDiffEditor,
   focusTextEditor,
