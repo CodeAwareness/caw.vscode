@@ -101,7 +101,7 @@
       "explorer": [
         {
           "id": "codeAwareness",
-          "name": "Peer Changes",
+          "name": "Peer Diffs",
           "icon": "media/code.svg",
           "contextualTitle": "Files changed at peers.",
           "when": "workbenchState != empty"
@@ -191,7 +191,7 @@
       ]
     },
     "configuration": {
-      "title": "cΩ",
+      "title": "Code Awareness",
       "properties": {
         "cΩ.maxCommitsInLog": {
           "type": "number",

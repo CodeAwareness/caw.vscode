@@ -12,6 +12,7 @@ import CΩDiffs from './cΩ.diffs'
 import CΩPanel from './cΩ.panel'
 import CΩWorkspace from './cΩ.workspace'
 import CΩWS from './cΩ.ws'
+import CΩTDP from '@/lib/cΩ.tdp'
 
 function init() {
   CΩStore.colorTheme = vscode.window.activeColorTheme.kind
@@ -36,6 +37,7 @@ ipcTable['auth:login'] = (data: TAuth) => {
       doc: CΩStore.activeTextEditor?.document?.getText()
     })
     .then(CΩEditor.updateDecorations)
+    .then(CΩTDP.addProject)
     .then(CΩPanel.updateProject)
   }
 }

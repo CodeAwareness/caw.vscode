@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import * as _ from 'lodash'
-import * as fs from 'fs'
+import * as path from 'path'
 
 import config from '@/config'
 import logger from './logger'
@@ -15,6 +15,7 @@ import CΩEditor from './cΩ.editor'
 import CΩDeco   from './cΩ.deco'
 import CΩPanel  from './cΩ.panel'
 import CΩDiffs  from './cΩ.diffs'
+import CΩSCM from './cΩ.scm'
 
 const isWindows = !!process.env.ProgramFiles
 
@@ -183,19 +184,32 @@ function getSavedCode() {
   // TODO: return readFile(_tmpFile).catch(err => null && err)
 }
 
-function addProject(folder: string): Promise<void> {
+// TODO: add heartbeat so that we can clean up duplicate projects (which accumulate on Local Service due to restarting VSCode)
+async function addProject(wsFolder: any) {
+  const folder: string = wsFolder.uri ? wsFolder.uri.path : wsFolder.toString()
   logger.log('WORKSPACE: addProject', folder)
-  if (!CΩStore?.ws?.rSocket) return Promise.reject()
-  return CΩStore.ws.rSocket
-    .transmit('repo:add')
+  if (!CΩStore?.ws?.rSocket) return
+
+  CΩStore.ws.rSocket
+    .transmit('repo:add', { folder })
     .then(() => {
+      CΩSCM.addProject(wsFolder)
       logger.info('WORKSPACE: Folder added to workspace: ', folder)
+    })
+
+  CΩStore.ws.rSocket
+    .transmit('repo:add-submodules', { folder })
+    .then(subs => {
+      subs?.map((p: any) => CΩSCM.addProject(p))
+      logger.info('WORKSPACE: Folder submodules added to workspace: ', subs)
     })
 }
 
-function removeProject(folder: string): Promise<void> {
-  if (!CΩStore?.ws?.rSocket) return Promise.reject()
-  return CΩStore.ws.rSocket
+function removeProject(wsFolder: any) {
+  if (!CΩStore?.ws?.rSocket) return
+  const folder: string = wsFolder.uri ? wsFolder.uri.path : wsFolder.toString()
+
+  CΩStore.ws.rSocket
     .transmit('repo:remove', { folder })
     .then(() => {
       logger.info('WORKSPACE: Folder removed from workspace: ', folder)

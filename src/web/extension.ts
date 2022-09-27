@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 import * as _ from 'lodash'
+import * as path from 'path'
 
 import { CΩStatusbar } from '@/vscode/statusbar'
 import { setupCommands } from '@/vscode/commands'
@@ -9,12 +10,14 @@ import type { TCΩEditor } from '@/lib/cΩ.editor'
 import { initConfig } from '@/lib/settings'
 import { CΩStore } from '@/lib/cΩ.store'
 
+import config from '@/config'
 import logger from '@/lib/logger'
-import TDP from '@/lib/cΩ.tdp'
 import CΩPanel from '@/lib/cΩ.panel'
 import CΩEditor from '@/lib/cΩ.editor'
 import CΩWorkspace from '@/lib/cΩ.workspace'
 import CΩWS from '@/lib/cΩ.ws'
+import CΩTDP from '@/lib/cΩ.tdp'
+import CΩSCM from '@/lib/cΩ.scm'
 
 let activated: boolean // extension activated !
 const deactivateTasks: Array<any> = [] // keeping track of all the disposables
@@ -53,6 +56,40 @@ function initCodeAwareness(context: vscode.ExtensionContext) {
   logger.info('CODEAWARENESS_EXTENSION: extension activated (workspaceFolders)', vscode.workspace.workspaceFolders)
 }
 
+const CΩDocumentContentProvider = {
+
+  _onDidChange: new vscode.EventEmitter(),
+
+  get onDidChange() {
+    logger.info('peer8DocumentContentProvider onDidChange')
+    return this._onDidChange.event
+  },
+
+  dispose() {
+    logger.info('peer8DocumentContentProvider dispose')
+    this._onDidChange.dispose()
+  },
+
+  updated(repo: any) {
+    logger.info('peer8DocumentContentProvider updated', repo)
+    // this._onDidChange.fire(Uri.parse(`${PEER8_SCHEMA}:src/extension.js`))
+  },
+
+  provideTextDocumentContent(relativePath: string) {
+    // @ts-ignore
+    const [, wsName, uri] = /([^/]+)\/(.+)$/.exec(relativePath.path)
+    const { tmpDir, selectedContributor } = CΩStore
+    const ctId = selectedContributor.user
+    const userDir = path.join(tmpDir, ctId.toString(), wsName)
+    const peerFile = path.join(userDir, config.EXTRACT_REPO_DIR, uri)
+    // logger.info('peer8DocumentContentProvider uri', relativePath.path, 'peerFile', peerFile)
+
+    return CΩStore?.ws?.rSocket?.transmit('repo:read-file', { fpath: peerFile })
+      // TODO: find a better way to indicate deleted file, as opposed to new file created, as opposed to simply file not existing
+      .catch(() => '') // if file not existing
+  },
+}
+
 /************************************************************************************
  * Watch the workspace folder list, and register / unregister as projects.
  *
@@ -61,13 +98,14 @@ function initCodeAwareness(context: vscode.ExtensionContext) {
  ************************************************************************************/
 function setupWatchers(context: vscode.ExtensionContext) {
   const { subscriptions } = context
-  TDP.clearWorkspace()
-  vscode.workspace.workspaceFolders?.map(folder => subscriptions.push(
-      vscode.window.registerTreeDataProvider(SCM_PEER_FILES_VIEW, TDP.addPeerWorkspace(folder))
+  CΩTDP.clearWorkspace()
+  vscode.workspace.workspaceFolders?.map(wsFolder => subscriptions.push(
+      vscode.window.registerTreeDataProvider(SCM_PEER_FILES_VIEW, CΩTDP.addPeerWorkspace(wsFolder))
     ))
   // TODO: SCM files
   subscriptions.push(
-    // vscode.workspace.registerTextDocumentContentProvider(CΩ_SCHEMA, CΩDocumentContentProvider)
+    /* @ts-ignore */
+    vscode.workspace.registerTextDocumentContentProvider(config.CΩ_SCHEMA, CΩDocumentContentProvider)
   )
   // TODO: Code Lenses
   subscriptions.push(
@@ -79,13 +117,14 @@ function setupWatchers(context: vscode.ExtensionContext) {
     logger.info('CODEAWARENESS_EXTENSION: onDidChangeWorkspaceFolders (events)', e)
     // TODO: can we not mix promises and try catch?
     try {
-      e.added.forEach(folder => {
-        CΩWorkspace.addProject(folder.uri.path)
-        vscode.window.registerTreeDataProvider(SCM_PEER_FILES_VIEW, TDP.addPeerWorkspace(folder))
+      // TODO: cleanup this, we have calls to TDP and CSM from here, workspace and scm..
+      e.added.forEach(wsFolder => {
+        CΩWorkspace.addProject(wsFolder)
+        vscode.window.registerTreeDataProvider(SCM_PEER_FILES_VIEW, CΩTDP.addPeerWorkspace(wsFolder))
       })
-      e.removed.forEach(folder => {
-        CΩWorkspace.removeProject(folder.uri.path)
-        TDP.removePeerWorkspace(folder)
+      e.removed.forEach(wsFolder => {
+        CΩWorkspace.removeProject(wsFolder)
+        CΩTDP.removePeerWorkspace(wsFolder)
       })
     } catch (ex) {
       // showErrorMessage(ex.message)
@@ -135,7 +174,12 @@ function setupWatchers(context: vscode.ExtensionContext) {
     CΩEditor.setActiveEditor(editor as TCΩEditor)
     CΩStore?.ws?.rSocket?.transmit('repo:active-path', { fpath: editor.document.uri.path, doc: editor.document.getText() })
       .then(CΩEditor.updateDecorations)
+      .then(CΩTDP.addProject)
       .then(CΩPanel.updateProject)
+      .then((project: any) => {
+        Object.keys(project.contributors).map((f: string) => CΩTDP.addFile(project.root, f))
+        CΩTDP.refresh()
+      })
   })
 
   /************************************************************************************

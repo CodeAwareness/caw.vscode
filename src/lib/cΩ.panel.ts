@@ -149,6 +149,7 @@ function didChangeViewState(state: any) {
  ************************************************************************************/
 function updateProject(data: any) {
   postMessage({ command: 'setProject', data })
+  return data
 }
 
 const CΩPanel = {

@@ -5,6 +5,7 @@ import logger from '@/lib/logger'
 
 import CΩPanel from '@/lib/cΩ.panel'
 import CΩDiffs from '@/lib/cΩ.diffs'
+import CΩStore from '@/lib/cΩ.store'
 
 const { registerCommand } = vscode.commands
 
@@ -43,7 +44,20 @@ function setupCommands(context: vscode.ExtensionContext) {
   }))
 
   context.subscriptions.push(registerCommand('CΩ.openPeerFile', function(wsFolder, fpath, uid) {
-    logger.log('COMMAND: openPeerFile request received')
+    logger.log('COMMAND: openPeerFile request received', wsFolder, fpath)
+    if (!CΩStore.ws?.rSocket) return
+    CΩStore.ws.rSocket
+      .transmit('repo:vscode-diff', { wsFolder, fpath, uid })
+      .then(data => {
+        if (data.exists) {
+          const resourceUri = vscode.Uri.file(data.res1)
+          vscode.commands.executeCommand('vscode.open', resourceUri)
+        } else {
+          const res1 = vscode.Uri.file(data.res1)
+          const res2 = vscode.Uri.file(data.res2)
+          vscode.commands.executeCommand('vscode.diff', res1, res2, 'New File (diff mode)', { viewColumn: 1, preserveFocus: true })
+        }
+      })
   }))
 
   context.subscriptions.push(registerCommand('CΩ.openDiff', function(resourceUri, cdir, cfile, title) {
