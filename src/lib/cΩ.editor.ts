@@ -53,6 +53,8 @@ function setActiveEditor(editor: TCΩEditor) {
  * Mark peer changes within the current editor (gutter only when cΩ panel is not active)
  *
  * CΩWorkspace calls this function when we have a change or a new file open.
+ *
+ * @param object The `project` structure is defined in the CΩ Local Service
  ************************************************************************************/
 function updateDecorations(project: any) {
   logger.log('EDITOR: syncing webview (project)', project)

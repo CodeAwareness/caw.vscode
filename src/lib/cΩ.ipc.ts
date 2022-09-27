@@ -57,8 +57,17 @@ ipcTable['branch:unselect'] = () => {
   CΩEditor.closeDiffEditor()
 }
 
-ipcTable['contrib:select'] = () => {
-  // TODO: CΩDiffs.diffWithContributor()
+ipcTable['contrib:select'] = (contrib: any) => {
+  const fpath = CΩStore.activeTextEditor?.document?.uri?.path
+  if (!fpath) return
+  const origin = CΩStore.activeProject.origin
+  CΩStore?.ws?.rSocket?.transmit('repo:diff-contrib', { origin, fpath, contrib })
+    .then(info => {
+      const peerFileUri = vscode.Uri.file(info.peerFile)
+      const userFileUri = vscode.Uri.file(fpath)
+      // logger.info('OPEN DIFF with', userFile, peerFile, title)
+      vscode.commands.executeCommand('vscode.diff', userFileUri, peerFileUri, info.title, { viewColumn: 1, preserveFocus: true })
+    })
 }
 
 ipcTable['contrib:unselect'] = () => {
