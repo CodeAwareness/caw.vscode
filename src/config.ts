@@ -1,12 +1,22 @@
-const DEBUG = !process.argv?.length
-console.log('CONFIG PROCESS ARGV (DEBUG)', DEBUG, process.argv, process)
+// TODO: move all these into VSCode extension configuration instead
+
+const DEBUG = true
 
 const PORT_LOCAL = 8885
-const CONFIGURATION_FILE = '.CΩ'
+
+// SCHEMA used by VSCode to handle repository, SCM, etc
 const CΩ_SCHEMA = 'codeAwareness'
+
+// API version
 const SERVER_VERSION = 'v1'
+
+// Where to load the Web Panel from
 const EXT_URL = DEBUG ? `https://localhost:${PORT_LOCAL}` : 'https://ext.codeawareness.com' // CΩ Webview server
+
+// Where to post requests to
 const API_URL = DEBUG ? `https://localhost:${PORT_LOCAL}/api/${SERVER_VERSION}` : `https://api.codeawareness.com/${SERVER_VERSION}`
+
+// Local communication with CodeAwareness local service
 const SERVER_WSS = 'wss://localhost:48408'
 
 console.log('CONFIG', EXT_URL, API_URL, SERVER_WSS)
@@ -35,7 +45,6 @@ const EXTRACT_PEER_DIR = 'e'
 
 export default {
   API_URL,
-  CONFIGURATION_FILE,
   CΩ_SCHEMA,
   EXT_URL,
   EXTRACT_BRANCH_DIR,

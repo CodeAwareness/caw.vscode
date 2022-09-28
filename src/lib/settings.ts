@@ -13,38 +13,18 @@ import { CΩStore } from './cΩ.store'
  *
  * TODO: securely store API keys for persistent login
  */
-function checkConfigurationFile(/* context */) {
+function checkConfiguration(/* context */) {
   const vscodeConfig = vscode.workspace.getConfiguration('codeAwareness')
   logger.info('SETTINGS configuration', vscodeConfig) // TODO: add settings
 
   if (!vscode.workspace.workspaceFolders) return Promise.resolve()
-  const configPromises = vscode.workspace.workspaceFolders.map(folder => initializeFromConfigurationFile(folder.uri.path))
 
-  return Promise.all(configPromises)
-}
-
-function initializeFromConfigurationFile(folder: string) {
+  // TODO: configure ... all things
   return Promise.resolve()
-  // TODO
-  /*
-  const configurationPath = pathJoin(folder.uri.path, CONFIGURATION_FILE)
-
-  return exists(configurationPath)
-    .then(configFileExists => {
-      if (!configFileExists) return logger.info('SETTINGS project without peer8 configuration file')
-      return readFile(configurationPath)
-    })
-    .then(data => {
-      if (!data) return
-      const configuration = JSON.parse(data.toString('UTF8'))
-      logger.info('SETTINGS project contains peer8 configuration file', configuration)
-      return configuration
-    })
-  */
 }
 
 function initConfig() {
-  checkConfigurationFile()
+  checkConfiguration()
     .then(() => {
       CΩStore.colorTheme = vscode.window.activeColorTheme.kind
     })
@@ -52,6 +32,5 @@ function initConfig() {
 
 export {
   initConfig,
-  checkConfigurationFile,
-  initializeFromConfigurationFile,
+  checkConfiguration,
 }
