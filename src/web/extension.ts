@@ -177,7 +177,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
       .then(CΩTDP.addProject)
       .then(CΩPanel.updateProject)
       .then((project: any) => {
-        Object.keys(project.contributors).map((f: string) => CΩTDP.addFile(project.root, f))
+        Object.keys(project.changes).map((f: string) => CΩTDP.addFile(project.root, f))
         CΩTDP.refresh()
       })
   })
