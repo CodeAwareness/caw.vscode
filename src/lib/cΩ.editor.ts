@@ -43,6 +43,8 @@ const getSelections = (ev: any) => {
  *
  ************************************************************************************/
 function setActiveEditor(editor: TCΩEditor) {
+  const { tmpDir } = CΩStore
+  if (editor.document.fileName.includes(tmpDir)) return
   CΩStore.reset()
   CΩDiffs.clear()
   CΩStore.activeTextEditor = editor
@@ -61,7 +63,6 @@ function updateDecorations(project: any) {
   const editor = CΩStore.activeTextEditor
   CΩStore.activeProject = project
   if (!editor) return logger.error('EDITOR trying to setup editor failed; no active text editor.')
-  // TODO: project now contains the line changes from peers;
   CΩDeco.insertDecorations()
 
   return project

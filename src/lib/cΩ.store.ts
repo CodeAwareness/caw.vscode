@@ -76,8 +76,6 @@ export const CΩStore = {
     uri: '',
     dirty: false,
   },
-  activeFile: undefined as string | undefined,
-  activeLine: undefined as number | undefined,
   activeTextEditor: null as TCΩEditor | null,
   projects: [] as any[],
   activeProject: undefined as any,

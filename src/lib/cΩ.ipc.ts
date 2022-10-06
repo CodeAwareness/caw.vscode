@@ -47,16 +47,25 @@ ipcTable['auth:logout'] = () => {
   CΩDeco.clear()
 }
 
-ipcTable['branch:select'] = (data: any) => {
-  // TODO: CΩDiffs.diffWithBranch(data)
-}
-
-ipcTable['branch:refresh'] = (data: any) => {
-  // refresh branches using git and display in CΩPanel
+ipcTable['branch:select'] = (branch: string) => {
+  const fpath = CΩStore.activeProject.activePath
+  if (!fpath) return
+  const origin = CΩStore.activeProject.origin
+  CΩStore?.ws?.rSocket?.transmit('repo:diff-branch', { origin, branch, fpath })
+    .then(info => {
+      const peerFileUri = vscode.Uri.file(info.peerFile)
+      const userFileUri = vscode.Uri.file(info.userFile)
+      // logger.info('OPEN DIFF with', info, fpath)
+      vscode.commands.executeCommand('vscode.diff', userFileUri, peerFileUri, info.title, { viewColumn: 1, preserveFocus: true })
+    })
 }
 
 ipcTable['branch:unselect'] = () => {
   CΩEditor.closeDiffEditor()
+}
+
+ipcTable['branch:refresh'] = (data: any) => {
+  // refresh branches using git and display in CΩPanel
 }
 
 ipcTable['contrib:select'] = (contrib: any) => {
@@ -67,7 +76,7 @@ ipcTable['contrib:select'] = (contrib: any) => {
     .then(info => {
       const peerFileUri = vscode.Uri.file(info.peerFile)
       const userFileUri = vscode.Uri.file(fpath)
-      // logger.info('OPEN DIFF with', userFile, peerFile, title)
+      // logger.info('OPEN DIFF with', fpath, info)
       vscode.commands.executeCommand('vscode.diff', userFileUri, peerFileUri, info.title, { viewColumn: 1, preserveFocus: true })
     })
 }

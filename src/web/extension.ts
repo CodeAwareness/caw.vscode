@@ -185,7 +185,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
   /************************************************************************************
    * User closed a file (activeTextEditor)
    * VSCode does not properly notify us on closing a tab;
-   * Also, when closing a Diff window, VSCode triggers this event for the original source file. (!)
+   * Also, when closing a Diff window, VSCode triggers this event for the original source file, not for the diff one. (!WTF...)
    * TODO: find another workaround
    ************************************************************************************/
   subscriptions.push(vscode.window.onDidChangeVisibleTextEditors(params => {

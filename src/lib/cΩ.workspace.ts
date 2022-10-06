@@ -95,9 +95,9 @@ function setupWorker() {
 function refreshLines(options: any) {
   const contentChanges: any[] = options.contentChanges
   if (!contentChanges) return // TODO: maybe handle this better
-  if (!CΩStore.activeFile || !CΩStore.user || !contentChanges.length) return Promise.resolve()
+  if (!CΩStore.activeProject.activePath || !CΩStore.user || !contentChanges.length) return Promise.resolve()
   // TODO: maybe use the `document` object we receive along with contentChanges, to ensure correct project / fpath selection
-  const fpath = CΩStore.activeFile
+  const fpath = CΩStore.activeProject.activePath
   if (!fpath) return Promise.reject()
   // TODO: why sometimes we make a change, but we receive an empty contentChanges array?
   // logger.log('WORKSPACE: contentChanges', contentChanges)
@@ -134,28 +134,6 @@ function closeTextDocument(params: any) {
 type TypeCursorInFile = {
   line: number
   uri: string
-}
-/************************************************************************************
- * setupRepoFrom
- *
- * @param number - cursor line number
- * @param object - the active document uri (VSCode object)
- ************************************************************************************/
-function setupRepoFrom({ line, uri }: TypeCursorInFile): Promise<void> {
-  const normUri = uri.toLowerCase() // TODO: is there a better way to do this for Windows? We sometimes get /c://some/dir and sometimes /C://some/dir (!)
-  if (!CΩStore.ws?.rSocket) return Promise.reject(new Error('Local service not running. Cannot setup repo.'))
-
-  return CΩStore.ws.rSocket
-    .transmit('repo:switched-file', { uri })
-    .then(data => {
-      logger.info('WORKSPACE: switched file: ', uri, data)
-      if (!data?.repo) {
-        CΩPanel.postMessage({ command: 'setMode', data: { mode: 'empty' } })
-        throw new Error(`File is not part of any projects in your workspaces: ${uri}`)
-      }
-      CΩStore.activeFile = data.filePath
-      CΩStore.activeLine = line
-    })
 }
 
 /************************************************************************************
@@ -229,7 +207,6 @@ const CΩWorkspace = {
   refreshLines,
   removeProject,
   saveCode,
-  setupRepoFrom,
   setupWorker,
   setupTempFiles,
 }
