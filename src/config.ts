@@ -11,13 +11,13 @@ const CΩ_SCHEMA = 'codeAwareness'
 const SERVER_VERSION = 'v1'
 
 // Where to load the Web Panel from
-const EXT_URL = DEBUG ? `https://localhost:${PORT_LOCAL}` : 'https://ext.codeawareness.com' // CΩ Webview server
+const EXT_URL = DEBUG ? `https://127.0.0.1:${PORT_LOCAL}` : 'https://ext.codeawareness.com' // CΩ Webview server
 
 // Where to post requests to
-const API_URL = DEBUG ? `https://localhost:${PORT_LOCAL}/api/${SERVER_VERSION}` : `https://api.codeawareness.com/${SERVER_VERSION}`
+const API_URL = DEBUG ? `https://127.0.0.1:${PORT_LOCAL}/api/${SERVER_VERSION}` : `https://api.codeawareness.com/${SERVER_VERSION}`
 
 // Local communication with CodeAwareness local service
-const SERVER_WSS = 'wss://localhost:48408'
+const SERVER_WSS = 'wss://127.0.0.1:48408'
 
 console.log('CONFIG', EXT_URL, API_URL, SERVER_WSS)
 
