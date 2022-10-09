@@ -49,7 +49,9 @@ function initCodeAwareness(context: vscode.ExtensionContext) {
   activated = true
   console.log('Extension: initCodeAwareness')
   initConfig()
+  logger.info('will initialize WSS')
   CΩStore.ws = new CΩWS()
+  logger.info('WSS READY')
   CΩStatusbar.init()
   setupCommands(context)
   setupWatchers(context)

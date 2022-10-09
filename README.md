@@ -18,20 +18,12 @@ Note about privacy and intellectual property: Code Awareness does not require ac
 ## Requirements
 
 Make sure you install the [Code Awareness local service](https://github.com/CodeAwareness/cA.localservice) first.
-
 When developing, you'll also need the [Code Awareness VSCode panel](https://github.com/CodeAwareness/cA.vscode.panel).
 
 ## Extension Settings
 
 TODO:
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
+- Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
 
 ## Known Issues
 
@@ -58,6 +50,10 @@ Limitations:
 
 -----------------------------------------------------------------------------------------------------------
 
+# Run in production mode
+
+To load a prebuilt extension, simply download it from [https://ext.codeawareness.com/code-awareness-0.0.1.vsix](https://ext.codeawareness.com/code-awareness-0.0.1.vsix) and load it in VSCode, by going to the Extention explorer, click the ellipsis menu at the top, and select "Install from VSIX"
+
 # Development
 
 ## Setup
@@ -66,7 +62,7 @@ Limitations:
 - install [Code Awareness VSCode panel](https://github.com/CodeAwareness/cA.vscode.panel)
 - Run your cΩ local service with `yarn start`
 - Run your cΩ panel with `yarn dev`
-- Finally go to VSCode, open this source code folder and choose Run Extension.
+- Finally go to VSCode, open this source code folder, change `const DEBUG = true` in the `src/config` file, and choose Run Extension.
 
 ## Setup git to work with unicode in your filenames
 

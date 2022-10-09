@@ -24,8 +24,9 @@ function checkConfiguration(/* context */) {
 }
 
 function initConfig() {
-  checkConfiguration()
+  return checkConfiguration()
     .then(() => {
+      logger.info('CONFIGURATION READY')
       CΩStore.colorTheme = vscode.window.activeColorTheme.kind
     })
 }

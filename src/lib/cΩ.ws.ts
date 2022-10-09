@@ -1,6 +1,5 @@
 import type { Socket } from 'socket.io-client'
 import io from 'socket.io-client'
-import { nanoid } from 'nanoid'
 import config from '@/config'
 
 import logger from './logger'
@@ -13,6 +12,10 @@ export type CΩSocket = Socket & {
 
 export type Class<T> = new (...args: any[]) => T
 
+const shortid = () => {
+  return new Date().valueOf() // we run multiple editors, yes, but we run them as a user on a local computer, so this is fine.
+}
+
 export class CΩWS {
   public rootSocket: CΩSocket | null
   public uSocket: CΩSocket | null
@@ -21,7 +24,7 @@ export class CΩWS {
   /* we send a GUID with every requests, such that multiple instances of VSCode can work independently;
    * TODO: allow different users logged into different VSCode instances; IS THIS SECURE? (it will require rewriting some of the local service)
    */
-  public guid: string
+  public guid: number
 
   private _delay: number
   private expDelay(): number {
@@ -38,7 +41,7 @@ export class CΩWS {
     this.rootSocket = null
     this.uSocket = null
     this.rSocket = null
-    this.guid = nanoid()
+    this.guid = shortid()
     this.init()
   }
 
