@@ -1,22 +1,29 @@
-# codeAwareness README
+# codeAwareness (cΩ)
 
 ## Features
 
 Low noise collaboration.
-Truly enjoy coding with your team mates.
+Enjoy coding with a team and learn from your peers.
 
-TODO: add screenshots. For example if there is an image subfolder under your extension project workspace:
+- File diffs awareness between you and your team members
+- Quick diffs between you and your peers, for any file
+- List of files changed by your peers is available in the left SCM tree
+- Support for branch diffs on the active file
+- Swarm Authorization. More details to come soon on our [website](https://codeawareness.com).
 
-\!\[feature X\]\(images/feature-x.png\)
+Note about security: we're using an original git repo authorization mechanism, we call Swarm Authorization. To prove that you have access to a repository, the local service sends us the latest commit SHA in your repo. If this is the same as the SHA at your peers, then we authorize you to be in the same group with your peers.
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+Note about privacy and intellectual property: Code Awareness does not require access to your repository in the cloud. As you can tell by looking at the Code Awareness (cΩ) local service code, we simply gather code diffs between you and your peers. These diffs are stored temporarily on our servers, to allow us to build the right diff trees between team members.
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+Make sure you install the [Code Awareness local service](https://github.com/CodeAwareness/cA.localservice) first.
+
+When developing, you'll also need the [Code Awareness VSCode panel](https://github.com/CodeAwareness/cA.vscode.panel).
 
 ## Extension Settings
 
+TODO:
 Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
 
 For example:
@@ -28,25 +35,38 @@ This extension contributes the following settings:
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+Beta release. Much work remaining to be done.
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+Code Awareness allows you to see your peer's changes (diffs). When editing a file, you will see orange markers next to the scrollbar (the gutter indicators). These are the points where other people have made changes to this file, in their branch, or perhaps in the same branch (trunk based development style). When you open the Code Awareness panel (click on Code Awareness in the status bar), you'll also see those lines highlighted in light blue, and you'll be able to see the people who have made those changes. Click on their portrait to see the diffs between you and them. You can also click on any local branch (shown in the panel) to see the diffs between your file and the same file in that branch.
 
 ### 1.0.0
 
-Initial release of ...
+First open-source release.
 
-### 1.0.1
+- support for trunk based development (alpha)
+- file diffs awareness between you and your team members
+- quick diffs between you and your peers, for any file
+- list of files changed by your peers is available in the left SCM tree.
+- support for branch diffs on the active file
 
-Fixed issue #.
+Limitations:
 
-### 1.1.0
-
-Added features X, Y, and Z.
+- at this time, the API itself is closed-source, as we're trying to get some funding to expand our efforts;
+- there is no support yet for cloud workspaces (file that are not local).
 
 -----------------------------------------------------------------------------------------------------------
+
+# Development
+
+## Setup
+
+- install the [Code Awareness local service](https://github.com/CodeAwareness/cA.localservice)
+- install [Code Awareness VSCode panel](https://github.com/CodeAwareness/cA.vscode.panel)
+- Run your cΩ local service with `yarn start`
+- Run your cΩ panel with `yarn dev`
+- Finally go to VSCode, open this source code folder and choose Run Extension.
 
 ## Setup git to work with unicode in your filenames
 
