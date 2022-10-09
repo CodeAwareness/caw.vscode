@@ -1,6 +1,6 @@
 // TODO: move all these into VSCode extension configuration instead
 
-const DEBUG = true
+const DEBUG = false
 
 const PORT_LOCAL = 8885
 

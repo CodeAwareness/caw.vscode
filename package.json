@@ -1,14 +1,14 @@
 {
   "name": "code-awareness",
   "displayName": "Code Awareness",
-  "description": "Connect your work.",
+  "description": "Low noise collaboration.",
   "version": "0.0.1",
   "publisher": "CodeAwareness",
   "author": "Mark Vasile",
   "repository": "https://github.com/CodeAwareness/cA.vscode",
   "bugs": "https://github.com/CodeAwareness/cA.vscode/issues",
   "engines": {
-    "vscode": "^1.62.0"
+    "vscode": "^1.69.0"
   },
   "categories": [
     "SCM Providers"
