@@ -52,7 +52,7 @@ Limitations:
 
 # Run in production mode
 
-To load a prebuilt extension, simply download it from [https://ext.codeawareness.com/code-awareness-0.0.1.vsix](https://ext.codeawareness.com/code-awareness-0.0.1.vsix) and load it in VSCode, by going to the Extention explorer, click the ellipsis menu at the top, and select "Install from VSIX"
+To load a prebuilt extension, simply download it from [https://ext.codeawareness.com/code-awareness-0.0.2.vsix](https://ext.codeawareness.com/code-awareness-0.0.2.vsix) and load it in VSCode, by going to the Extention explorer, click the ellipsis menu at the top, and select "Install from VSIX"
 
 # Development
 

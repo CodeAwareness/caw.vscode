@@ -3,7 +3,7 @@
   "displayName": "Code Awareness",
   "description": "Low noise collaboration.",
   "icon": "ca-logo.png",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "CodeAwareness",
   "author": "Mark Vasile",
   "repository": "https://github.com/CodeAwareness/cA.vscode",
@@ -216,11 +216,13 @@
     "test": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js",
     "pretest": "npm run compile-web",
     "vscode:prepublish": "npm run package-web",
+    "package": "npm run package-web && vsce package",
     "compile-web": "webpack",
     "watch-web": "NODE_ENV=development webpack --watch",
     "package-web": "webpack --mode production --devtool hidden-source-map",
     "lint": "eslint src --ext ts",
-    "run-in-browser": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. ."
+    "run-in-browser": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. .",
+    "postinstall": "node ./node_modules/vscode/bin/install"
   },
   "devDependencies": {
     "@types/axios": "^0.14.0",

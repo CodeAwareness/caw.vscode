@@ -14,7 +14,7 @@ const webpack = require('webpack');
 
 /** @type WebpackConfig */
 const webExtensionConfig = {
-	mode: 'none', // this leaves the source code as close as possible to the original (when packaging we set this to 'production')
+	mode: 'production', // this leaves the source code as close as possible to the original (when packaging we set this to 'production')
 	target: 'webworker', // extensions run in a webworker context
 	entry: {
 		'extension': './src/web/extension.ts',
@@ -26,8 +26,13 @@ const webExtensionConfig = {
 		libraryTarget: 'commonjs',
 		devtoolModuleFilenameTemplate: '../../[resource-path]'
 	},
+  plugins: [
+		new webpack.ProvidePlugin({
+			process: 'process/browser', // provide a shim for the global `process` variable
+		}),
+	],
 	resolve: {
-		mainFields: ['browser', 'module', 'main'], // look for `browser` entry point in imported node modules
+		mainFields: ['browser', 'module', 'main'], // look for `browser`, `main`, etc, entry points in package.json
 		extensions: ['.ts', '.js'], // support ts-files and js-files
 		alias: {
 			// provides alternate implementation for node module and source files
@@ -49,11 +54,6 @@ const webExtensionConfig = {
 			}]
 		}]
 	},
-	plugins: [
-		new webpack.ProvidePlugin({
-			process: 'process/browser', // provide a shim for the global `process` variable
-		}),
-	],
 	externals: {
 		'vscode': 'commonjs vscode', // ignored because it doesn't exist
 	},

@@ -1,4 +1,3 @@
-import axios from 'axios'
 import * as vscode from 'vscode'
 import * as path from 'path'
 
@@ -40,7 +39,7 @@ function moveEditor(webviewPanel: vscode.WebviewPanel) {
 function createPanel(extensionPath: string) {
   CΩStore.panel = vscode.window.createWebviewPanel(
     'codeAwareness',
-    'codeAwareness',
+    'Code Awareness',
     panelColumn,
     {
       retainContextWhenHidden: true,
@@ -83,27 +82,22 @@ function toggle(context: vscode.ExtensionContext) {
 
   if (!panel.webview) return
 
-  return getWebviewContent(panel.webview, config.EXT_URL)
-    .then(() => {
-      CΩEditor.focusTextEditor()
-      CΩIPC.setup(panel.webview, context)
-      panel.onDidDispose(dispose, undefined, context.subscriptions)
-      panel.onDidChangeViewState((state: vscode.WindowState) => CΩPanel.didChangeViewState(state), undefined, context.subscriptions)
-    })
+  getWebviewContent(panel.webview, config.EXT_URL)
+  CΩEditor.focusTextEditor()
+  CΩIPC.setup(panel.webview, context)
+  panel.onDidDispose(dispose, undefined, context.subscriptions)
+  panel.onDidChangeViewState((state: vscode.WindowState) => CΩPanel.didChangeViewState(state), undefined, context.subscriptions)
+  return
 }
 
-axios.defaults.adapter = require('axios/lib/adapters/http')
-const axiosEXT = axios.create({ baseURL: config.EXT_URL })
-
 function getWebviewContent(webview: vscode.Webview, extURL: string) {
-  webview.html = '<h1>Loading...</h1>'
-  console.log('WEBVIEW: ', extURL, locale)
-  return axiosEXT.get(extURL + `/index.html?l=${locale}`)
-    .then(response => (webview.html = response.data))
-    .catch(err => {
-      webview.html = '<h1>Offline</h1><p>You are either offline or the CodeAwareness server is down.</p></h1>'
-      logger.error('PANEL getWebviewContent error', err)
-    })
+  webview.html = `<!doctype html><html lang="en"><head><meta charset="UTF-8">
+    <title>CodeAwareness VSCode panel</title>
+    <script defer="defer" src="https://vscode.codeawareness.com/runtime.js"></script>
+    <script defer="defer" src="https://vscode.codeawareness.com/988.js"></script>
+    <script defer="defer" src="https://vscode.codeawareness.com/main.js"></script>
+    <link href="https://vscode.codeawareness.com/main.css" rel="stylesheet"></head>
+    <body><script src="https://vscode.codeawareness.com/main.js"></script></body></html>`
 }
 
 /************************************************************************************

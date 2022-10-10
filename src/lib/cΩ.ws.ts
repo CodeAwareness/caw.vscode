@@ -13,7 +13,7 @@ export type CΩSocket = Socket & {
 export type Class<T> = new (...args: any[]) => T
 
 const shortid = () => {
-  return new Date().valueOf() // we run multiple editors, yes, but we run them as a user on a local computer, so this is fine.
+  return new Date().valueOf().toString() // we run multiple editors, yes, but we run them as a user on a local computer, so this is fine.
 }
 
 export class CΩWS {
@@ -24,7 +24,7 @@ export class CΩWS {
   /* we send a GUID with every requests, such that multiple instances of VSCode can work independently;
    * TODO: allow different users logged into different VSCode instances; IS THIS SECURE? (it will require rewriting some of the local service)
    */
-  public guid: number
+  public guid: string
 
   private _delay: number
   private expDelay(): number {

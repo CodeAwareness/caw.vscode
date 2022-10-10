@@ -8,7 +8,7 @@ import CΩDeco from './cΩ.deco'
 import CΩDiffs from './cΩ.diffs'
 import CΩPanel from './cΩ.panel'
 
-const isWindows = !!process.env.ProgramFiles
+const isWindows = !!process.env.ProgramFiles // TODO: I think this is vscode.process.env ?
 
 export type TCΩEditor = vscode.TextEditor & {
   _documentData: any
@@ -78,7 +78,7 @@ let tryingToClose: boolean // Yeah, I don't know how to do this, VSCode seems to
 function closeDiffEditor() {
   const { tmpDir } = CΩStore
   /*
-  const editors = window.visibleTextEditors
+  const editors = vscode.window.visibleTextEditors
   editors.map(editor => (editor._documentData._document.uri.path.includes(tmpDir) && closeEditor(editor)))
   */
   setTimeout(() => {
