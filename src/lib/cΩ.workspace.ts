@@ -149,7 +149,7 @@ function highlight() {
   // TODO: highlight changes existing at peers
 }
 
-const getCode = (editor: TCΩEditor) => editor.document.getText()
+const getCode = (editor: TCΩEditor) => editor?.document.getText()
 
 function saveCode() {
   if (!CΩStore.activeTextEditor) return Promise.reject() // TODO:

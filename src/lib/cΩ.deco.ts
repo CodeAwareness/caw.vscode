@@ -9,7 +9,7 @@ let lastUri: string
 // TODO: make 2000 wait time into a configurable value
 const insertAfterSomeTime = _.throttle(doInsert, 2000, { trailing: true })
 const insertThenWaitSomeTime = _.throttle(doInsert, 2000, { leading: true })
-const getEditorDocPath = (editor: vscode.TextEditor) => editor.document.uri.path
+const getEditorDocPath = (editor: vscode.TextEditor) => editor?.document.uri.path
 
 type TEditorRanges = {
   editor: vscode.TextEditor

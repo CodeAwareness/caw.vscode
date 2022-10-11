@@ -17,8 +17,8 @@ export type TCΩEditor = vscode.TextEditor & {
 }
 
 const getSelectedLine = (editor: TCΩEditor) => editor._selections && editor._selections[0].active.line
-const getEditorDocPath = (editor: TCΩEditor) => editor.document.uri.path
-const getEditorDocFileName = (editor: TCΩEditor) => editor.document.fileName
+const getEditorDocPath = (editor: TCΩEditor) => editor?.document.uri.path
+const getEditorDocFileName = (editor: TCΩEditor) => editor?.document.fileName
 
 const closeActiveEditor = () => {
   return vscode.commands.executeCommand('workbench.action.closeActiveEditor')
@@ -44,7 +44,7 @@ const getSelections = (ev: any) => {
  ************************************************************************************/
 function setActiveEditor(editor: TCΩEditor) {
   const { tmpDir } = CΩStore
-  if (editor.document.fileName.includes(tmpDir)) return
+  if (editor?.document.fileName.includes(tmpDir)) return
   CΩStore.reset()
   CΩDiffs.clear()
   CΩStore.activeTextEditor = editor
