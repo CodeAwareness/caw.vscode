@@ -1,14 +1,12 @@
-import type { Socket } from 'socket.io-client'
-import io from 'socket.io-client'
-import config from '@/config'
+import EventEmitter from 'events'
+import { createReadStream, createWriteStream, mkdirSync, openSync } from 'fs'
+import { spawn, fork } from 'child_process'
+// import * as net from 'net' // TODO: check to see if this works in Windows
 
+import config from '@/config'
 import logger from './logger'
 import CΩStore from './cΩ.store'
 import CΩWorkspace from './cΩ.workspace'
-
-export type CΩSocket = Socket & {
-  transmit: (action: string, data?: any, options?: any) => Promise<any>
-}
 
 export type Class<T> = new (...args: any[]) => T
 
@@ -17,123 +15,90 @@ const shortid = () => {
 }
 
 export class CΩWS {
-  public rootSocket: CΩSocket | null
-  public uSocket: CΩSocket | null
-  public rSocket: CΩSocket | null
+  public wsocket: EventEmitter
+  private pipeIncoming
+  private pipeOutgoing
+  private fifoIn
+  private fifoOut
 
   /* we send a GUID with every requests, such that multiple instances of VSCode can work independently;
    * TODO: allow different users logged into different VSCode instances; IS THIS SECURE? (it will require rewriting some of the local service)
    */
   public guid: string
 
-  private _delay: number
-  private expDelay(): number {
-    this._delay = this._delay * 2
-    return this._delay
-  }
-
-  private resetDelay() {
-    this._delay = 200
-  }
-
   public constructor() {
-    this._delay = 200
-    this.rootSocket = null
-    this.uSocket = null
-    this.rSocket = null
     this.guid = shortid()
+    this.wsocket = new EventEmitter()
     this.init()
+
+    const rnd = Math.random().toString().substr(2)
+    this.pipeIncoming = `/var/tmp/cΩ/${rnd}.vsin`
+    this.pipeOutgoing = '/var/tmp/cΩ/${rnd}.vsout'
+    /* @ts-ignore */
+    this.fifoIn = createReadStream(null, { fd })
+    this.fifoOut = createWriteStream(this.pipeIncoming)
   }
 
   public init(): void {
-    this.rootSocket = io(config.SERVER_WSS, {
-      reconnectionDelayMax: 10000,
-      timestampRequests: true,
-      transports: ['websocket'],
-    }) as CΩSocket
-
-    logger.log('WSS: initializing sockets')
-    this.rootSocket.on('connect', () => {
-      logger.log('WSS: rootSocket connected')
-      connectNamespace('users')
-        .then((socket: CΩSocket) => {
-          socket.on('connect', () => { logger.log('WSS: socketUser connected') })
-          socket.transmit = this.transmit(socket)
-          this.uSocket = socket
-          socket.transmit('auth:info').then(CΩWorkspace.init)
-        })
-
-      connectNamespace('repos')
-        .then((socket: CΩSocket) => {
-          socket.on('connect', () => { logger.log('WSS: socketRepo connected') })
-          socket.transmit = this.transmit(socket)
-          this.rSocket = socket
-        })
+    /* TODO: test this instead on Windows
+    const server = net.createServer(function(stream) {
+      stream.on('data', function(c) {
+        console.log('NET data:', c.toString())
+      })
+      stream.on('end', function() {
+        console.log('NET END')
+        server.close()
+      })
     })
 
-    this.rootSocket.on('disconnect', () => {
-      this.rootSocket!.connect()
+    server.listen('/tmp/test-cΩ.sock')
+
+    var stream = net.connect('/tmp/test.sock')
+    stream.write('hello')
+    stream.end()
+     */
+
+    console.log('WSS: initializing IPC')
+    const fifo = spawn('mkfifo', [this.pipeOutgoing])
+
+    fifo.on('exit', () => {
+      logger.log('Created Output Pipe')
+      const fd = openSync(this.pipeOutgoing, 'r+')
+
+      this.transmit('auth:info').then(CΩWorkspace.init)
+
+      this.fifoIn.on('data', data => {
+        console.log('----- Received packet -----')
+        console.log(data.toString())
+        const { status, action, body } = JSON.parse(data.toString())
+        this.wsocket.emit(`${status}:${action}`, body)
+      })
     })
   }
 
   /*
    * Transmit an action, and perhaps some data. Recommend a namespacing format for the action, something like `<domain>:<action>`, e.g. `auth:login` or `users:query`.
-   * The response from Transient.server comes in the form of `res:<domain>:<action>` with the `domain` and `action` being the same as the transmitted ones.
-   *
-   * TODO: prevent multiple transmit requests to overload the system with pendingConnection (consider reconnect fn too)
    */
-  private transmit(wsocket: CΩSocket) {
-    return (action: string, data?: any, options?: any) => {
-      let handled = false
-      return new Promise((resolve, reject) => {
-        this.resetDelay()
-        const pendingConnection: any = () => {
-          logger.info(`WSS: pending connection (delay: ${this._delay})`, action)
-          setTimeout(() => {
-            if (!handled) reject({ message: `Request timed out: ${action}` })
-          }, options?.timeout || 3000)
-          if (!wsocket.connected) {
-            setTimeout(pendingConnection, this.expDelay())
-            return
-          }
-          this.resetDelay()
-          logger.info(`WSS: will emit action: ${action}`)
-          if (!data) data = {}
-          data.cΩ = this.guid
-          wsocket.emit(action, data)
-          wsocket.on(`res:${action}`, data => {
-            console.log('ACTION COMPLETE', action, data)
-            handled = true
-            resolve(data)
-          })
-          wsocket.on(`error:${action}`, err => {
-            logger.log('WSS: wsocket error', action, err)
-            handled = true
-            reject(err)
-          })
-        }
-
-        pendingConnection()
-      })
-    }
+  public transmit(action: string, data?: any, options?: any) {
+    return new Promise((resolve, reject) => {
+      logger.info(`WSS: will emit action: ${action}`)
+      if (!data) data = {}
+      data.cΩ = this.guid
+      const handler = (body: any) => {
+        console.log('WSS: resolved action', action, body)
+        this.wsocket.removeListener(action, handler)
+        resolve(body)
+      }
+      const errHandler = (err: any) => {
+        logger.log('WSS: wsocket error', action, err)
+        this.wsocket.removeListener(action, errHandler)
+        reject(err)
+      }
+      this.fifoOut.write(JSON.stringify({ action, data }))
+      this.wsocket.on(`res:${action}`, handler)
+      this.wsocket.on(`error:${action}`, errHandler)
+    })
   }
-}
-
-function connectNamespace(nsp: string): Promise<CΩSocket> {
-  logger.log(`WSS: will setup namespace ${nsp}`)
-  const socket = io(`${config.SERVER_WSS}/${nsp}`) as CΩSocket
-
-  socket.on('connection', () => {
-    logger.log(`WSS: ${nsp} socket connection ready`)
-  })
-
-  socket.on('reconnect', () => {
-    logger.log(`WSS: ${nsp} socket reconnected`, socket)
-  })
-
-  socket.on('error', logger.error)
-
-  return Promise.resolve(socket)
 }
 
 export default CΩWS

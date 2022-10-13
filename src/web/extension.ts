@@ -51,7 +51,6 @@ function initCodeAwareness(context: vscode.ExtensionContext) {
   initConfig()
   logger.info('will initialize WSS')
   CΩStore.ws = new CΩWS()
-  logger.info('WSS READY')
   CΩStatusbar.init()
   setupCommands(context)
   setupWatchers(context)
@@ -86,7 +85,7 @@ const CΩDocumentContentProvider = {
     const peerFile = path.join(userDir, config.EXTRACT_REPO_DIR, uri)
     // logger.info('peer8DocumentContentProvider uri', relativePath.path, 'peerFile', peerFile)
 
-    return CΩStore?.ws?.rSocket?.transmit('repo:read-file', { fpath: peerFile })
+    return CΩStore.ws!.transmit('repo:read-file', { fpath: peerFile })
       // TODO: find a better way to indicate deleted file, as opposed to new file created, as opposed to simply file not existing
       .catch(() => '') // if file not existing
   },
@@ -171,10 +170,10 @@ function setupWatchers(context: vscode.ExtensionContext) {
    * User switching to a different file
    ************************************************************************************/
   vscode.window.onDidChangeActiveTextEditor((editor: vscode.TextEditor | undefined) => {
-    logger.info('CODEAWARENESS_EXTENSION: onDidChangeActiveTextEditor', editor)
+    logger.info('CODEAWARENESS_EXTENSION: onDidChangeActiveTextEditor (editor, cΩStore)', editor, CΩStore)
     if (!editor) return
     CΩEditor.setActiveEditor(editor as TCΩEditor)
-    CΩStore?.ws?.rSocket?.transmit('repo:active-path', { fpath: editor.document.uri.path, doc: editor.document.getText() })
+    CΩStore.ws!.transmit('repo:active-path', { fpath: editor.document.uri.path, doc: editor.document.getText() })
       .then(CΩEditor.updateDecorations)
       .then(CΩTDP.addProject)
       .then(CΩPanel.updateProject)

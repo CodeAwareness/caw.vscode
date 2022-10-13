@@ -45,10 +45,9 @@ function setupCommands(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(registerCommand('CΩ.openPeerFile', function(wsFolder, fpath, uid) {
     logger.log('COMMAND: openPeerFile request received', wsFolder, fpath)
-    if (!CΩStore.ws?.rSocket) return
-    CΩStore.ws.rSocket
+    CΩStore.ws!
       .transmit('repo:vscode-diff', { wsFolder, fpath, uid })
-      .then(data => {
+      .then((data: any) => {
         if (data.exists) {
           const resourceUri = vscode.Uri.file(data.res1)
           vscode.commands.executeCommand('vscode.open', resourceUri)

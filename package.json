@@ -221,8 +221,7 @@
     "watch-web": "NODE_ENV=development webpack --watch",
     "package-web": "webpack --mode production --devtool hidden-source-map",
     "lint": "eslint src --ext ts",
-    "run-in-browser": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. .",
-    "postinstall": "node ./node_modules/vscode/bin/install"
+    "run-in-browser": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. ."
   },
   "devDependencies": {
     "@types/axios": "^0.14.0",
@@ -268,7 +267,6 @@
     "napi-nanoid": "^0.0.4",
     "patch-package": "^6.4.7",
     "shortid": "^2.2.16",
-    "socket.io-client": "^4.5.1",
     "vscode-nls": "^5.0.1"
   }
 }

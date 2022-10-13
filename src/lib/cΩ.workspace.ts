@@ -5,7 +5,6 @@ import * as path from 'path'
 import config from '@/config'
 import logger from './logger'
 
-import type { TAuth } from './cΩ.store'
 import type { TContributor } from './cΩ.store'
 import { CΩStore, CΩWork } from './cΩ.store'
 
@@ -19,7 +18,7 @@ import CΩSCM from './cΩ.scm'
 
 const isWindows = !!process.env.ProgramFiles
 
-function init(data?: TAuth) {
+function init(data?: any) {
   console.log('Workspace: init', data)
   setupTempFiles()
   if (data?.user) {
@@ -38,11 +37,9 @@ function dispose() {
 function setupTempFiles() {
   // TODO: get tmpDir from localService
   console.log('setupTempFiles (repo:get-tmp-dir)')
-  if (!CΩStore.ws?.rSocket) return
-  CΩStore.ws.rSocket
-    .transmit('repo:get-tmp-dir')
-    .then((data: string) => {
-      CΩStore.tmpDir = data
+  CΩStore.ws!.transmit('repo:get-tmp-dir')
+    .then((data: any) => {
+      CΩStore.tmpDir = data.toString()
       logger.info('WORKSPACE: temporary folder used: ', CΩStore.tmpDir)
     })
 }
@@ -166,29 +163,24 @@ function getSavedCode() {
 async function addProject(wsFolder: any) {
   const folder: string = wsFolder.uri ? wsFolder.uri.path : wsFolder.toString()
   logger.log('WORKSPACE: addProject', folder)
-  if (!CΩStore?.ws?.rSocket) return
 
-  CΩStore.ws.rSocket
-    .transmit('repo:add', { folder })
+  CΩStore.ws!.transmit('repo:add', { folder })
     .then(() => {
       CΩSCM.addProject(wsFolder)
       logger.info('WORKSPACE: Folder added to workspace: ', folder)
     })
 
-  CΩStore.ws.rSocket
-    .transmit('repo:add-submodules', { folder })
-    .then(subs => {
+  CΩStore.ws!.transmit('repo:add-submodules', { folder })
+    .then((subs: any) => {
       subs?.map((p: any) => CΩSCM.addProject(p))
       logger.info('WORKSPACE: Folder submodules added to workspace: ', subs)
     })
 }
 
 function removeProject(wsFolder: any) {
-  if (!CΩStore?.ws?.rSocket) return
   const folder: string = wsFolder.uri ? wsFolder.uri.path : wsFolder.toString()
 
-  CΩStore.ws.rSocket
-    .transmit('repo:remove', { folder })
+  CΩStore.ws!.transmit('repo:remove', { folder })
     .then(() => {
       logger.info('WORKSPACE: Folder removed from workspace: ', folder)
     })
