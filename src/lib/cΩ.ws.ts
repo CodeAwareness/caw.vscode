@@ -31,9 +31,8 @@ export class CΩWS {
     this.wsocket = new EventEmitter()
     this.init()
 
-    const rnd = Math.random().toString().substr(2)
-    this.pipeIncoming = `/var/tmp/cΩ/${rnd}.vsin`
-    this.pipeOutgoing = '/var/tmp/cΩ/${rnd}.vsout'
+    this.pipeIncoming = `/var/tmp/cΩ/${this.guid}.vsin`
+    this.pipeOutgoing = '/var/tmp/cΩ/${this.guid}.vsout'
     /* @ts-ignore */
     this.fifoIn = createReadStream(null, { fd })
     this.fifoOut = createWriteStream(this.pipeIncoming)
