@@ -18,8 +18,9 @@ export class CΩWS {
   public wsocket: EventEmitter
   private pipeIncoming
   private pipeOutgoing
-  private fifoIn
-  private fifoOut
+  private fifoIn: any
+  private fifoOut: any
+  private fd: any
 
   /* we send a GUID with every requests, such that multiple instances of VSCode can work independently;
    * TODO: allow different users logged into different VSCode instances; IS THIS SECURE? (it will require rewriting some of the local service)
@@ -33,9 +34,6 @@ export class CΩWS {
 
     this.pipeIncoming = `/var/tmp/cΩ/${this.guid}.vsin`
     this.pipeOutgoing = '/var/tmp/cΩ/${this.guid}.vsout'
-    /* @ts-ignore */
-    this.fifoIn = createReadStream(null, { fd })
-    this.fifoOut = createWriteStream(this.pipeIncoming)
   }
 
   public init(): void {
@@ -62,11 +60,14 @@ export class CΩWS {
 
     fifo.on('exit', () => {
       logger.log('Created Output Pipe')
-      const fd = openSync(this.pipeOutgoing, 'r+')
+      this.fd = openSync(this.pipeOutgoing, 'r+')
+      /* @ts-ignore */
+      this.fifoIn = createReadStream(null, { fd: this.fd })
+      this.fifoOut = createWriteStream(this.pipeIncoming)
 
       this.transmit('auth:info').then(CΩWorkspace.init)
 
-      this.fifoIn.on('data', data => {
+      this.fifoIn.on('data', (data: any) => {
         console.log('----- Received packet -----')
         console.log(data.toString())
         const { status, action, body } = JSON.parse(data.toString())
