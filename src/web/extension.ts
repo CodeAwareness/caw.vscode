@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as vscode from 'vscode'
 import * as _ from 'lodash'
 import * as path from 'path'
@@ -17,7 +18,6 @@ import CΩEditor from '@/lib/cΩ.editor'
 import CΩWorkspace from '@/lib/cΩ.workspace'
 import CΩWS from '@/lib/cΩ.ws'
 import CΩTDP from '@/lib/cΩ.tdp'
-import CΩSCM from '@/lib/cΩ.scm'
 
 let activated: boolean // extension activated !
 const deactivateTasks: Array<any> = [] // keeping track of all the disposables
@@ -34,6 +34,7 @@ export function deactivate() {
   const promises = [
     CΩStatusbar.dispose(),
     CΩWorkspace.dispose(),
+    CΩStore.ws?.dispose(),
   ]
 
   for (const task of deactivateTasks) {
@@ -101,8 +102,8 @@ function setupWatchers(context: vscode.ExtensionContext) {
   const { subscriptions } = context
   CΩTDP.clearWorkspace()
   vscode.workspace.workspaceFolders?.map(wsFolder => subscriptions.push(
-      vscode.window.registerTreeDataProvider(SCM_PEER_FILES_VIEW, CΩTDP.addPeerWorkspace(wsFolder))
-    ))
+    vscode.window.registerTreeDataProvider(SCM_PEER_FILES_VIEW, CΩTDP.addPeerWorkspace(wsFolder))
+  ))
   // TODO: SCM files
   subscriptions.push(
     /* @ts-ignore */
@@ -155,7 +156,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
   /************************************************************************************
    * User saving the activeTextEditor
    ************************************************************************************/
-  subscriptions.push(vscode.workspace.onDidSaveTextDocument(e => {
+  subscriptions.push(vscode.workspace.onDidSaveTextDocument((/* err */) => {
     // TODO: some throttle mechanism to make sure we're only sending at most once per some configured interval (subscription plan related)
     // use delay to allow the system to do other things like build and stuff, and prevent excessive use (peaks) of CPU
     // TODO:
@@ -210,4 +211,6 @@ function setupWatchers(context: vscode.ExtensionContext) {
   logger.info('CODEAWARENESS_EXTENSION: deactivateTasks', deactivateTasks)
   deactivateTasks.push(() => telemetryReporter.dispose())
   */
+
+  logger.log('setup watchers complete.')
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as vscode from 'vscode'
 
 import type { TAuth } from './cΩ.store'
@@ -8,12 +9,13 @@ import { CΩStore } from './cΩ.store'
 import logger from './logger'
 import CΩEditor from './cΩ.editor'
 import CΩDeco from './cΩ.deco'
-import CΩDiffs from './cΩ.diffs'
 import CΩPanel from './cΩ.panel'
 import CΩWorkspace from './cΩ.workspace'
-import CΩWS from './cΩ.ws'
 import CΩTDP from '@/lib/cΩ.tdp'
 
+/**
+ * This is the VSCode <--> VSCode Webview IPC module
+ */
 function init() {
   CΩStore.colorTheme = vscode.window.activeColorTheme.kind
   const data = { colorTheme: CΩStore.colorTheme }
@@ -36,9 +38,9 @@ ipcTable['auth:login'] = (data: TAuth) => {
       fpath: CΩStore.activeTextEditor?.document?.uri?.path,
       doc: CΩStore.activeTextEditor?.document?.getText()
     })
-    .then(CΩEditor.updateDecorations)
-    .then(CΩTDP.addProject)
-    .then(CΩPanel.updateProject)
+      .then(CΩEditor.updateDecorations)
+      .then(CΩTDP.addProject)
+      .then(CΩPanel.updateProject)
   }
 }
 

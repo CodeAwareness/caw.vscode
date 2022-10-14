@@ -15,7 +15,7 @@ const webpack = require('webpack');
 /** @type WebpackConfig */
 const webExtensionConfig = {
 	mode: 'production', // this leaves the source code as close as possible to the original (when packaging we set this to 'production')
-	target: 'node', // extensions run in a webworker context
+	target: 'node', // extensions run in a webworker context, but we need some node modules here
 	entry: {
 		'extension': './src/web/extension.ts',
 		'test/suite/index': './src/web/test/suite/index.ts'
@@ -55,7 +55,7 @@ const webExtensionConfig = {
 		}]
 	},
 	externals: {
-		'vscode': 'commonjs vscode', // ignored because it doesn't exist
+		vscode: 'commonjs vscode', // ignored because it doesn't exist
 	},
 	performance: {
 		hints: false

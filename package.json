@@ -228,7 +228,7 @@
     "@types/jest": "^28.1.6",
     "@types/lodash": "^4.14.182",
     "@types/mocha": "^9.1.1",
-    "@types/node": "^18.0.6",
+    "@types/node": "^18.8.5",
     "@types/vscode": "^1.69.0",
     "@types/webpack-env": "^1.17.0",
     "@typescript-eslint/eslint-plugin": "^5.30.7",

@@ -1,18 +1,14 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as vscode from 'vscode'
-import * as _ from 'lodash'
-import * as path from 'path'
 
 import config from '@/config'
 import logger from './logger'
 
-import type { TContributor } from './cΩ.store'
 import { CΩStore, CΩWork } from './cΩ.store'
 
 import type { TCΩEditor } from './cΩ.editor'
 
-import CΩEditor from './cΩ.editor'
 import CΩDeco   from './cΩ.deco'
-import CΩPanel  from './cΩ.panel'
 import CΩDiffs  from './cΩ.diffs'
 import CΩSCM from './cΩ.scm'
 
@@ -60,7 +56,6 @@ function setupWorker() {
   // TODO: download diffs periodically
 }
 
-
 /************************************************************************************
  * refreshLines
  *
@@ -95,7 +90,7 @@ function refreshLines(options: any) {
   if (!CΩStore.activeProject.activePath || !CΩStore.user || !contentChanges.length) return Promise.resolve()
   // TODO: maybe use the `document` object we receive along with contentChanges, to ensure correct project / fpath selection
   const fpath = CΩStore.activeProject.activePath
-  if (!fpath) return Promise.reject()
+  if (!fpath) return Promise.reject(new Error('No active file'))
   // TODO: why sometimes we make a change, but we receive an empty contentChanges array?
   // logger.log('WORKSPACE: contentChanges', contentChanges)
   contentChanges.map(change => {
@@ -128,11 +123,6 @@ function closeTextDocument(params: any) {
   console.log('WORKSPACE: closeTextDocument', params)
 }
 
-type TypeCursorInFile = {
-  line: number
-  uri: string
-}
-
 /************************************************************************************
  * Diff code slices navigation
  *
@@ -149,7 +139,7 @@ function highlight() {
 const getCode = (editor: TCΩEditor) => editor?.document.getText()
 
 function saveCode() {
-  if (!CΩStore.activeTextEditor) return Promise.reject() // TODO:
+  if (!CΩStore.activeTextEditor) return Promise.reject(new Error('No active editor')) // TODO:
   const existingCode = getCode(CΩStore.activeTextEditor)
   // TODO:
   return Promise.resolve()
@@ -164,7 +154,7 @@ async function addProject(wsFolder: any) {
   const folder: string = wsFolder.uri ? wsFolder.uri.path : wsFolder.toString()
   logger.log('WORKSPACE: addProject', folder)
 
-  CΩStore.ws!.transmit('repo:add', { folder })
+  CΩStore.ws?.transmit('repo:add', { folder })
     .then(() => {
       CΩSCM.addProject(wsFolder)
       logger.info('WORKSPACE: Folder added to workspace: ', folder)

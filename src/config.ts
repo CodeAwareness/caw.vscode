@@ -19,6 +19,8 @@ const API_URL = DEBUG ? `https://127.0.0.1:${PORT_LOCAL}/api/${SERVER_VERSION}` 
 // Local communication with CodeAwareness local service
 const SERVER_WSS = 'wss://127.0.0.1:48408'
 
+// Where to subscribe for Code Awareness local service (pipe IPC)
+const PIPE_CLIENTS = '/var/tmp/cΩ/clients'
 console.log('CONFIG', EXT_URL, API_URL, SERVER_WSS)
 
 // Workspace: SYNC_INTERVAL gives the timer for syncing with the server
@@ -53,6 +55,7 @@ export default {
   EXTRACT_REPO_DIR,
   LOG_LEVEL,
   MAX_NR_OF_SHA_TO_COMPARE,
+  PIPE_CLIENTS,
   PORT_LOCAL,
   SERVER_VERSION,
   SERVER_WSS,

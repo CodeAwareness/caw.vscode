@@ -78,6 +78,20 @@ After which a `git ls-files` will list the files with the approriate characters.
 * Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
 * Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
 
+### Developer notes
+
+Honestly I've never had so much headache with any software before. It's been utter hell to figure out VSCode. Here are some hickups I've encountered so far:
+
+- WebSockets exist in Extension Development Host, but not in the regular (production) VSCode.
+- NodeJS `path` module exists in production but not in the Dev Host.
+- Trying to get the current path of a file on Windows returns either of the following values, depending on the planet alignment and the amount of alcohool you poured on your house plants:
+     * 1. C:\Folder\Sub\fileName.ext
+     * 2. c:\Folder\Sub\fileName.ext
+     * 3. /c:/Folder/Sub/fileName.ext
+     * 4. /C:/Folder/Sub/fileName.ext
+
+At the time of writing this, I'm close to wanting to start my own code editor project. However, VSCode is a beloved editor with a huge audience, so I'm doing my best to contain my frustrations. Any donations you may be inclined to send my way will be used for therapy.
+
 ### For more information
 
 * [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)

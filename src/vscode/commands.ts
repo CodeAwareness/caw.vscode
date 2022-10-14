@@ -1,10 +1,9 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as vscode from 'vscode'
-import * as _ from 'lodash'
 
 import logger from '@/lib/logger'
 
 import CΩPanel from '@/lib/cΩ.panel'
-import CΩDiffs from '@/lib/cΩ.diffs'
 import CΩStore from '@/lib/cΩ.store'
 
 const { registerCommand } = vscode.commands
@@ -45,8 +44,7 @@ function setupCommands(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(registerCommand('CΩ.openPeerFile', function(wsFolder, fpath, uid) {
     logger.log('COMMAND: openPeerFile request received', wsFolder, fpath)
-    CΩStore.ws!
-      .transmit('repo:vscode-diff', { wsFolder, fpath, uid })
+    CΩStore.ws!.transmit('repo:vscode-diff', { wsFolder, fpath, uid })
       .then((data: any) => {
         if (data.exists) {
           const resourceUri = vscode.Uri.file(data.res1)
