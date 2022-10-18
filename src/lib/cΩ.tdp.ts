@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import { EventEmitter, TreeItem, TreeItemCollapsibleState } from 'vscode'
-import * as path from 'path'
+import * as path from 'node:path'
 
 import { CΩStore } from './cΩ.store'
 import logger from './logger'

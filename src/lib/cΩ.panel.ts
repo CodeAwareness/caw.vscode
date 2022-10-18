@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import * as path from 'path'
+import * as path from 'node:path'
 
 import config from '@/config'
 import logger from './logger'
@@ -82,8 +82,9 @@ function toggle(context: vscode.ExtensionContext) {
 
   if (!panel.webview) return
 
-  getWebviewContent(panel.webview, config.EXT_URL)
+  getWebviewContent(panel.webview, config.EXT_URL) // PRODUCTION
   CΩEditor.focusTextEditor()
+  console.log('VSCODE will setup IPC')
   CΩIPC.setup(panel.webview, context)
   panel.onDidDispose(dispose, undefined, context.subscriptions)
   panel.onDidChangeViewState((state: vscode.WindowState) => CΩPanel.didChangeViewState(state), undefined, context.subscriptions)
@@ -94,12 +95,12 @@ function getWebviewContent(webview: vscode.Webview, extURL: string) {
   webview.html = `<!doctype html><html lang="en"><head><meta charset="UTF-8">
     <title>CodeAwareness VSCode panel</title>
     <script defer="defer" src="https://vscode.codeawareness.com/runtime.js"></script>
-    <script defer="defer" src="https://vscode.codeawareness.com/988.js"></script>
+    <script defer="defer" src="https://vscode.codeawareness.com/993.js?t=${new Date().valueOf()}"></script>
     <script defer="defer" src="https://vscode.codeawareness.com/main.js?t=${new Date().valueOf()}"></script>
     <link href="https://vscode.codeawareness.com/main.css" rel="stylesheet"></head>
     <body>
       <h1 id="panelLoading">Loading...</h1>
-      <script defer src="https://vscode.codeawareness.com/main.js"></script>
+      <script defer src="https://vscode.codeawareness.com/main.js?t=${new Date().valueOf()}"></script>
     </body></html>`
 }
 

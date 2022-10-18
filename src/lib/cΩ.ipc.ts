@@ -12,6 +12,7 @@ import CΩDeco from './cΩ.deco'
 import CΩPanel from './cΩ.panel'
 import CΩWorkspace from './cΩ.workspace'
 import CΩTDP from '@/lib/cΩ.tdp'
+import CΩWS from '@/lib/cΩ.ws'
 
 /**
  * This is the VSCode <--> VSCode Webview IPC module
@@ -22,11 +23,23 @@ function init() {
   CΩPanel.postMessage({ command: 'setColorTheme', data })
 }
 
-const postBack = (command: string) => (data: any) => {
-  CΩPanel.postMessage({ command, data })
+const shortid = () => {
+  const n = String.fromCharCode(Math.floor(Math.random() * 10 + 48))
+  const l = String.fromCharCode(Math.floor(Math.random() * 26 + 97))
+  const c = String.fromCharCode(Math.floor(Math.random() * 26 + 65))
+  return l + c + n + new Date().valueOf().toString()
+}
+
+const postBack = (command: string, id?: string) => (data: any) => {
+  CΩPanel.postMessage({ command, id, data })
 }
 
 const ipcTable: Record<string, any> = {}
+
+ipcTable['webview:loaded'] = () => {
+  console.log('Will init webview with GUID', CΩWS.guid)
+  postBack('wss-guid')(CΩWS.guid)
+}
 
 ipcTable['auth:login'] = (data: TAuth) => {
   init()
@@ -88,8 +101,6 @@ ipcTable['contrib:unselect'] = () => {
 }
 
 /************************************************************************************
- * processSystemEvent
- *
  * @param string - key: the event key, indicating an action to be taken
  * @param object - data: the data to be processed inside the action
  ************************************************************************************/
@@ -99,19 +110,30 @@ function processSystemEvent(key: string, data: any) {
 }
 
 /************************************************************************************
- * setup
- *
+ * @param string - key: the event key, indicating an action to be taken,
+ * plus a unique ID to keep the req-res correlation.
+ * For example, key can be: `auth:info:1kG9`
+ * @param object - data: the data to be processed inside the action
+ ************************************************************************************/
+function processAPI(id: string, key: string, data: any) {
+  logger.info('IPC processAPI', key, data)
+  CΩWS.transmit(key, data)
+    .then(data => {
+      postBack(key, id)(data)
+    })
+}
+
+/************************************************************************************
  * @param object - webview: the webview object
  * @param object - context: used for continuation of subscriptions
  ************************************************************************************/
 function setup(webview: any, context: any) {
-  postBack('wss-guid')(CΩStore.ws?.guid) // TODO: exponential delay checking until .ws exists
   webview.onDidReceiveMessage(
     (message: any) => {
       switch (message.command) {
         case 'api':
           // system events to sync day>ta between editor and webview
-          processSystemEvent(message.key, message.data)
+          processAPI(message.id, message.key, message.data)
           break
 
         case 'event':

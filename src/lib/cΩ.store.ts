@@ -116,7 +116,7 @@ export const CΩStore = {
   panel: undefined as any,
   tokens: undefined as TTokens | undefined,
   user: undefined as TUser | undefined,
-  ws: undefined as CΩWS | undefined,
+  ws: undefined as typeof CΩWS | undefined,
 
   clear: () => {
     console.log('STORE CLEAR')

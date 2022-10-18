@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as vscode from 'vscode'
 import * as _ from 'lodash'
-import * as path from 'path'
+import * as path from 'node:path'
 
 import { CΩStatusbar } from '@/vscode/statusbar'
 import { setupCommands } from '@/vscode/commands'
@@ -16,8 +16,8 @@ import logger from '@/lib/logger'
 import CΩPanel from '@/lib/cΩ.panel'
 import CΩEditor from '@/lib/cΩ.editor'
 import CΩWorkspace from '@/lib/cΩ.workspace'
-import CΩWS from '@/lib/cΩ.ws'
 import CΩTDP from '@/lib/cΩ.tdp'
+import CΩWS from '@/lib/cΩ.ws'
 
 let activated: boolean // extension activated !
 const deactivateTasks: Array<any> = [] // keeping track of all the disposables
@@ -50,8 +50,6 @@ function initCodeAwareness(context: vscode.ExtensionContext) {
   activated = true
   console.log('Extension: initCodeAwareness')
   initConfig()
-  logger.info('will initialize WSS')
-  CΩStore.ws = new CΩWS()
   CΩStatusbar.init()
   setupCommands(context)
   setupWatchers(context)
@@ -174,7 +172,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
     logger.info('CODEAWARENESS_EXTENSION: onDidChangeActiveTextEditor (editor, cΩStore)', editor, CΩStore)
     if (!editor) return
     CΩEditor.setActiveEditor(editor as TCΩEditor)
-    CΩStore.ws!.transmit('repo:active-path', { fpath: editor.document.uri.path, doc: editor.document.getText() })
+    CΩWS.transmit('repo:active-path', { fpath: editor.document.uri.path, doc: editor.document.getText() })
       .then(CΩEditor.updateDecorations)
       .then(CΩTDP.addProject)
       .then(CΩPanel.updateProject)
