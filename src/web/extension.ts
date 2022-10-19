@@ -34,7 +34,7 @@ export function deactivate() {
   const promises = [
     CΩStatusbar.dispose(),
     CΩWorkspace.dispose(),
-    CΩStore.ws?.dispose(),
+    CΩWS.dispose(),
   ]
 
   for (const task of deactivateTasks) {
@@ -50,6 +50,7 @@ function initCodeAwareness(context: vscode.ExtensionContext) {
   activated = true
   console.log('Extension: initCodeAwareness')
   initConfig()
+  CΩWS.init()
   CΩStatusbar.init()
   setupCommands(context)
   setupWatchers(context)
@@ -84,7 +85,7 @@ const CΩDocumentContentProvider = {
     const peerFile = path.join(userDir, config.EXTRACT_REPO_DIR, uri)
     // logger.info('peer8DocumentContentProvider uri', relativePath.path, 'peerFile', peerFile)
 
-    return CΩStore.ws!.transmit('repo:read-file', { fpath: peerFile })
+    return CΩWS.transmit('repo:read-file', { fpath: peerFile })
       // TODO: find a better way to indicate deleted file, as opposed to new file created, as opposed to simply file not existing
       .catch(() => '') // if file not existing
   },

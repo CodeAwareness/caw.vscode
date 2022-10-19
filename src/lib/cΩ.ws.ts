@@ -1,4 +1,4 @@
-import EventEmitter from 'events'
+import { EventEmitter, once } from 'node:events'
 import { appendFile, constants as fsConstants, createReadStream, openSync } from 'fs'
 import { open } from 'fs/promises'
 import { spawn } from 'child_process'
@@ -40,10 +40,8 @@ const CΩWS = {
       CΩWS.transmit('auth:info').then(CΩWorkspace.init)
 
       fifoIn.on('data', (data: any) => {
-        console.log('----- Received packet -----')
-        console.log(data.toString())
-        const { status, action, body } = JSON.parse(data.toString())
-        wsocket.emit(`${status}:${action}`, body)
+        const { action, body } = JSON.parse(data.toString('utf8'))
+        wsocket.emit(action, body)
       })
     }
 
@@ -71,34 +69,28 @@ const CΩWS = {
   transmit: function(action: string, data?: any) {
     let handler: any
     let errHandler: any
-    return new Promise(
-      (resolve, reject) => {
-        logger.info(`WSS: will emit action: ${action}`)
-        if (!data) data = {}
-        data.cΩ = guid
-        handler = (body: any) => {
-          console.log('WSS: resolved action', action, body)
-          wsocket.removeListener(action, handler)
-          resolve(body)
-        }
-        errHandler = (err: any) => {
-          logger.log('WSS: wsocket error', action, err)
-          wsocket.removeListener(action, errHandler)
-          reject(err)
-        }
-        return fifoOut.write(JSON.stringify({ action, data }))
-      })
-      .then(shouldContinue => {
+    return new Promise((resolve, reject) => {
+      logger.info(`WSS: will emit action: ${action}`)
+      if (!data) data = {}
+      data.cΩ = guid
+      handler = (body: any) => {
+        logger.info('WSS: resolved action', action, body)
+        wsocket.removeListener(action, handler)
+        resolve(body)
+      }
+      errHandler = (err: any) => {
+        logger.info('WSS: wsocket error', action, err)
+        wsocket.removeListener(action, errHandler)
+        reject(err)
+      }
+      const hasFlushed = fifoOut.write(JSON.stringify({ action, data }))
         // Backpressure if buffer is full
-        if (!shouldContinue) {
-          return EventEmitter.once(fifoOut, 'drain')
-        }
-        return
-      })
-      .then(() => {
+      const ret = !hasFlushed && once(fifoOut, 'drain') || Promise.resolve()
+      ret.then(() => {
         wsocket.on(`res:${action}`, handler)
         wsocket.on(`error:${action}`, errHandler)
       })
+    })
   },
 
   dispose: function() {

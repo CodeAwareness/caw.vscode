@@ -47,7 +47,7 @@ ipcTable['auth:login'] = (data: TAuth) => {
   CΩStore.tokens = data?.tokens
   if (data?.user) {
     CΩWorkspace.setupWorker()
-    CΩStore.ws!.transmit('repo:active-path', {
+    CΩWS.transmit('repo:active-path', {
       fpath: CΩStore.activeTextEditor?.document?.uri?.path,
       doc: CΩStore.activeTextEditor?.document?.getText()
     })
@@ -66,7 +66,7 @@ ipcTable['branch:select'] = (branch: string) => {
   const fpath = CΩStore.activeProject.activePath
   if (!fpath) return
   const origin = CΩStore.activeProject.origin
-  CΩStore?.ws!.transmit('repo:diff-branch', { origin, branch, fpath })
+  CΩWS.transmit('repo:diff-branch', { origin, branch, fpath })
     .then((info: any) => {
       const peerFileUri = vscode.Uri.file(info.peerFile)
       const userFileUri = vscode.Uri.file(info.userFile)
@@ -87,7 +87,7 @@ ipcTable['contrib:select'] = (contrib: any) => {
   const fpath = CΩStore.activeTextEditor?.document?.uri?.path
   if (!fpath) return
   const origin = CΩStore.activeProject.origin
-  CΩStore?.ws!.transmit('repo:diff-contrib', { origin, fpath, contrib })
+  CΩWS.transmit('repo:diff-contrib', { origin, fpath, contrib })
     .then((info: any) => {
       const peerFileUri = vscode.Uri.file(info.peerFile)
       const userFileUri = vscode.Uri.file(fpath)

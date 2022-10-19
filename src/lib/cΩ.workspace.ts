@@ -8,9 +8,10 @@ import { CΩStore, CΩWork } from './cΩ.store'
 
 import type { TCΩEditor } from './cΩ.editor'
 
-import CΩDeco   from './cΩ.deco'
-import CΩDiffs  from './cΩ.diffs'
+import CΩDeco from './cΩ.deco'
+import CΩDiffs from './cΩ.diffs'
 import CΩSCM from './cΩ.scm'
+import CΩWS from './cΩ.ws'
 
 const isWindows = !!process.env.ProgramFiles
 
@@ -33,7 +34,7 @@ function dispose() {
 function setupTempFiles() {
   // TODO: get tmpDir from localService
   console.log('setupTempFiles (repo:get-tmp-dir)')
-  CΩStore.ws!.transmit('repo:get-tmp-dir')
+  CΩWS.transmit('repo:get-tmp-dir')
     .then((data: any) => {
       CΩStore.tmpDir = data.toString()
       logger.info('WORKSPACE: temporary folder used: ', CΩStore.tmpDir)
@@ -154,13 +155,13 @@ async function addProject(wsFolder: any) {
   const folder: string = wsFolder.uri ? wsFolder.uri.path : wsFolder.toString()
   logger.log('WORKSPACE: addProject', folder)
 
-  CΩStore.ws?.transmit('repo:add', { folder })
+  CΩWS.transmit('repo:add', { folder })
     .then(() => {
       CΩSCM.addProject(wsFolder)
       logger.info('WORKSPACE: Folder added to workspace: ', folder)
     })
 
-  CΩStore.ws!.transmit('repo:add-submodules', { folder })
+  CΩWS.transmit('repo:add-submodules', { folder })
     .then((subs: any) => {
       subs?.map((p: any) => CΩSCM.addProject(p))
       logger.info('WORKSPACE: Folder submodules added to workspace: ', subs)
@@ -170,7 +171,7 @@ async function addProject(wsFolder: any) {
 function removeProject(wsFolder: any) {
   const folder: string = wsFolder.uri ? wsFolder.uri.path : wsFolder.toString()
 
-  CΩStore.ws!.transmit('repo:remove', { folder })
+  CΩWS.transmit('repo:remove', { folder })
     .then(() => {
       logger.info('WORKSPACE: Folder removed from workspace: ', folder)
     })

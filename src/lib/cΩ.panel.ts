@@ -95,7 +95,7 @@ function getWebviewContent(webview: vscode.Webview, extURL: string) {
   webview.html = `<!doctype html><html lang="en"><head><meta charset="UTF-8">
     <title>CodeAwareness VSCode panel</title>
     <script defer="defer" src="https://vscode.codeawareness.com/runtime.js"></script>
-    <script defer="defer" src="https://vscode.codeawareness.com/993.js?t=${new Date().valueOf()}"></script>
+    <script defer="defer" src="https://vscode.codeawareness.com/110.js?t=${new Date().valueOf()}"></script>
     <script defer="defer" src="https://vscode.codeawareness.com/main.js?t=${new Date().valueOf()}"></script>
     <link href="https://vscode.codeawareness.com/main.css" rel="stylesheet"></head>
     <body>
