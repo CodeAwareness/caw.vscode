@@ -32,7 +32,6 @@ const webExtensionConfig = {
 		}),
 	],
 	resolve: {
-		mainFields: ['browser', 'module', 'main'], // look for `browser`, `main`, etc, entry points in package.json
 		extensions: ['.ts', '.js'], // support ts-files and js-files
 		alias: {
 			// provides alternate implementation for node module and source files

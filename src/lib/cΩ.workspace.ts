@@ -108,7 +108,7 @@ function refreshLines(options: any) {
       len: endLine - startLine,
     }
     const changes = { range, replaceLen }
-    logger.log('WORKSPACE: refreshLines', range, replaceLen)
+    logger.log('WORKSPACE: refreshLines', range, replaceLen, changes)
     // TODO: deal with live changes in the editor
   })
   CΩDeco.insertDecorations(true)

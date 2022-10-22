@@ -15,11 +15,11 @@ const shortid = () => {
 }
 
 /* internal communication is done via EventEmitter to simulate a real socket */
-let wsocket = new EventEmitter()
+const wsocket = new EventEmitter()
 /* we send a GUID with every requests, such that multiple instances of VSCode can work independently;
  * TODO: allow different users logged into different VSCode instances; IS THIS SECURE? (it will require rewriting some of the local service)
  */
-let guid = shortid()
+const guid = shortid()
 /* using two named pipes for IPC */
 const pipeIncoming = `/var/tmp/cΩ/${guid}.in.sock`
 const pipeOutgoing = `/var/tmp/cΩ/${guid}.out.sock`
@@ -52,7 +52,7 @@ const CΩWS = {
       outHandle = await open(pipeOutgoing, fsConstants.O_RDWR | fsConstants.O_NONBLOCK)
       // readable: false avoids buffering reads from the pipe in memory
       fifoOut = new net.Socket({ fd: outHandle.fd, readable: false })
-      appendFile(catalog, `\n${guid}`, err => { err && logger.error })
+      appendFile(catalog, `\n${guid}`, err => { err && logger.error(err) })
 
       try {
         setupIncoming()
@@ -88,15 +88,15 @@ const CΩWS = {
       const ret = !hasFlushed && once(fifoOut, 'drain') || Promise.resolve()
       ret.then(() => {
         wsocket.on(`res:${action}`, handler)
-        wsocket.on(`error:${action}`, errHandler)
+        wsocket.on(`err:${action}`, errHandler)
       })
     })
   },
 
   dispose: function() {
-    fifoIn.destroy()
-    fifoOut.destroy()
-    outHandle.close()
+    fifoIn?.destroy()
+    fifoOut?.destroy()
+    outHandle?.close()
   },
 }
 

@@ -1,5 +1,4 @@
 import * as vscode from 'vscode'
-import * as _ from 'lodash'
 // import replaceStream from 'replacestream' // doesn't work (!)
 
 /* @ts-ignore */
@@ -10,6 +9,7 @@ const isWindows = !!vscode.process?.env.ProgramFiles
  ************************************************************************************/
 
 function init() {
+  console.log('isWindows?', isWindows)
 }
 
 function clear() {

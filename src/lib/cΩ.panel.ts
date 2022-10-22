@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 import * as path from 'node:path'
+import got from 'got'
 
 import config from '@/config'
 import logger from './logger'
@@ -82,13 +83,13 @@ function toggle(context: vscode.ExtensionContext) {
 
   if (!panel.webview) return
 
-  getWebviewContent(panel.webview, config.EXT_URL) // PRODUCTION
+  getWebviewContentLocal(panel.webview, config.EXT_URL) // PRODUCTION
   CΩEditor.focusTextEditor()
   console.log('VSCODE will setup IPC')
   CΩIPC.setup(panel.webview, context)
   panel.onDidDispose(dispose, undefined, context.subscriptions)
   panel.onDidChangeViewState((state: vscode.WindowState) => CΩPanel.didChangeViewState(state), undefined, context.subscriptions)
-  return
+  return true
 }
 
 function getWebviewContent(webview: vscode.Webview, extURL: string) {
@@ -102,6 +103,10 @@ function getWebviewContent(webview: vscode.Webview, extURL: string) {
       <h1 id="panelLoading">Loading...</h1>
       <script defer src="https://vscode.codeawareness.com/main.js?t=${new Date().valueOf()}"></script>
     </body></html>`
+}
+
+async function getWebviewContentLocal(webview: vscode.Webview, extURL: string) {
+  webview.html = (await got('https://127.0.0.1:8885')).body
 }
 
 /************************************************************************************

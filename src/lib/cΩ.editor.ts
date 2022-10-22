@@ -1,12 +1,9 @@
 import * as vscode from 'vscode'
 import logger from './logger'
 
-import type { TChanges } from './cΩ.store'
 import { CΩStore } from './cΩ.store'
-import CΩWorkspace from './cΩ.workspace'
 import CΩDeco from './cΩ.deco'
 import CΩDiffs from './cΩ.diffs'
-import CΩPanel from './cΩ.panel'
 
 const isWindows = !!process.env.ProgramFiles // TODO: I think this is vscode.process.env ?
 

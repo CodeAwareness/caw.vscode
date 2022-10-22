@@ -4,7 +4,6 @@ import * as path from 'node:path'
 
 import { CΩStore } from './cΩ.store'
 import logger from './logger'
-import { SCM_PEER_FILES_VIEW } from '@/web/extension'
 
 const dataChangeEvent = new EventEmitter()
 
@@ -77,8 +76,8 @@ const TDP = {
   },
 
   provideTextDocumentContent: (uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<string> => {
-		return 'TEST'
-	},
+    return 'TEST'
+  },
 
   getTreeItem: (el: vscode.TreeItem): vscode.TreeItem => {
     return el
