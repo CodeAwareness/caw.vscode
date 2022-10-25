@@ -40,8 +40,8 @@ const CΩWS = {
       CΩWS.transmit('auth:info').then(CΩWorkspace.init)
 
       fifoIn.on('data', (data: any) => {
-        const { action, body } = JSON.parse(data.toString('utf8'))
-        wsocket.emit(action, body)
+        const { action, body, err } = JSON.parse(data.toString('utf8'))
+        wsocket.emit(action, body || err)
       })
     }
 
@@ -67,18 +67,16 @@ const CΩWS = {
    * Transmit an action, and perhaps some data. Recommend a namespacing format for the action, something like `<domain>:<action>`, e.g. `auth:login` or `users:query`.
    */
   transmit: function(action: string, data?: any) {
-    let handler: any
-    let errHandler: any
     return new Promise((resolve, reject) => {
       logger.info(`WSS: will emit action: ${action}`)
       if (!data) data = {}
       data.cΩ = guid
-      handler = (body: any) => {
+      const handler = (body: any) => {
         logger.info('WSS: resolved action', action, body)
         wsocket.removeListener(action, handler)
         resolve(body)
       }
-      errHandler = (err: any) => {
+      const errHandler = (err: any) => {
         logger.info('WSS: wsocket error', action, err)
         wsocket.removeListener(action, errHandler)
         reject(err)
