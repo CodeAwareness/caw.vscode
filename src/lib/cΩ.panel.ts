@@ -83,8 +83,8 @@ function toggle(context: vscode.ExtensionContext) {
 
   if (!panel.webview) return
 
-  // getWebviewContentLocal(panel.webview, config.EXT_URL) // DEV
-  getWebviewContent(panel.webview, config.EXT_URL) // PRODUCTION
+  getWebviewContentLocal(panel.webview, config.EXT_URL) // DEV
+  // getWebviewContent(panel.webview, config.EXT_URL) // PRODUCTION
   CΩEditor.focusTextEditor()
   console.log('VSCODE will setup IPC')
   CΩIPC.setup(panel.webview, context)
@@ -120,7 +120,18 @@ function getWebviewContent(webview: vscode.Webview, extURL: string) {
 }
 
 async function getWebviewContentLocal(webview: vscode.Webview, extURL: string) {
-  webview.html = (await got('https://127.0.0.1:8885')).body
+  // webview.html = (await got('https://127.0.0.1:8885')).body
+
+  const nonce = getNonce()
+  const cspSource = 'https://127.0.0.1:8885'
+  const mediaSource = 'https://codeawareness.com'
+  webview.html = `<!doctype html><html lang="en"><head><meta charset="UTF-8">
+    <title>CodeAwareness VSCode panel</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src ${cspSource}; style-src ${cspSource} 'unsafe-inline'; img-src ${cspSource} ${mediaSource}; script-src 'nonce-${nonce}' 'unsafe-eval';">
+    <script defer="defer" nonce="${nonce}" src="https://127.0.0.1:8885/main.js?t=${new Date().valueOf()}"></script>
+    <body>
+      <h1 id="panelLoading">Loading...</h1>
+    </body></html>`
 }
 
 /************************************************************************************
