@@ -119,7 +119,10 @@ function processAPI(id: string, key: string, data: any) {
   logger.info('IPC processAPI', key, data)
   CΩWS.transmit(key, data)
     .then(data => {
-      postBack(key, id)(data)
+      postBack(`res:${key}`, id)(data)
+    })
+    .catch(err => {
+      postBack(`err:${key}`, id)(err)
     })
 }
 
