@@ -83,7 +83,8 @@ function toggle(context: vscode.ExtensionContext) {
 
   if (!panel.webview) return
 
-  getWebviewContentLocal(panel.webview, config.EXT_URL) // PRODUCTION
+  // getWebviewContentLocal(panel.webview, config.EXT_URL) // DEV
+  getWebviewContent(panel.webview, config.EXT_URL) // PRODUCTION
   CΩEditor.focusTextEditor()
   console.log('VSCODE will setup IPC')
   CΩIPC.setup(panel.webview, context)
@@ -92,16 +93,29 @@ function toggle(context: vscode.ExtensionContext) {
   return true
 }
 
+function getNonce() {
+	let text = ''
+	const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+	for (let i = 0; i < 32; i++) {
+		text += possible.charAt(Math.floor(Math.random() * possible.length))
+	}
+	return text
+}
+
 function getWebviewContent(webview: vscode.Webview, extURL: string) {
+  const nonce = getNonce()
+  const cspSource = 'https://vscode.codeawareness.com https://api.codeawareness.com'
+  const mediaSource = 'https://codeawareness.com'
   webview.html = `<!doctype html><html lang="en"><head><meta charset="UTF-8">
     <title>CodeAwareness VSCode panel</title>
-    <script defer="defer" src="https://vscode.codeawareness.com/runtime.js"></script>
-    <script defer="defer" src="https://vscode.codeawareness.com/110.js?t=${new Date().valueOf()}"></script>
-    <script defer="defer" src="https://vscode.codeawareness.com/main.js?t=${new Date().valueOf()}"></script>
-    <link href="https://vscode.codeawareness.com/main.css" rel="stylesheet"></head>
+    <meta http-equiv="Content-Security-Policy" content="default-src ${cspSource}; style-src ${cspSource} 'unsafe-inline'; img-src ${cspSource} ${mediaSource}; script-src 'nonce-${nonce}';">
+    <script defer="defer" nonce="${nonce}" src="https://vscode.codeawareness.com/runtime.js"></script>
+    <script defer="defer" nonce="${nonce}" src="https://vscode.codeawareness.com/110.js?t=${new Date().valueOf()}"></script>
+    <script defer="defer" nonce="${nonce}" src="https://vscode.codeawareness.com/main.js?t=${new Date().valueOf()}"></script>
+    <link nonce="${nonce}" href="https://vscode.codeawareness.com/main.css" rel="stylesheet"></head>
     <body>
       <h1 id="panelLoading">Loading...</h1>
-      <script defer src="https://vscode.codeawareness.com/main.js?t=${new Date().valueOf()}"></script>
+      <script defer nonce="${nonce}" src="https://vscode.codeawareness.com/main.js?t=${new Date().valueOf()}"></script>
     </body></html>`
 }
 
