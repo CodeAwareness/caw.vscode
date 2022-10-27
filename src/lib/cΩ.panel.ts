@@ -124,7 +124,7 @@ async function getWebviewContentLocal(webview: vscode.Webview, extURL: string) {
 
   const nonce = getNonce()
   const cspSource = 'https://127.0.0.1:8885'
-  const mediaSource = 'https://codeawareness.com'
+  const mediaSource = 'https://codeawareness.com https://ext.codeawareness.com'
   webview.html = `<!doctype html><html lang="en"><head><meta charset="UTF-8">
     <title>CodeAwareness VSCode panel</title>
     <meta http-equiv="Content-Security-Policy" content="default-src ${cspSource}; style-src ${cspSource} 'unsafe-inline'; img-src ${cspSource} ${mediaSource}; script-src 'nonce-${nonce}' 'unsafe-eval';">

@@ -74,12 +74,14 @@ const CΩWS = {
       const handler = (body: any) => {
         logger.info('WSS: resolved action', action, body)
         wsocket.removeListener(action, handler)
-        resolve(body)
+        const data = typeof body === 'string' ? JSON.parse(body) : body
+        resolve(data)
       }
       const errHandler = (err: any) => {
         logger.info('WSS: wsocket error', action, err)
-        wsocket.removeListener(action, errHandler)
-        reject(err)
+        // wsocket.removeListener(action, errHandler)
+        const data = typeof err === 'string' ? JSON.parse(err) : err
+        reject(data)
       }
       const hasFlushed = fifoOut.write(JSON.stringify({ action, data }))
         // Backpressure if buffer is full

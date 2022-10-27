@@ -119,10 +119,12 @@ function processAPI(id: string, key: string, data: any) {
   logger.info('IPC processAPI', key, data)
   CΩWS.transmit(key, data)
     .then(data => {
-      postBack(`res:${key}`, id)(data)
+      const body = typeof data === 'string' ? JSON.parse(data) : data
+      postBack(`res:${key}`, id)(body)
     })
     .catch(err => {
-      postBack(`err:${key}`, id)(err)
+      const obj = typeof err === 'string' ? JSON.parse(err) : err
+      postBack(`err:${key}`, id)(obj)
     })
 }
 
