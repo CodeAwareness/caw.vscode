@@ -99,6 +99,7 @@ function doInsert(uri: string) {
     return setDecorations({ editor, ranges: [] })
   }
   const alines: Record<string, any> = project.changes[fpath].alines
+  if (!alines) return
   logger.log('DECO: doInsert linesHash', alines)
   const linesHash = Object.keys(alines)
     .reduce((acc: Record<string, number>, sha: string) => {

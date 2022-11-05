@@ -1,12 +1,10 @@
 import * as vscode from 'vscode'
 import * as path from 'node:path'
-import got from 'got'
 
 import config from '@/config'
 import logger from './logger'
 
 import { CΩStore } from './cΩ.store'
-import { locale } from './locale'
 
 import CΩIPC from './cΩ.ipc'
 import CΩWorkspace from './cΩ.workspace'
@@ -94,12 +92,12 @@ function toggle(context: vscode.ExtensionContext) {
 }
 
 function getNonce() {
-	let text = ''
-	const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-	for (let i = 0; i < 32; i++) {
-		text += possible.charAt(Math.floor(Math.random() * possible.length))
-	}
-	return text
+  let text = ''
+  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  for (let i = 0; i < 32; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length))
+  }
+  return text
 }
 
 function getWebviewContent(webview: vscode.Webview, extURL: string) {

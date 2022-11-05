@@ -1,8 +1,6 @@
-import { EventEmitter, once } from 'node:events'
-import { appendFile, constants as fsConstants, createReadStream, openSync } from 'fs'
-import { open } from 'fs/promises'
-import { spawn } from 'child_process'
-import * as net from 'net' // TODO: check to see if this works in Windows
+import { EventEmitter } from 'node:events'
+import { appendFileSync } from 'fs'
+import net from 'node:net'
 
 import config from '@/config'
 import logger from './logger'
@@ -25,7 +23,6 @@ const pipeIncoming = `/var/tmp/cΩ/${guid}.in.sock`
 const pipeOutgoing = `/var/tmp/cΩ/${guid}.out.sock`
 let fifoIn: any
 let fifoOut: any
-let outHandle: any
 
 const CΩWS = {
   guid,
@@ -33,34 +30,26 @@ const CΩWS = {
     console.log('WSS: initializing pipe IPC with CΩ Local Service')
     const catalog = config.PIPE_CLIENTS
 
-    const setupIncoming = () => {
-      const fd = openSync(pipeIncoming, 'r+')
-      /* @ts-ignore */
-      fifoIn = createReadStream(null, { fd })
-      CΩWS.transmit('auth:info').then(CΩWorkspace.init)
+    appendFileSync(catalog, `\n${guid}`, 'utf8')
 
-      fifoIn.on('data', (data: any) => {
-        const { action, body, err } = JSON.parse(data.toString('utf8'))
-        wsocket.emit(action, body || err)
+    console.log('WROTE TO CLIENTS')
+    setTimeout(() => {
+      console.log('WILL TRY CONNECTING')
+      fifoOut = net.createConnection(pipeOutgoing)
+      fifoOut.on('connect', () => {
+        console.log('IPC Client fifo OUT socket connected.', pipeOutgoing)
+        CΩWS.transmit('auth:info').then(CΩWorkspace.init)
       })
-    }
 
-    const fifo = spawn('mkfifo', [pipeOutgoing])
-    fifo.on('exit', async () => {
-      // Read write flag is required even if you only need to write because otherwise you get ENXIO https://linux.die.net/man/4/fifo
-      // Non blocking flag is required to avoid blocking threads in the thread pool
-      outHandle = await open(pipeOutgoing, fsConstants.O_RDWR | fsConstants.O_NONBLOCK)
-      // readable: false avoids buffering reads from the pipe in memory
-      fifoOut = new net.Socket({ fd: outHandle.fd, readable: false })
-      appendFile(catalog, `\n${guid}`, err => { err && logger.error(err) })
-
-      try {
-        setupIncoming()
-      } catch (err) {
-        // TODO: better wait protocol; we need to wait here for the CΩ LS to create a pipe for us.
-        setTimeout(setupIncoming, 1000)
-      }
-    })
+      fifoIn = net.createConnection(pipeIncoming)
+      fifoIn.on('connect', () => {
+        console.log('IPC Client fifo IN socket connected.', pipeIncoming)
+        fifoIn.on('data', (data: any) => {
+          const { action, body, err } = JSON.parse(data.toString('utf8'))
+          wsocket.emit(action, body || err)
+        })
+      })
+    }, 2000)
   },
 
   /*
@@ -73,7 +62,7 @@ const CΩWS = {
       data.cΩ = guid
       const handler = (body: any) => {
         logger.info('WSS: resolved action', action, body)
-        wsocket.removeListener(action, handler)
+        // wsocket.removeListener(action, handler)
         const data = typeof body === 'string' ? JSON.parse(body) : body
         resolve(data)
       }
@@ -83,20 +72,17 @@ const CΩWS = {
         const data = typeof err === 'string' ? JSON.parse(err) : err
         reject(data)
       }
-      const hasFlushed = fifoOut.write(JSON.stringify({ action, data }))
-        // Backpressure if buffer is full
-      const ret = !hasFlushed && once(fifoOut, 'drain') || Promise.resolve()
-      ret.then(() => {
-        wsocket.on(`res:${action}`, handler)
-        wsocket.on(`err:${action}`, errHandler)
-      })
+      fifoOut.write(JSON.stringify({ action, data }))
+      fifoOut.write('Ωstdin endΩ')
+      console.log('WSS: write complete', fifoOut)
+      wsocket.on(`res:${action}`, handler)
+      wsocket.on(`err:${action}`, errHandler)
     })
   },
 
   dispose: function() {
     fifoIn?.destroy()
     fifoOut?.destroy()
-    outHandle?.close()
   },
 }
 
