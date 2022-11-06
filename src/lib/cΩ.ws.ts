@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events'
 import { appendFileSync } from 'fs'
-import net from 'node:net'
+import ipc from 'node-ipc'
 
 import config from '@/config'
 import logger from './logger'
@@ -27,71 +27,34 @@ const wsocket = new EventEmitter()
  */
 const guid = shortid()
 
-/* Using two named pipes for IPC */
-const pipeIncoming = `/var/tmp/cΩ/${guid}.in.sock`
-const pipeOutgoing = `/var/tmp/cΩ/${guid}.out.sock`
-let fifoIn: any
-let fifoOut: any
-
 const CΩWS = {
   guid,
 
   init: async function(): Promise<void> {
-    const catalog = config.PIPE_CLIENTS
+    ipc.config.id = guid
+    ipc.config.retry = 1500
 
-    appendFileSync(catalog, `\n${guid}`, 'utf8')
-
-    setTimeout(setupFIFO, FIFO_INIT_DELAY)
-
-    function setupFIFO() {
-      fifoOut = net.createConnection(pipeOutgoing)
-      fifoOut.on('connect', () => {
-        console.log('IPC Client fifo OUT socket connected.', pipeOutgoing)
+    ipc.connectTo('CΩ', () => {
+      ipc.of.CΩ.on('connect', () => {
+        console.log('IPC Client fifo OUT socket connected.')
         CΩWS.transmit('auth:info').then(CΩWorkspace.init)
       })
 
-      fifoIn = net.createConnection(pipeIncoming)
-      fifoIn.on('connect', () => {
-        console.log('IPC Client fifo IN socket connected.', pipeIncoming)
-        let buffer = ''
-
-        fifoIn.on('data', (buf: any) => {
-          const text = String(buf)
-          if (!text?.length) return
-          buffer += text
-          if (!text.includes(PACKET_SEPARATOR)) {
-            return
-          }
-          processBuffer(buffer)
-        })
-
-        function processBuffer(buffer: string) {
-          if (!buffer.length) return
-          const index = buffer.indexOf(PACKET_SEPARATOR)
-          if (index === -1) return // still gathering chunks
-
-          // Packet complete
-          const packet = buffer.substr(0, index)
-          console.log('----- Received packet -----')
-          console.log(packet)
-
-          const { action, body, err } = JSON.parse(packet.replace(ESCAPED_PACKSEP, PACKET_SEPARATOR))
-          // originally I wrote this IPC using WebSockets, only to find out at the end of my toil that VSCode has WebSockets in dev mode only. Will refactor some day.
-          wsocket.emit(action, body || err)
-
-          // Process remaining bits in the buffer
-          processBuffer(buffer.substr(index + PACKET_SEPARATOR.length))
-        }
+      ipc.of.CΩ.on('message', (data: any) => {
+        console.log('IPC', data)
+        const { action, body, err } = data
+        console.log('ACTION, BODY, ERR', action, body, err)
+        // originally I wrote this IPC using WebSockets, only to find out at the end of my toil that VSCode has WebSockets in dev mode only. Will refactor some day.
+        wsocket.emit(action, body || err)
       })
-    }
+    })
   },
 
   /* Transmit an action, and perhaps some data. Recommend a namespacing format for the action, something like `<domain>:<action>`, e.g. `auth:login` or `users:query`. */
   transmit: function(action: string, data?: any) {
     return new Promise((resolve, reject) => {
       logger.info(`WSS: will emit action: ${action}`)
-      if (!data) data = {}
-      data.cΩ = guid
+
       const handler = (body: any) => {
         logger.info('WSS: resolved action', action, body)
         // wsocket.removeListener(action, handler)
@@ -104,17 +67,16 @@ const CΩWS = {
         const data = typeof err === 'string' ? JSON.parse(err) : err
         reject(data)
       }
-      fifoOut.write(JSON.stringify({ action, data }).replace(PACKET_SEPARATOR, ESCAPED_PACKSEP))
-      fifoOut.write(PACKET_SEPARATOR)
-      console.log('WSS: write complete', fifoOut)
+
+      data = Object.assign(data || {}, { cΩ: guid })
+      ipc.of.CΩ.emit('message', JSON.stringify({ action, data }))
       wsocket.on(`res:${action}`, handler)
       wsocket.on(`err:${action}`, errHandler)
     })
   },
 
   dispose: function() {
-    fifoIn?.destroy()
-    fifoOut?.destroy()
+    // TODO: cleanup IPC
   },
 }
 
