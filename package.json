@@ -9,7 +9,7 @@
   "repository": "https://github.com/CodeAwareness/cA.vscode",
   "bugs": "https://github.com/CodeAwareness/cA.vscode/issues",
   "engines": {
-    "vscode": "^1.69.0"
+    "vscode": "^1.72.0"
   },
   "categories": [
     "SCM Providers"
@@ -230,18 +230,18 @@
     "@types/mocha": "^10.0.0",
     "@types/node": "^18.11.9",
     "@types/node-ipc": "^9.2.0",
-    "@types/vscode": "^1.73.0",
+    "@types/vscode": "^1.72.0",
     "@types/webpack-env": "^1.18.0",
     "@typescript-eslint/eslint-plugin": "^5.42.0",
     "@typescript-eslint/parser": "^5.42.0",
     "@vscode/test-web": "^0.0.32",
     "assert": "^2.0.0",
     "babel-jest": "^29.2.2",
-    "eslint": "^8.26.0",
+    "eslint": "^8.27.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-jest": "^27.1.4",
-    "eslint-plugin-n": "^15.4.0",
+    "eslint-plugin-n": "^15.5.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-security": "^1.5.0",

@@ -1,19 +1,10 @@
 import { EventEmitter } from 'node:events'
-import { appendFileSync } from 'fs'
 import ipc from 'node-ipc'
 
-import config from '@/config'
 import logger from './logger'
 import CΩWorkspace from './cΩ.workspace'
 
 export type Class<T> = new (...args: any[]) => T
-
-/* Packet separator in FIFO communication (this is really a separator between individual `transmit` commands) */
-const PACKET_SEPARATOR = 'Ωstdin endΩ'
-const ESCAPED_PACKSEP = 'Ω\\stdin end\\Ω'
-
-/* Wait 2 seconds after adding itself to LS client list, then proceed with connecting to FIFO */
-const FIFO_INIT_DELAY = 2000
 
 const shortid = () => {
   return new Date().valueOf().toString() // we run multiple editors, yes, but we run them as a user on a local computer, so this is fine.
