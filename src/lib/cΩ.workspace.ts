@@ -36,7 +36,7 @@ function setupTempFiles() {
   console.log('setupTempFiles (repo:get-tmp-dir)')
   CΩWS.transmit('repo:get-tmp-dir')
     .then((data: any) => {
-      CΩStore.tmpDir = data.toString()
+      CΩStore.tmpDir = data.tmpDir
       logger.info('WORKSPACE: temporary folder used: ', CΩStore.tmpDir)
     })
 }

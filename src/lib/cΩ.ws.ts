@@ -1,7 +1,6 @@
 import { EventEmitter } from 'node:events'
 import ipc from 'node-ipc'
 
-import logger from './logger'
 import CΩWorkspace from './cΩ.workspace'
 
 export type Class<T> = new (...args: any[]) => T
@@ -17,26 +16,49 @@ const wsocket = new EventEmitter()
  * TODO: perhaps allow different users logged into different VSCode instances? IS THIS SECURE? (it will require rewriting some of the local service)
  */
 const guid = shortid()
+const ipcClient = new ipc.IPC()
+const ipcCatalog = ipc
+
+function initServer() {
+  return new Promise((resolve, reject) => {
+    console.log('connecting IPC', guid)
+    ipcClient.connectTo(guid, () => {
+      ipcClient.of[guid].on('message', (data: any) => {
+        const { action, body, err } = data
+        // originally I wrote this IPC using WebSockets, only to find out at the end of my toil that VSCode has WebSockets in dev mode only. Will refactor some day.
+        wsocket.emit(action, body || err)
+      })
+
+      setTimeout(resolve, 4000)
+    })
+  })
+}
 
 const CΩWS = {
   guid,
 
   init: async function(): Promise<void> {
-    ipc.config.id = guid
-    ipc.config.retry = 1500
+    ipcClient.config.socketRoot = '/var/tmp/'
+    ipcClient.config.appspace = 'cΩ.'
+    ipcClient.config.id = guid
+    ipcClient.config.retry = 1500
 
-    ipc.connectTo('CΩ', () => {
-      ipc.of.CΩ.on('connect', () => {
+    ipcCatalog.config.socketRoot = '/var/tmp/'
+    ipcCatalog.config.appspace = 'cΩ.'
+    ipcCatalog.config.id = 'catalog'
+    ipcCatalog.config.retry = 1500
+
+    ipcCatalog.connectTo('catalog', () => {
+      ipcCatalog.of.catalog.on('connect', () => {
         console.log('IPC Client fifo OUT socket connected.')
-        CΩWS.transmit('auth:info').then(CΩWorkspace.init)
+        ipcCatalog.of.catalog.emit('clientId', guid)
+        initServer()
+          .then(() => CΩWS.transmit('auth:info'))
+          .then(CΩWorkspace.init)
       })
 
-      ipc.of.CΩ.on('message', (data: any) => {
-        console.log('IPC', data)
-        const { action, body, err } = data
-        console.log('ACTION, BODY, ERR', action, body, err)
-        // originally I wrote this IPC using WebSockets, only to find out at the end of my toil that VSCode has WebSockets in dev mode only. Will refactor some day.
-        wsocket.emit(action, body || err)
+      ipcCatalog.of.catalog.on('message', (message) => {
+        console.log('MESSAGE RECEIVED ON Catalog', message)
       })
     })
   },
@@ -44,23 +66,23 @@ const CΩWS = {
   /* Transmit an action, and perhaps some data. Recommend a namespacing format for the action, something like `<domain>:<action>`, e.g. `auth:login` or `users:query`. */
   transmit: function(action: string, data?: any) {
     return new Promise((resolve, reject) => {
-      logger.info(`WSS: will emit action: ${action}`)
+      console.info(`WSS: will emit action: ${action}`)
 
       const handler = (body: any) => {
-        logger.info('WSS: resolved action', action, body)
+        console.info('WSS: resolved action', action, body)
         // wsocket.removeListener(action, handler)
         const data = typeof body === 'string' ? JSON.parse(body) : body
         resolve(data)
       }
       const errHandler = (err: any) => {
-        logger.info('WSS: wsocket error', action, err)
+        console.info('WSS: wsocket error', action, err)
         // wsocket.removeListener(action, errHandler)
         const data = typeof err === 'string' ? JSON.parse(err) : err
         reject(data)
       }
 
       data = Object.assign(data || {}, { cΩ: guid })
-      ipc.of.CΩ.emit('message', JSON.stringify({ action, data }))
+      ipcClient.of[guid].emit('message', JSON.stringify({ action, data }))
       wsocket.on(`res:${action}`, handler)
       wsocket.on(`err:${action}`, errHandler)
     })
