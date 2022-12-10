@@ -103,7 +103,7 @@ function getNonce() {
 function getWebviewContent(webview: vscode.Webview, extURL: string) {
   const nonce = getNonce()
   const cspSource = 'https://vscode.codeawareness.com https://api.codeawareness.com'
-  const mediaSource = 'https://codeawareness.com'
+  const mediaSource = 'https://codeawareness.com https://ext.codeawareness.com'
   // TODO: everytime i publish the CΩ Panel it builds a new chunk hash, try to make this pain go away without introducing cache headaches
   webview.html = `<!doctype html><html lang="en"><head><meta charset="UTF-8">
     <title>CodeAwareness VSCode panel</title>
