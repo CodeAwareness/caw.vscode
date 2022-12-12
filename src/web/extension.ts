@@ -154,15 +154,16 @@ function setupWatchers(context: vscode.ExtensionContext) {
   /************************************************************************************
    * User saving the activeTextEditor
    ************************************************************************************/
-  subscriptions.push(vscode.workspace.onDidSaveTextDocument((/* err */) => {
+  subscriptions.push(vscode.workspace.onDidSaveTextDocument(doc => {
     // TODO: some throttle mechanism to make sure we're only sending at most once per some configured interval (subscription plan related)
     // use delay to allow the system to do other things like build and stuff, and prevent excessive use (peaks) of CPU
-    // TODO:
-    /*
-    CΩDiffs
-      .sendDiffs(project)
-      .then(CΩWorkspace.refreshChanges)
-      */
+    CΩWS.transmit('repo:file-saved', { fpath: doc.fileName, doc: doc.getText() })
+      .then(CΩEditor.updateDecorations)
+      .then(CΩPanel.updateProject)
+      .then((project: any) => {
+        Object.keys(project.changes).map((f: string) => CΩTDP.addFile(project.root, f))
+        CΩTDP.refresh()
+      })
   }))
 
   /************************************************************************************
