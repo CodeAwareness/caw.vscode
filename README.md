@@ -40,6 +40,7 @@ First open-source release.
 - list of files changed by your peers is available in the left SCM tree.
 - support for branch diffs on the active file
 - i18n support for editor language
+- theme and color support
 
 Limitations:
 
