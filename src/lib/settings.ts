@@ -8,10 +8,8 @@ import logger from './logger'
 import { CΩStore } from './cΩ.store'
 
 /**
- * Projects may contain a .peer8 file, in which the user can store their own personalised settings.
- * These .peer8 files function in a similar way to .eslintrc and .editorconfig files
- *
- * TODO: securely store API keys for persistent login
+ * Projects may contain a .cΩ file, in which the user can store their own personalised settings.
+ * These .cΩ files function in a similar way to .eslintrc and .editorconfig files
  */
 function checkConfiguration(/* context */) {
   const vscodeConfig = vscode.workspace.getConfiguration('codeAwareness')

@@ -34,8 +34,6 @@ function dispose() {
 }
 
 function setupTempFiles() {
-  // TODO: get tmpDir from localService
-  console.log('setupTempFiles (repo:get-tmp-dir)')
   return CΩWS.transmit('repo:get-tmp-dir')
     .then((data: any) => {
       CΩStore.tmpDir = data.tmpDir
@@ -129,14 +127,13 @@ function closeTextDocument(params: any) {
 /************************************************************************************
  * Diff code slices navigation
  *
- * !!WORK IN PROGRESS!!
  * Ideally we could press a key combo to replace chunks of our code with the code from
  * our contributors diff, and cycle through all variations this way.
  * This would allow us to quickly check a single block of changes without having to
  * open the diff editor for each contributor.
  ************************************************************************************/
 function highlight() {
-  // TODO: highlight changes existing at peers
+  // TODO: cycle through the changes while highlighting changes existing at peers
 }
 
 const getCode = (editor: TCΩEditor) => editor?.document.getText()
