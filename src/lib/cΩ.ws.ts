@@ -1,5 +1,6 @@
 import { EventEmitter } from 'node:events'
 import ipc from 'node-ipc'
+import { CΩStatusbar } from '@/vscode/statusbar'
 
 import CΩWorkspace from './cΩ.workspace'
 
@@ -55,6 +56,7 @@ const CΩWS = {
         initServer()
           .then(() => CΩWS.transmit('auth:info'))
           .then(CΩWorkspace.init)
+          .then(CΩStatusbar.init)
       })
 
       ipcCatalog.of.catalog.on('message', (message) => {

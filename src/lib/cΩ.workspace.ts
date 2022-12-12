@@ -17,10 +17,12 @@ const isWindows = !!process.env.ProgramFiles
 
 function init(data?: any) {
   console.log('Workspace: init', data)
-  setupTempFiles()
   if (data?.user) {
+    CΩStore.user = data.user
+    CΩStore.tokens = data.tokens
     CΩDiffs.init()
   }
+  return setupTempFiles()
 }
 
 function dispose() {
@@ -34,7 +36,7 @@ function dispose() {
 function setupTempFiles() {
   // TODO: get tmpDir from localService
   console.log('setupTempFiles (repo:get-tmp-dir)')
-  CΩWS.transmit('repo:get-tmp-dir')
+  return CΩWS.transmit('repo:get-tmp-dir')
     .then((data: any) => {
       CΩStore.tmpDir = data.tmpDir
       logger.info('WORKSPACE: temporary folder used: ', CΩStore.tmpDir)

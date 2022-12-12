@@ -51,7 +51,6 @@ function initCodeAwareness(context: vscode.ExtensionContext) {
   console.log('Extension: initCodeAwareness')
   initConfig()
   CΩWS.init()
-  CΩStatusbar.init()
   setupCommands(context)
   setupWatchers(context)
   logger.info('CODEAWARENESS_EXTENSION: extension activated (workspaceFolders)', vscode.workspace.workspaceFolders)

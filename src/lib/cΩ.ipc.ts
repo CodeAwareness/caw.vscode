@@ -38,7 +38,8 @@ const ipcTable: Record<string, any> = {}
 
 ipcTable['webview:loaded'] = () => {
   console.log('Will init webview with GUID', CΩWS.guid)
-  postBack('wss-guid')(CΩWS.guid)
+  postBack('wssGuid')(CΩWS.guid)
+  postBack('authInfo')({ user: CΩStore.user, tokens: CΩStore.tokens })
 }
 
 ipcTable['auth:login'] = (data: TAuth) => {

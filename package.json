@@ -218,7 +218,7 @@
     "vscode:prepublish": "npm run package-web",
     "package": "npm run package-web && vsce package",
     "compile-web": "webpack",
-    "watch-web": "NODE_ENV=development webpack --watch",
+    "watch-web": "NODE_ENV=development DEBUG=1 webpack --watch",
     "package-web": "webpack --mode production --devtool hidden-source-map",
     "lint": "eslint src --ext ts",
     "run-in-browser": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. ."
