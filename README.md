@@ -64,6 +64,7 @@ Install and run the [Code Awareness local service](https://github.com/CodeAwaren
 
 - install the [Code Awareness local service](https://github.com/CodeAwareness/cA.localservice)
 - install [Code Awareness VSCode panel](https://github.com/CodeAwareness/cA.vscode.panel)
+- in the src/lib/cΩ.panel.ts uncomment the getWebviewContentLocal line
 - Run your Code Awareness local service with `yarn start`
 - Run your Code Awareness panel with `yarn dev`
 - Finally go to VSCode, open this source code folder, change `const DEBUG = true` in the `src/config` file, and choose Run Extension.
