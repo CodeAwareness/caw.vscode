@@ -76,6 +76,7 @@ const TDP = {
   },
 
   provideTextDocumentContent: (uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<string> => {
+    // TODO: provide text document content
     return 'TEST'
   },
 

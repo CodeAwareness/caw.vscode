@@ -59,7 +59,7 @@ function createPanel(extensionPath: string) {
  * When toggling the CodeAwareness webview panel on and off,
  * we load the svelte app into the webview and show or hide the panel.
  *
- * @param Object - context object from VSCode
+ * @param context vscode.ExtensionContext - context object from VSCode
  *
  ************************************************************************************/
 function toggle(context: vscode.ExtensionContext) {
@@ -81,10 +81,10 @@ function toggle(context: vscode.ExtensionContext) {
 
   if (!panel.webview) return
 
-  // getWebviewContentLocal(panel.webview, config.EXT_URL) // DEV
-  getWebviewContent(panel.webview, config.EXT_URL) // PRODUCTION
+  // getWebviewContentLocal(panel.webview) // DEV
+  getWebviewContent(panel.webview) // PRODUCTION
   CΩEditor.focusTextEditor()
-  console.log('VSCODE will setup IPC')
+  console.log('VSCODE will setup IPC', config.EXT_URL)
   CΩIPC.setup(panel.webview, context)
   panel.onDidDispose(dispose, undefined, context.subscriptions)
   panel.onDidChangeViewState((state: vscode.WindowState) => CΩPanel.didChangeViewState(state), undefined, context.subscriptions)
@@ -100,7 +100,7 @@ function getNonce() {
   return text
 }
 
-function getWebviewContent(webview: vscode.Webview, extURL: string) {
+function getWebviewContent(webview: vscode.Webview) {
   const nonce = getNonce()
   const cspSource = 'https://vscode.codeawareness.com https://api.codeawareness.com'
   const mediaSource = 'https://codeawareness.com https://ext.codeawareness.com'
@@ -118,7 +118,7 @@ function getWebviewContent(webview: vscode.Webview, extURL: string) {
     </body></html>`
 }
 
-async function getWebviewContentLocal(webview: vscode.Webview, extURL: string) {
+async function getWebviewContentLocal(webview: vscode.Webview) {
   // webview.html = (await got('https://127.0.0.1:8885')).body
 
   const nonce = getNonce()
@@ -136,7 +136,7 @@ async function getWebviewContentLocal(webview: vscode.Webview, extURL: string) {
 /************************************************************************************
  * post a message back to VSCode API
  *
- * @param Object - data to be sent to the webview
+ * @param data Object - data to be sent to the webview
  ************************************************************************************/
 function postMessage(data: any) {
   if (CΩStore.panel) {
@@ -153,7 +153,7 @@ function postMessage(data: any) {
  * so I'm instead using this trick, of moving the code to the left.
  * (sorry for those people with portrait monitors... I'll figure something out later)
  *
- * @param Object - the state object received from VSCode API
+ * @param state Object - the state object received from VSCode API
  *
  ************************************************************************************/
 function didChangeViewState(state: any) {
@@ -171,7 +171,7 @@ function didChangeViewState(state: any) {
  * so I'm instead using this trick, of moving the code to the left.
  * (sorry for those people with portrait monitors... I'll figure something out later)
  *
- * @param Object - the project (received from VSCode API)
+ * @param data Object - the project (received from VSCode API)
  *
  ************************************************************************************/
 function updateProject(data: any) {

@@ -4,7 +4,6 @@ import * as vscode from 'vscode'
 import logger from '@/lib/logger'
 
 import CΩPanel from '@/lib/cΩ.panel'
-import CΩStore from '@/lib/cΩ.store'
 import CΩWS from '@/lib/cΩ.ws'
 
 const { registerCommand } = vscode.commands
@@ -58,7 +57,7 @@ function setupCommands(context: vscode.ExtensionContext) {
       })
   }))
 
-  context.subscriptions.push(registerCommand('CΩ.openDiff', function(resourceUri, cdir, cfile, title) {
+  context.subscriptions.push(registerCommand('CΩ.openDiff', function(/* resourceUri, cdir, cfile, title */) {
     logger.log('COMMAND: openDiff request received')
   }))
 
