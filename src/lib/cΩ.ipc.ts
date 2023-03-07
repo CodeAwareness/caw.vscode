@@ -1,3 +1,6 @@
+/****************************************************************************
+ * Inter Process Communication between VSCode extension and the webview panel
+ ****************************************************************************/
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as vscode from 'vscode'
 

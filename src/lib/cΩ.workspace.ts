@@ -1,3 +1,6 @@
+/**************************
+ * Code Awareness workspace
+ **************************/
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as vscode from 'vscode'
 
@@ -60,10 +63,9 @@ function setupWorker() {
 /************************************************************************************
  * refreshLines
  *
- * @param Object { contentChanges }
+ * @param Object { contentChanges, document }
  *
- * Refresh changed lines (orange hints in the ruler, line highlights in the editor).
- * TODO: think of a better name for these two functions: refreshLines, refreshChanges
+ * Refresh changed lines (orange hints in the ruler, and line highlights in the editor).
  *
  * The vscodeChanges is an object received from VSCode, and contains the details about the changes that occured in the document.
  * The range lines numbers are zero indexed.
@@ -85,31 +87,38 @@ function setupWorker() {
  * 4: changes: [2, 1], 2 (lines > 2 => max(2, line + 1))     Marked: 1, 2, 9, 10, 18
  * 5: changes: [12, 1], 1 (lines > 12 => max(12, line -1))   Marked: 1, 2, 9, 10, 17
  ************************************************************************************/
-function refreshLines(options: any) {
-  const contentChanges: any[] = options.contentChanges
-  if (!contentChanges) return // TODO: maybe handle this better
-  if (!CΩStore.activeProject.activePath || !CΩStore.user || !contentChanges.length) return Promise.resolve()
+function refreshLines(options: vscode.TextDocumentChangeEvent) {
+  console.log('WORKSPACE: refreshLines options', options)
+  const { contentChanges, document } = options
+  if (!CΩStore.activeProject.activePath || !CΩStore.user || !contentChanges?.length) return Promise.resolve()
   // TODO: maybe use the `document` object we receive along with contentChanges, to ensure correct project / fpath selection
-  const fpath = CΩStore.activeProject.activePath
+  const fpath = document.uri.fsPath
   if (!fpath) return Promise.reject(new Error('No active file'))
-  // TODO: why sometimes we make a change, but we receive an empty contentChanges array?
-  // logger.log('WORKSPACE: contentChanges', contentChanges)
+  const project = CΩStore.activeProject
+  // TODO: why sometimes we make a change, but we receive an empty contentChanges array? (for example when we insert a new line)
   contentChanges.map(change => {
-    logger.log('WORKSPACE: CHANGE', change)
-    const startChar = change.range._start._character
-    const endChar = change.range._end._character
-    const startLine = change.range._start._line
-    const endLine = change.range._end._line
-    const endLineChar = isWindows ? '\r\n' : /\n|\r/
-    const replaceLen = change.text.split(endLineChar).length - 1 // subtract 1 to eliminate the last carriage return char
+    logger.log('WORKSPACE: CHANGE', change.range, change.range.start, change.range.end)
+    const startLine = change.range.start.line
+    const endLine = change.range.end.line
+    const endLineChar = isWindows ? '\r\n' : /\n|\r/ // TODO: better handling of CR LF, based on user pref ? source file defaults ? editor prefs ?
+    const replaceLen = change.text.split(endLineChar).length - 1
     const range = {
-      // @ts-expect-error Issue with this trick i'm using
-      line: startLine + 1 - (!startChar && !(endChar - startChar)), // convert from VSCode zero index line numbers; and subtract 1 if it's line 0, char 0
-      len: endLine - startLine,
+      line: startLine,
+      len: endLine - startLine + replaceLen,
     }
     const changes = { range, replaceLen }
-    logger.log('WORKSPACE: refreshLines', range, replaceLen, changes)
+    logger.log('WORKSPACE: refreshLines changes', range, replaceLen, changes)
     // TODO: deal with live changes in the editor
+
+    project.editorDiff = project.editorDiff || {}
+    const editorDiff = project.editorDiff
+    editorDiff[fpath] = editorDiff[fpath] || []
+    editorDiff[fpath].push(changes)
+
+    if (!CΩDiffs.pendingDiffs[fpath]) {
+      CΩDiffs.shiftWithLiveEdits(project, fpath)
+      delete editorDiff[fpath]
+    }
   })
   CΩDeco.insertDecorations(true)
   return Promise.resolve()

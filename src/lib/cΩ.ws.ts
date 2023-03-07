@@ -1,3 +1,6 @@
+/***************************
+ * CodeAwareness Web Sockets
+ ***************************/
 import { EventEmitter } from 'node:events'
 import ipc from 'node-ipc'
 import { CΩStatusbar } from '@/vscode/statusbar'

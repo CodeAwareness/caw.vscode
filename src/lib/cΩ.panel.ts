@@ -1,3 +1,6 @@
+/**********************
+ * VSCode Webview Panel
+ **********************/
 import * as vscode from 'vscode'
 import * as path from 'node:path'
 
@@ -81,10 +84,12 @@ function toggle(context: vscode.ExtensionContext) {
 
   if (!panel.webview) return
 
-  // getWebviewContentLocal(panel.webview) // DEV
-  getWebviewContent(panel.webview) // PRODUCTION
+  // TODO: find a way to detect DEV vs PROD execution mode, so we don't have to keep on switching these two lines:
+  getWebviewContentLocal(panel.webview) // DEV
+  // getWebviewContent(panel.webview) // PRODUCTION
+
   CΩEditor.focusTextEditor()
-  console.log('VSCODE will setup IPC', config.EXT_URL)
+  console.log('VSCODE will setup IPC with panel loaded from:', config.EXT_URL)
   CΩIPC.setup(panel.webview, context)
   panel.onDidDispose(dispose, undefined, context.subscriptions)
   panel.onDidChangeViewState((state: vscode.WindowState) => CΩPanel.didChangeViewState(state), undefined, context.subscriptions)

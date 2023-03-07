@@ -29,7 +29,6 @@ export function activate(context: vscode.ExtensionContext) {
   initCodeAwareness(context)
 }
 
-// this method is called when your extension is deactivated
 export function deactivate() {
   const promises = [
     CΩStatusbar.dispose(),
@@ -58,6 +57,7 @@ function initCodeAwareness(context: vscode.ExtensionContext) {
 
 const CΩDocumentContentProvider = {
 
+  // Found this trick to work out transmitting events between VSCode internals and our extension
   _onDidChange: new vscode.EventEmitter(),
 
   get onDidChange() {
@@ -145,7 +145,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
   /************************************************************************************
    * User changing the code inside the activeTextEditor
    ************************************************************************************/
-  const refreshLines = _.throttle(CΩWorkspace.refreshLines, 2000, { leading: false, trailing: true })
+  const refreshLines = _.throttle(CΩWorkspace.refreshLines, 1000, { leading: false, trailing: true })
   subscriptions.push(vscode.workspace.onDidChangeTextDocument(params => {
     if (!CΩStore.activeTextEditor) return
     refreshLines(params)
@@ -202,7 +202,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
 
   /************************************************************************************
    * VSCode Telemetry
-   * TODO: create ApplicationInsights Key for Telemetry
+   * TODO: create ApplicationInsights Key for Telemetry (Microsoft VSCode only)
    ************************************************************************************/
   /*
   const { name, version, aiKey } = require('../package.json')

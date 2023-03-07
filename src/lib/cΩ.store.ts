@@ -1,12 +1,14 @@
-/**
- * Non reactive simple store. We don't need reactivity for this project, so this is more of a collection of variables.
- */
+/*********************************************
+ * Simple Store for VSCode extension.
+ * We don't need reactivity for this project,
+ * just a centralized collection of variables.
+ *********************************************/
 import * as vscode from 'vscode'
 
 import { TCΩEditor } from '@/lib/cΩ.editor'
 import CΩWS from '@/lib/cΩ.ws'
 
-type TDiffRange = {
+export type TDiffRange = {
   range: {
     line: number,
     len: number, // len: 0 indicates an insert op
@@ -36,22 +38,23 @@ export type TContributor = {
   _id: string, // contribution ID
 }
 
-/* peerFS: {
-   *   wsFolder: {
-   *     folderName1: {
-   *       fileName11: {},
-   *       folderName11: {
-   *         fileName111: {},
-   *       },
-   *     },
-   *     folderName2: {
-   *       fileName21: {},
-   *     },
-   *     fileName1: {}
-   *     ...
-   *   }
-   * }
-   */
+/**
+ * peerFS: {
+ *   wsFolder: {
+ *     folderName1: {
+ *       fileName11: {},
+ *       folderName11: {
+ *         fileName111: {},
+ *       },
+ *     },
+ *     folderName2: {
+ *       fileName21: {},
+ *     },
+ *     fileName1: {}
+ *     ...
+ *   }
+ * }
+ */
 export type TPeerFS = Record<string, any>
 
 export type TTokens = {
@@ -81,37 +84,15 @@ export const CΩStore = {
   activeProject: undefined as any,
   selectedContributor: undefined as any,
 
-  colorTheme: 1 as vscode.ColorThemeKind, // 1 = Light, 2 = Dark, 3 = High Contrast
-
-  /* tmpDir: {
-   *   name: '/tmp/peer8_-12750-bA2Le6JKQ4Ad/'
-   *   ... // see npm tmp package
-   * }
-   */
-  tmpDir: '/tmp/cΩ.vscode',
-
-  /* peerFS: {
-   *   wsFolder: {
-   *     folderName1: {
-   *       fileName11: {},
-   *       folderName11: {
-   *         fileName111: {},
-   *       },
-   *     },
-   *     folderName2: {
-   *       fileName21: {},
-   *     },
-   *     fileName1: {}
-   *     ...
-   *   }
-   * }
-   *
-   * Just a tree structure, hashed for faster locating of files and folders
-   */
-  peerFS: {} as TPeerFS,
-
   doc: undefined as any | undefined, // active document (specific doc format for Atom, VSCode)
   line: 0, // cursor line nr in document
+
+  colorTheme: 1 as vscode.ColorThemeKind, // 1 = Light, 2 = Dark, 3 = High Contrast
+
+  tmpDir: '/tmp/cΩ.vscode', // temp dir default value; the real value is actually received from the CodeAwareness local service
+
+  /* Just a tree hash map structure, for faster locating of files and folders */
+  peerFS: {} as TPeerFS,
 
   panel: undefined as any,
   tokens: undefined as TTokens | undefined,
@@ -138,8 +119,6 @@ export const CΩStore = {
   }
 }
 
-export default CΩStore
-
 let tokenInterval: ReturnType<typeof setTimeout>|undefined
 let syncTimer: ReturnType<typeof setTimeout>|undefined
 
@@ -148,3 +127,5 @@ export const CΩWork = {
   tokenInterval,
   syncTimer,
 }
+
+export default CΩStore

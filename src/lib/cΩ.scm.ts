@@ -1,3 +1,6 @@
+/**********************************
+ * VSCode Source Control Management
+ **********************************/
 import * as vscode from 'vscode'
 import { basename } from 'path'
 

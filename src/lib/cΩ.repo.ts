@@ -1,3 +1,6 @@
+/**********************************************
+ * VSCode Source Control Management: Repository
+ **********************************************/
 import * as vscode from 'vscode'
 import config from '@/config'
 

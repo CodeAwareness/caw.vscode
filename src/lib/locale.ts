@@ -1,3 +1,6 @@
+/***************
+ * VSCode Locale
+ ***************/
 import * as vscode from 'vscode'
 import { config as nlsConfig, MessageFormat as nlsMessageFormat } from 'vscode-nls'
 

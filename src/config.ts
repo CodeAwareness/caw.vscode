@@ -1,7 +1,8 @@
-// TODO: move all these into VSCode extension configuration instead
+// TODO: move some/all these into VSCode extension configuration instead
 
 const DEBUG = false
 
+// Dev mode, please configure local nginx
 const PORT_LOCAL = 8885
 
 // SCHEMA used by VSCode to handle repository, SCM, etc
@@ -21,7 +22,6 @@ const SERVER_WSS = 'wss://127.0.0.1:48408'
 
 // Where to subscribe for Code Awareness local service (pipe IPC)
 const PIPE_CLIENTS = '/var/tmp/cΩ/clients'
-console.log('CONFIG', EXT_URL, API_URL, SERVER_WSS)
 
 // Workspace: SYNC_INTERVAL gives the timer for syncing with the server
 const SYNC_INTERVAL = 1000 * 100 // download diffs from the server every minute or so
@@ -29,7 +29,8 @@ const SYNC_INTERVAL = 1000 * 100 // download diffs from the server every minute 
 // Diffs: SYNC_THRESHOLD gives the throttling interval for sending and receiving diffs
 const SYNC_THRESHOLD = 1000 // avoid too many send/receive requests per second
 
-const MAX_NR_OF_SHA_TO_COMPARE = 100
+// TODO: what are we doing with this... can't remember why we diff against 5 prev commits
+const MAX_NR_OF_SHA_TO_COMPARE = 5
 
 const LOG_LEVEL = process.env.LOG_LEVEL || 'debug' // ['verbose', 'debug', 'error']
 

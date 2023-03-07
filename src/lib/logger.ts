@@ -1,3 +1,6 @@
+/**********************
+ * CodeAwareness logger
+ **********************/
 /* eslint-disable no-console */
 import config from '@/config'
 

@@ -1,3 +1,6 @@
+/*********************
+ * VSCode Decorations
+ *********************/
 import * as vscode from 'vscode'
 import * as _ from 'lodash'
 
@@ -6,9 +9,10 @@ import logger from './logger'
 import CΩPanel from './cΩ.panel'
 
 let lastUri: string
+// try to only insert decorations in the text editor at idle times; for now: at most once a second or so
 // TODO: make 2000 wait time into a configurable value
-const insertAfterSomeTime = _.throttle(doInsert, 2000, { trailing: true })
-const insertThenWaitSomeTime = _.throttle(doInsert, 2000, { leading: true })
+const insertAfterSomeTime = _.throttle(doInsert, 1000, { trailing: true })
+const insertThenWaitSomeTime = _.throttle(doInsert, 1000, { leading: true })
 const getEditorDocPath = (editor: vscode.TextEditor) => editor?.document.uri.path
 
 type TEditorRanges = {
@@ -68,6 +72,8 @@ function setDecorations(options: TEditorRanges) {
     )
   })
 
+  // We don't insert line / range highlights when the panel is closed, to allow for more zen focus mode
+  // TODO: make this configurable by the user
   const isPanelOpen = !!CΩPanel.hasPanel()
   // logger.info('setDecorations ranges', ranges, isPanelOpen)
   editor.setDecorations(changeDecorationType, isPanelOpen ? vsRanges : [])

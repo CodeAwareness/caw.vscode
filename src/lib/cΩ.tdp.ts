@@ -1,3 +1,6 @@
+/***************************
+ * VSCode Tree Data Provider
+ ***************************/
 import * as vscode from 'vscode'
 import { EventEmitter, TreeItem, TreeItemCollapsibleState } from 'vscode'
 import * as path from 'node:path'

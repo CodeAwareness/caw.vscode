@@ -15,6 +15,7 @@ function setupCommands(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(registerCommand('CΩ.highlight', function() {
     logger.log('COMMAND: highlight request received')
+    // TODO: highlight a range (slice)
   }))
 
   context.subscriptions.push(registerCommand('CΩ.nextContributor', function() {
@@ -59,10 +60,12 @@ function setupCommands(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(registerCommand('CΩ.openDiff', function(/* resourceUri, cdir, cfile, title */) {
     logger.log('COMMAND: openDiff request received')
+    // TODO: open diffs
   }))
 
   context.subscriptions.push(registerCommand('CΩ.refresh', function() {
     logger.log('COMMAND: refresh request received')
+    // TODO: refresh diffs
   }))
 
   context.subscriptions.push(registerCommand('CΩ.openFile', function({ resourceUri }, ...rest) {
@@ -72,6 +75,7 @@ function setupCommands(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(registerCommand('CΩ.selectRange', function() {
     logger.log('COMMAND: selectRange request received')
+    // TODO: select a diff range (slice)
   }))
 }
 

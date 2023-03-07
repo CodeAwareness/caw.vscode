@@ -1,3 +1,6 @@
+/************************
+ * CodeAwareness settings
+ ************************/
 import * as vscode from 'vscode'
 /*
  * VSCode specific settings

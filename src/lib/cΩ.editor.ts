@@ -1,3 +1,6 @@
+/********************
+ * VSCode Text Editor
+ ********************/
 import * as vscode from 'vscode'
 import logger from './logger'
 
@@ -5,7 +8,7 @@ import { CΩStore } from './cΩ.store'
 import CΩDeco from './cΩ.deco'
 import CΩDiffs from './cΩ.diffs'
 
-const isWindows = !!process.env.ProgramFiles // TODO: I think this is vscode.process.env ?
+// TODO: find a way to detect windows env
 
 export type TCΩEditor = vscode.TextEditor & {
   _documentData: any
@@ -36,7 +39,7 @@ const getSelections = (ev: any) => {
  * We're setting up the workspace everytime a new editor is activated,
  * because the user may have several repositories open, or a file outside any repo.
  *
- * @param Object - editor object from VSCode
+ * @param editor Object - editor object from VSCode
  *
  ************************************************************************************/
 function setActiveEditor(editor: TCΩEditor) {
@@ -53,7 +56,7 @@ function setActiveEditor(editor: TCΩEditor) {
  *
  * CΩWorkspace calls this function when we have a change or a new file open.
  *
- * @param object The `project` structure is defined in the CΩ Local Service
+ * @param project object The `project` structure is defined in the CΩ Local Service
  ************************************************************************************/
 function updateDecorations(project: any) {
   logger.log('EDITOR: syncing webview (project)', project)
@@ -118,6 +121,9 @@ function focusTextEditor() {
 const CΩEditor = {
   closeDiffEditor,
   focusTextEditor,
+  getEditorDocPath,
+  getSelectedLine,
+  getSelections,
   setActiveEditor,
   updateDecorations,
 }
