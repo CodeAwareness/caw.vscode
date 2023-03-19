@@ -41,7 +41,7 @@
       "no-mixed-operators": 0,
       "no-mixed-spaces-and-tabs": [ "warn" ],
       "no-multi-spaces": 0,
-      "space-infix-ops": 0,
+      "space-infix-ops": ["error", { "int32Hint": false }],
       "space-before-function-paren": [
         "warn",
         {

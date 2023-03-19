@@ -6,7 +6,7 @@
 import * as vscode from 'vscode'
 
 import { TCΩEditor } from '@/lib/cΩ.editor'
-import CΩWS from '@/lib/cΩ.ws'
+import CΩIPC from '@/lib/cΩ.ipc'
 
 export type TDiffRange = {
   range: {
@@ -97,7 +97,7 @@ export const CΩStore = {
   panel: undefined as any,
   tokens: undefined as TTokens | undefined,
   user: undefined as TUser | undefined,
-  ws: undefined as typeof CΩWS | undefined,
+  ws: undefined as typeof CΩIPC | undefined,
 
   clear: () => {
     console.log('STORE CLEAR')

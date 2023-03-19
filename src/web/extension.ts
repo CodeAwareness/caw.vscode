@@ -17,7 +17,7 @@ import CΩPanel from '@/lib/cΩ.panel'
 import CΩEditor from '@/lib/cΩ.editor'
 import CΩWorkspace from '@/lib/cΩ.workspace'
 import CΩTDP from '@/lib/cΩ.tdp'
-import CΩWS from '@/lib/cΩ.ws'
+import CΩIPC from '@/lib/cΩ.ipc'
 
 let activated: boolean // extension activated !
 const deactivateTasks: Array<any> = [] // keeping track of all the disposables
@@ -33,7 +33,7 @@ export function deactivate() {
   const promises = [
     CΩStatusbar.dispose(),
     CΩWorkspace.dispose(),
-    CΩWS.dispose(),
+    CΩIPC.dispose(),
   ]
 
   for (const task of deactivateTasks) {
@@ -49,7 +49,7 @@ function initCodeAwareness(context: vscode.ExtensionContext) {
   activated = true
   console.log('Extension: initCodeAwareness')
   initConfig()
-  CΩWS.init()
+  CΩIPC.init()
   setupCommands(context)
   setupWatchers(context)
   logger.info('CODEAWARENESS_EXTENSION: extension activated (workspaceFolders)', vscode.workspace.workspaceFolders)
@@ -61,18 +61,18 @@ const CΩDocumentContentProvider = {
   _onDidChange: new vscode.EventEmitter(),
 
   get onDidChange() {
-    logger.info('peer8DocumentContentProvider onDidChange')
+    logger.info('code∑DocumentContentProvider onDidChange')
     return this._onDidChange.event
   },
 
   dispose() {
-    logger.info('peer8DocumentContentProvider dispose')
+    logger.info('code∑DocumentContentProvider dispose')
     this._onDidChange.dispose()
   },
 
   updated(repo: any) {
-    logger.info('peer8DocumentContentProvider updated', repo)
-    // this._onDidChange.fire(Uri.parse(`${PEER8_SCHEMA}:src/extension.js`))
+    logger.info('code∑DocumentContentProvider updated', repo)
+    // this._onDidChange.fire(Uri.parse(`${CODE∑_SCHEMA}:src/extension.js`))
   },
 
   provideTextDocumentContent(relativePath: string) {
@@ -82,9 +82,9 @@ const CΩDocumentContentProvider = {
     const ctId = selectedContributor.user
     const userDir = path.join(tmpDir, ctId.toString(), wsName)
     const peerFile = path.join(userDir, config.EXTRACT_REPO_DIR, uri)
-    // logger.info('peer8DocumentContentProvider uri', relativePath.path, 'peerFile', peerFile)
+    // logger.info('code∑DocumentContentProvider uri', relativePath.path, 'peerFile', peerFile)
 
-    return CΩWS.transmit('repo:read-file', { fpath: peerFile })
+    return CΩIPC.transmit('repo:read-file', { fpath: peerFile })
       // TODO: find a better way to indicate deleted file, as opposed to new file created, as opposed to simply file not existing
       .catch(() => '') // if file not existing
   },
@@ -109,7 +109,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
   )
   // TODO: Code Lenses
   subscriptions.push(
-    // peer8CodeLensProvider()
+    // code∑CodeLensProvider()
   )
   // Sync workspace folders
   subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(e => {
@@ -157,7 +157,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
   subscriptions.push(vscode.workspace.onDidSaveTextDocument(doc => {
     // TODO: some throttle mechanism to make sure we're only sending at most once per some configured interval (subscription plan related)
     // use delay to allow the system to do other things like build and stuff, and prevent excessive use (peaks) of CPU
-    CΩWS.transmit('repo:file-saved', { fpath: doc.fileName, doc: doc.getText() })
+    CΩIPC.transmit('repo:file-saved', { fpath: doc.fileName, doc: doc.getText() })
       .then(CΩEditor.updateDecorations)
       .then(CΩPanel.updateProject)
       .then((project: any) => {
@@ -173,7 +173,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
     logger.info('CODEAWARENESS_EXTENSION: onDidChangeActiveTextEditor (editor, cΩStore)', editor, CΩStore)
     if (!editor) return
     CΩEditor.setActiveEditor(editor as TCΩEditor)
-    CΩWS.transmit('repo:active-path', { fpath: editor.document.uri.path, doc: editor.document.getText() })
+    CΩIPC.transmit('repo:active-path', { fpath: editor.document.uri.path, doc: editor.document.getText() })
       .then(CΩEditor.updateDecorations)
       .then(CΩTDP.addProject)
       .then(CΩPanel.updateProject)

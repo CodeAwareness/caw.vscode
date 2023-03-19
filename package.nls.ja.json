@@ -6,12 +6,12 @@
   "extension.mergeSlice": "変更をマージする",
   "extension.openFile": "ファイルを開く",
   "extension.openDiff": "diffを開く",
-  "extension.openPeerFile": "Peerにあるファイルを開く",
+  "extension.openPeerFile": "他人にあるファイルを開く",
   "extension.prevContribution": "前のコード差分",
   "extension.prevContributor": "前の寄稿者",
   "extension.refresh": "再読込",
   "extension.selectRange": "セレクトする",
-  "extension.togglePeer8": "CodeAwarenessをトグル",
-  "peer8.config.maxCommitsInLog": "Peer8サーバーへSHAリストを送る時に、git logからの過去コミットSHAの最大数。Peer8はそのSHAを使ってコード差分を計算する。",
-  "peer8.config.syncInterval": "Peer8サーバーと定期的にシンクする秒数。"
+  "extension.toggle": "CodeAwarenessをトグル",
+  "codeAwareness.config.maxCommitsInLog": "CodeAwarenessサーバーへSHAリストを送る時に、git logからの過去コミットSHAの最大数。CodeAwarenessはそのSHAを使ってコード差分を計算する。",
+  "codeAwareness.config.syncInterval": "CodeAwarenessサーバーと定期的にシンクする秒数。"
 }

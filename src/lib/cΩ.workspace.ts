@@ -14,7 +14,7 @@ import type { TCΩEditor } from './cΩ.editor'
 import CΩDeco from './cΩ.deco'
 import CΩDiffs from './cΩ.diffs'
 import CΩSCM from './cΩ.scm'
-import CΩWS from './cΩ.ws'
+import CΩIPC from './cΩ.ipc'
 
 const isWindows = !!process.env.ProgramFiles
 
@@ -37,7 +37,7 @@ function dispose() {
 }
 
 function setupTempFiles() {
-  return CΩWS.transmit('repo:get-tmp-dir')
+  return CΩIPC.transmit('repo:get-tmp-dir')
     .then((data: any) => {
       CΩStore.tmpDir = data.tmpDir
       logger.info('WORKSPACE: temporary folder used: ', CΩStore.tmpDir)
@@ -163,13 +163,13 @@ async function addProject(wsFolder: any) {
   const folder: string = wsFolder.uri ? wsFolder.uri.path : wsFolder.toString()
   logger.log('WORKSPACE: addProject', folder)
 
-  CΩWS.transmit('repo:add', { folder })
+  CΩIPC.transmit('repo:add', { folder })
     .then(() => {
       CΩSCM.addProject(wsFolder)
       logger.info('WORKSPACE: Folder added to workspace: ', folder)
     })
 
-  CΩWS.transmit('repo:add-submodules', { folder })
+  CΩIPC.transmit('repo:add-submodules', { folder })
     .then((subs: any) => {
       subs?.map((p: any) => CΩSCM.addProject(p))
       logger.info('WORKSPACE: Folder submodules added to workspace: ', subs)
@@ -179,7 +179,7 @@ async function addProject(wsFolder: any) {
 function removeProject(wsFolder: any) {
   const folder: string = wsFolder.uri ? wsFolder.uri.path : wsFolder.toString()
 
-  CΩWS.transmit('repo:remove', { folder })
+  CΩIPC.transmit('repo:remove', { folder })
     .then(() => {
       logger.info('WORKSPACE: Folder removed from workspace: ', folder)
     })

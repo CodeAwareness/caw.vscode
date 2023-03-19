@@ -9,7 +9,7 @@ import logger from './logger'
 
 import { CΩStore } from './cΩ.store'
 
-import CΩIPC from './cΩ.ipc'
+import CΩIPC from './cΩ.events'
 import CΩWorkspace from './cΩ.workspace'
 import CΩEditor from './cΩ.editor'
 
@@ -57,7 +57,7 @@ function createPanel(extensionPath: string) {
 }
 
 /************************************************************************************
- * toggle cΩ panel on and off
+ * toggle CodeAwareness panel on and off
  *
  * When toggling the CodeAwareness webview panel on and off,
  * we load the svelte app into the webview and show or hide the panel.

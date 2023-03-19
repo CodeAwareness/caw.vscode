@@ -1,171 +1,73 @@
-/****************************************************************************
- * Inter Process Communication between VSCode extension and the webview panel
- ****************************************************************************/
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import * as vscode from 'vscode'
+/******************************************************************
+ * CodeAwareness Inter Process Communication with the local service
+ ******************************************************************/
+import IPC from '@/lib/ipc'
+import { CΩStatusbar } from '@/vscode/statusbar'
 
-import type { TAuth } from './cΩ.store'
-
-import { localize } from './locale'
-import { CΩStore } from './cΩ.store'
-
-import logger from './logger'
-import CΩEditor from './cΩ.editor'
-import CΩDeco from './cΩ.deco'
-import CΩPanel from './cΩ.panel'
 import CΩWorkspace from './cΩ.workspace'
-import CΩTDP from '@/lib/cΩ.tdp'
-import CΩWS from '@/lib/cΩ.ws'
 
-/**
- * This is the VSCode <--> VSCode Webview IPC module
- */
-function init() {
-  CΩStore.colorTheme = vscode.window.activeColorTheme.kind
-  const data = { colorTheme: CΩStore.colorTheme }
-  CΩPanel.postMessage({ command: 'setColorTheme', data })
-}
+export type Class<T> = new (...args: any[]) => T
 
 const shortid = () => {
-  const n = String.fromCharCode(Math.floor(Math.random() * 10 + 48))
-  const l = String.fromCharCode(Math.floor(Math.random() * 26 + 97))
-  const c = String.fromCharCode(Math.floor(Math.random() * 26 + 65))
-  return l + c + n + new Date().valueOf().toString()
+  return new Date().valueOf().toString() // we run multiple editors, yes, but we run them as a user on a local computer, so this is fine.
 }
 
-const postBack = (command: string, id?: string) => (data: any) => {
-  CΩPanel.postMessage({ command, id, data })
-}
+/* We send a GUID with every requests, such that multiple instances of VSCode can work independently;
+ * TODO: perhaps allow different users logged into different VSCode instances? IS THIS SECURE? (it will require rewriting some of the local service)
+ */
+const guid = shortid()
+const ipcClient = new IPC(guid) // FIFO pipe for operations
+const ipcCatalog = new IPC('catalog') // the local service watches this file to connect to all clients
 
-const ipcTable: Record<string, any> = {}
-
-ipcTable['webview:loaded'] = () => {
-  console.log('Will init webview with GUID', CΩWS.guid)
-  postBack('wssGuid')(CΩWS.guid)
-  postBack('authInfo')({ user: CΩStore.user, tokens: CΩStore.tokens })
-}
-
-ipcTable['auth:login'] = (data: TAuth) => {
-  init()
-  CΩStore.user = data?.user
-  CΩStore.tokens = data?.tokens
-  if (data?.user) {
-    CΩWorkspace.setupWorker()
-    CΩWS.transmit('repo:active-path', {
-      fpath: CΩStore.activeTextEditor?.document?.uri?.path,
-      doc: CΩStore.activeTextEditor?.document?.getText()
-    })
-      .then(CΩEditor.updateDecorations)
-      .then(CΩTDP.addProject)
-      .then(CΩPanel.updateProject)
-  }
-}
-
-ipcTable['auth:logout'] = () => {
-  CΩStore.clear()
-  CΩDeco.clear()
-}
-
-ipcTable['branch:select'] = (branch: string) => {
-  const fpath = CΩStore.activeProject.activePath
-  if (!fpath) return
-  const origin = CΩStore.activeProject.origin
-  CΩWS.transmit('repo:diff-branch', { origin, branch, fpath })
-    .then((info: any) => {
-      const peerFileUri = vscode.Uri.file(info.peerFile)
-      const userFileUri = vscode.Uri.file(info.userFile)
-      // logger.info('OPEN DIFF with', info, fpath)
-      vscode.commands.executeCommand('vscode.diff', userFileUri, peerFileUri, info.title, { viewColumn: 1, preserveFocus: true })
-    })
-}
-
-ipcTable['branch:unselect'] = () => {
-  CΩEditor.closeDiffEditor()
-}
-
-ipcTable['branch:refresh'] = (data: any) => {
-  // refresh branches using git and display in CΩPanel
-}
-
-ipcTable['contrib:select'] = (contrib: any) => {
-  const fpath = CΩStore.activeTextEditor?.document?.uri?.path
-  if (!fpath) return
-  const origin = CΩStore.activeProject.origin
-  CΩWS.transmit('repo:diff-contrib', { origin, fpath, contrib })
-    .then((info: any) => {
-      const peerFileUri = vscode.Uri.file(info.peerFile)
-      const userFileUri = vscode.Uri.file(fpath)
-      // logger.info('OPEN DIFF with', fpath, info)
-      vscode.commands.executeCommand('vscode.diff', userFileUri, peerFileUri, info.title, { viewColumn: 1, preserveFocus: true })
-    })
-}
-
-ipcTable['contrib:unselect'] = () => {
-  CΩEditor.closeDiffEditor()
-}
-
-/************************************************************************************
- * @param string - key: the event key, indicating an action to be taken
- * @param object - data: the data to be processed inside the action
- ************************************************************************************/
-function processSystemEvent(key: string, data: any) {
-  logger.info('IPC processSystemEvent', key, data)
-  if (ipcTable[key]) ipcTable[key](data)
-}
-
-/************************************************************************************
- * @param string - key: the event key, indicating an action to be taken,
- * plus a unique ID to keep the req-res correlation.
- * For example, key can be: `auth:info:1kG9`
- * @param object - data: the data to be processed inside the action
- ************************************************************************************/
-function processAPI(id: string, key: string, data: any) {
-  logger.info('IPC processAPI', key, data)
-  CΩWS.transmit(key, data)
-    .then(data => {
-      const body = typeof data === 'string' ? JSON.parse(data) : data
-      postBack(`res:${key}`, id)(body)
-    })
-    .catch(err => {
-      const obj = typeof err === 'string' ? JSON.parse(err) : err
-      postBack(`err:${key}`, id)(obj)
-    })
-}
-
-/************************************************************************************
- * @param object - webview: the webview object
- * @param object - context: used for continuation of subscriptions
- ************************************************************************************/
-function setup(webview: any, context: any) {
-  webview.onDidReceiveMessage(
-    (message: any) => {
-      switch (message.command) {
-        case 'api':
-          // system events to sync day>ta between editor and webview
-          processAPI(message.id, message.key, message.data)
-          break
-
-        case 'event':
-          // system events to sync data between editor and webview
-          processSystemEvent(message.key, message.data)
-          break
-
-        case 'alert':
-          vscode.window.showErrorMessage(message.text)
-          break
-
-        case 'notification':
-          vscode.window.showInformationMessage(localize(message.localeKey, message.text))
-          break
-      }
-    },
-    undefined,
-    context.subscriptions,
-  )
+function initServer() {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      ipcClient.connect(() => {
+        setTimeout(resolve, 2000)
+      })
+    }, 2000) // let the VSCode and its extensions settle down, plus local service needs to create a client pipe connection
+  })
 }
 
 const CΩIPC = {
-  setup,
+  guid,
+
+  init: async function(): Promise<void> {
+    ipcCatalog.connect(() => {
+      ipcCatalog.emit(JSON.stringify({ action: 'clientId', data: guid })) // add this client to the list of clients managed by the local service
+      initServer()
+        .then(() => CΩIPC.transmit('auth:info')) // ask for existing auth info, if any
+        .then(CΩWorkspace.init)
+        .then(CΩStatusbar.init)
+    })
+  },
+
+  /* Transmit an action, and perhaps some data. Recommend a namespacing format for the action, something like `<domain>:<action>`, e.g. `auth:login` or `users:query`. */
+  transmit: function(action: string, data?: any) {
+    return new Promise((resolve, reject) => {
+      const handler = (body: any) => {
+        console.info('WSS: resolved action', action, body)
+        // ipcClient.pubsub.removeListener(action, handler)
+        const data = typeof body === 'string' ? JSON.parse(body) : body
+        resolve(data)
+      }
+      const errHandler = (err: any) => {
+        console.info('IPC: socket error', action, err)
+        // ipcClient.pubsub.removeListener(action, errHandler)
+        const data = typeof err === 'string' ? JSON.parse(err) : err
+        reject(data)
+      }
+
+      data = Object.assign(data || {}, { cΩ: guid })
+      ipcClient.emit(JSON.stringify({ action, data })) // send data to the pipe
+      ipcClient.pubsub.on(`res:${action}`, handler)    // process successful response
+      ipcClient.pubsub.on(`err:${action}`, errHandler) // process error response
+    })
+  },
+
+  dispose: function() {
+    // TODO: cleanup IPC
+  },
 }
 
 export default CΩIPC

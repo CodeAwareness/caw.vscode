@@ -11,7 +11,7 @@
   "extension.prevContributor": "Previous peer",
   "extension.refresh": "Refresh",
   "extension.selectRange": "Select diff range",
-  "extension.togglePeer8": "Toggle CodeAwareness panel",
-  "peer8.config.maxCommitsInLog": "Maximum number of commit SHA values in the log being sent to the Peer8 server. These SHA values are used to compute the code differences between you and other peers.",
-  "peer8.config.syncInterval": "Interval in seconds for perioding log sync with the server."
+  "extension.toggle": "Toggle CodeAwareness panel",
+  "codeAwareness.config.maxCommitsInLog": "Maximum number of commit SHA values in the log being sent to the CodeAwareness server. These SHA values are used to compute the code differences between you and other peers.",
+  "codeAwareness.config.syncInterval": "Interval in seconds for perioding log sync with the server."
 }

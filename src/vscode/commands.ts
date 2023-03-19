@@ -4,7 +4,7 @@ import * as vscode from 'vscode'
 import logger from '@/lib/logger'
 
 import CΩPanel from '@/lib/cΩ.panel'
-import CΩWS from '@/lib/cΩ.ws'
+import CΩIPC from '@/lib/cΩ.ipc'
 
 const { registerCommand } = vscode.commands
 
@@ -45,7 +45,7 @@ function setupCommands(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(registerCommand('CΩ.openPeerFile', function(wsFolder, fpath, uid) {
     logger.log('COMMAND: openPeerFile request received', wsFolder, fpath)
-    CΩWS.transmit('repo:vscode-diff', { wsFolder, fpath, uid })
+    CΩIPC.transmit('repo:vscode-diff', { wsFolder, fpath, uid })
       .then((data: any) => {
         if (data.exists) {
           const resourceUri = vscode.Uri.file(data.res1)

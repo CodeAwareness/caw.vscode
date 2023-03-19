@@ -23,7 +23,7 @@
     "commands": [
       {
         "command": "cΩ.toggle",
-        "title": "%extension.togglecΩ%"
+        "title": "%extension.toggle%"
       },
       {
         "command": "cΩ.nextContributor",
@@ -261,13 +261,7 @@
     "webpack-cli": "^4.10.0"
   },
   "dependencies": {
-    "@peculiar/webcrypto": "^1.4.1",
-    "form-data": "^4.0.0",
-    "got": "^12.5.2",
     "lodash": "^4.17.21",
-    "node-ipc": "^11.1.0",
-    "patch-package": "^6.5.0",
-    "sonic-boom": "^3.2.0",
     "vscode-nls": "^5.2.0"
   }
 }
