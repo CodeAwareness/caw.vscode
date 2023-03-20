@@ -9,7 +9,7 @@ type TNamePath = {
   path: string
 }
 
-const CΩRepository = {
+const CAWRepository = {
   createFrom(wsFolder: vscode.WorkspaceFolder) {
     return new Repository(wsFolder)
   },
@@ -25,7 +25,7 @@ class Repository {
   provideOriginalResource(options: TNamePath) {
     const { name, path } = options
     if (!name) return ''
-    return vscode.Uri.parse(`${config.CΩ_SCHEMA}:${name}/${path}`)
+    return vscode.Uri.parse(`${config.CAW_SCHEMA}:${name}/${path}`)
   }
 
   get workspaceFolder() {
@@ -33,4 +33,4 @@ class Repository {
   }
 }
 
-export default CΩRepository
+export default CAWRepository

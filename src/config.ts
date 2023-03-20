@@ -6,13 +6,13 @@ const DEBUG = false
 const PORT_LOCAL = 8885
 
 // SCHEMA used by VSCode to handle repository, SCM, etc
-const CΩ_SCHEMA = 'codeAwareness'
+const CAW_SCHEMA = 'codeAwareness'
 
 // API version
 const SERVER_VERSION = 'v1'
 
 // Where to load the Web Panel from
-const EXT_URL = DEBUG ? `https://127.0.0.1:${PORT_LOCAL}` : 'https://vscode.codeawareness.com' // CΩ Webview server
+const EXT_URL = DEBUG ? `https://127.0.0.1:${PORT_LOCAL}` : 'https://vscode.codeawareness.com' // CAW Webview server
 
 // Where to post requests to
 const API_URL = DEBUG ? `https://127.0.0.1:${PORT_LOCAL}/api/${SERVER_VERSION}` : `https://api.codeawareness.com/${SERVER_VERSION}`
@@ -21,7 +21,7 @@ const API_URL = DEBUG ? `https://127.0.0.1:${PORT_LOCAL}/api/${SERVER_VERSION}` 
 const SERVER_WSS = 'wss://127.0.0.1:48408'
 
 // Where to subscribe for Code Awareness local service (pipe IPC)
-const PIPE_CLIENTS = '/var/tmp/cΩ/clients'
+const PIPE_CLIENTS = '/var/tmp/caw/clients'
 
 // Workspace: SYNC_INTERVAL gives the timer for syncing with the server
 const SYNC_INTERVAL = 1000 * 100 // download diffs from the server every minute or so
@@ -48,7 +48,7 @@ const EXTRACT_PEER_DIR = 'e'
 
 export default {
   API_URL,
-  CΩ_SCHEMA,
+  CAW_SCHEMA,
   EXT_URL,
   EXTRACT_BRANCH_DIR,
   EXTRACT_LOCAL_DIR,

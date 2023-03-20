@@ -8,11 +8,11 @@ import * as vscode from 'vscode'
  */
 
 import logger from './logger'
-import { CΩStore } from './cΩ.store'
+import { CAWStore } from './caw.store'
 
 /**
- * Projects may contain a .cΩ file, in which the user can store their own personalised settings.
- * These .cΩ files function in a similar way to .eslintrc and .editorconfig files
+ * Projects may contain a .caw file, in which the user can store their own personalised settings.
+ * These .caw files function in a similar way to .eslintrc and .editorconfig files
  */
 function checkConfiguration(/* context */) {
   const vscodeConfig = vscode.workspace.getConfiguration('codeAwareness')
@@ -28,7 +28,7 @@ function initConfig() {
   return checkConfiguration()
     .then(() => {
       logger.info('CONFIGURATION READY')
-      CΩStore.colorTheme = vscode.window.activeColorTheme.kind
+      CAWStore.colorTheme = vscode.window.activeColorTheme.kind
     })
 }
 

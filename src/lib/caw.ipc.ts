@@ -2,9 +2,9 @@
  * CodeAwareness Inter Process Communication with the local service
  ******************************************************************/
 import IPC from '@/lib/ipc'
-import { CΩStatusbar } from '@/vscode/statusbar'
+import { CAWStatusbar } from '@/vscode/statusbar'
 
-import CΩWorkspace from './cΩ.workspace'
+import CAWWorkspace from './caw.workspace'
 
 export type Class<T> = new (...args: any[]) => T
 
@@ -29,16 +29,16 @@ function initServer() {
   })
 }
 
-const CΩIPC = {
+const CAWIPC = {
   guid,
 
   init: async function(): Promise<void> {
     ipcCatalog.connect(() => {
       ipcCatalog.emit(JSON.stringify({ action: 'clientId', data: guid })) // add this client to the list of clients managed by the local service
       initServer()
-        .then(() => CΩIPC.transmit('auth:info')) // ask for existing auth info, if any
-        .then(CΩWorkspace.init)
-        .then(CΩStatusbar.init)
+        .then(() => CAWIPC.transmit('auth:info')) // ask for existing auth info, if any
+        .then(CAWWorkspace.init)
+        .then(CAWStatusbar.init)
     })
   },
 
@@ -58,7 +58,7 @@ const CΩIPC = {
         reject(data)
       }
 
-      data = Object.assign(data || {}, { cΩ: guid })
+      data = Object.assign(data || {}, { caw: guid })
       ipcClient.emit(JSON.stringify({ action, data })) // send data to the pipe
       ipcClient.pubsub.on(`res:${action}`, handler)    // process successful response
       ipcClient.pubsub.on(`err:${action}`, errHandler) // process error response
@@ -70,4 +70,4 @@ const CΩIPC = {
   },
 }
 
-export default CΩIPC
+export default CAWIPC

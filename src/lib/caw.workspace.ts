@@ -7,23 +7,23 @@ import * as vscode from 'vscode'
 import config from '@/config'
 import logger from './logger'
 
-import { CΩStore, CΩWork } from './cΩ.store'
+import { CAWStore, CAWWork } from './caw.store'
 
-import type { TCΩEditor } from './cΩ.editor'
+import type { TCAWEditor } from './caw.editor'
 
-import CΩDeco from './cΩ.deco'
-import CΩDiffs from './cΩ.diffs'
-import CΩSCM from './cΩ.scm'
-import CΩIPC from './cΩ.ipc'
+import CAWDeco from './caw.deco'
+import CAWDiffs from './caw.diffs'
+import CAWSCM from './caw.scm'
+import CAWIPC from './caw.ipc'
 
 const isWindows = !!process.env.ProgramFiles
 
 function init(data?: any) {
   console.log('Workspace: init', data)
   if (data?.user) {
-    CΩStore.user = data.user
-    CΩStore.tokens = data.tokens
-    CΩDiffs.init()
+    CAWStore.user = data.user
+    CAWStore.tokens = data.tokens
+    CAWDiffs.init()
   }
   return setupTempFiles()
 }
@@ -31,28 +31,28 @@ function init(data?: any) {
 function dispose() {
   logger.info('WORKSPACE: dispose')
   // TODO: cleanup temp files
-  if (CΩWork.syncTimer) clearInterval(CΩWork.syncTimer)
-  CΩStore.panel?.dispose()
-  CΩStore.panel = undefined
+  if (CAWWork.syncTimer) clearInterval(CAWWork.syncTimer)
+  CAWStore.panel?.dispose()
+  CAWStore.panel = undefined
 }
 
 function setupTempFiles() {
-  return CΩIPC.transmit('repo:get-tmp-dir')
+  return CAWIPC.transmit('repo:get-tmp-dir')
     .then((data: any) => {
-      CΩStore.tmpDir = data.tmpDir
-      logger.info('WORKSPACE: temporary folder used: ', CΩStore.tmpDir)
+      CAWStore.tmpDir = data.tmpDir
+      logger.info('WORKSPACE: temporary folder used: ', CAWStore.tmpDir)
     })
 }
 
 /************************************************************************************
  * Synchronization routines for the client-server and extension-webview.
  * We're currently sending and downloading diffs on a timer.
- * For this we're setting up a worker (currently just an object in the CΩStore).
+ * For this we're setting up a worker (currently just an object in the CAWStore).
  *
  * TODO: add file system hook to send diffs when files are changed underneath VSCode.
  ************************************************************************************/
 function setupWorker() {
-  if (CΩWork.syncTimer) clearInterval(CΩWork.syncTimer)
+  if (CAWWork.syncTimer) clearInterval(CAWWork.syncTimer)
   const syncInterval: number = vscode.workspace
     .getConfiguration('codeAwareness')
     .get('syncInterval') || config.SYNC_INTERVAL
@@ -90,11 +90,11 @@ function setupWorker() {
 function refreshLines(options: vscode.TextDocumentChangeEvent) {
   console.log('WORKSPACE: refreshLines options', options)
   const { contentChanges, document } = options
-  if (!CΩStore.activeProject.activePath || !CΩStore.user || !contentChanges?.length) return Promise.resolve()
+  if (!CAWStore.activeProject.activePath || !CAWStore.user || !contentChanges?.length) return Promise.resolve()
   // TODO: maybe use the `document` object we receive along with contentChanges, to ensure correct project / fpath selection
   const fpath = document.uri.fsPath
   if (!fpath) return Promise.reject(new Error('No active file'))
-  const project = CΩStore.activeProject
+  const project = CAWStore.activeProject
   // TODO: why sometimes we make a change, but we receive an empty contentChanges array? (for example when we insert a new line)
   contentChanges.map(change => {
     logger.log('WORKSPACE: CHANGE', change.range, change.range.start, change.range.end)
@@ -115,12 +115,12 @@ function refreshLines(options: vscode.TextDocumentChangeEvent) {
     editorDiff[fpath] = editorDiff[fpath] || []
     editorDiff[fpath].push(changes)
 
-    if (!CΩDiffs.pendingDiffs[fpath]) {
-      CΩDiffs.shiftWithLiveEdits(project, fpath)
+    if (!CAWDiffs.pendingDiffs[fpath]) {
+      CAWDiffs.shiftWithLiveEdits(project, fpath)
       delete editorDiff[fpath]
     }
   })
-  CΩDeco.insertDecorations(true)
+  CAWDeco.insertDecorations(true)
   return Promise.resolve()
 }
 
@@ -145,11 +145,11 @@ function highlight() {
   // TODO: cycle through the changes while highlighting changes existing at peers
 }
 
-const getCode = (editor: TCΩEditor) => editor?.document.getText()
+const getCode = (editor: TCAWEditor) => editor?.document.getText()
 
 function saveCode() {
-  if (!CΩStore.activeTextEditor) return Promise.reject(new Error('No active editor')) // TODO:
-  const existingCode = getCode(CΩStore.activeTextEditor)
+  if (!CAWStore.activeTextEditor) return Promise.reject(new Error('No active editor')) // TODO:
+  const existingCode = getCode(CAWStore.activeTextEditor)
   // TODO:
   return Promise.resolve()
 }
@@ -163,15 +163,15 @@ async function addProject(wsFolder: any) {
   const folder: string = wsFolder.uri ? wsFolder.uri.path : wsFolder.toString()
   logger.log('WORKSPACE: addProject', folder)
 
-  CΩIPC.transmit('repo:add', { folder })
+  CAWIPC.transmit('repo:add', { folder })
     .then(() => {
-      CΩSCM.addProject(wsFolder)
+      CAWSCM.addProject(wsFolder)
       logger.info('WORKSPACE: Folder added to workspace: ', folder)
     })
 
-  CΩIPC.transmit('repo:add-submodules', { folder })
+  CAWIPC.transmit('repo:add-submodules', { folder })
     .then((subs: any) => {
-      subs?.map((p: any) => CΩSCM.addProject(p))
+      subs?.map((p: any) => CAWSCM.addProject(p))
       logger.info('WORKSPACE: Folder submodules added to workspace: ', subs)
     })
 }
@@ -179,7 +179,7 @@ async function addProject(wsFolder: any) {
 function removeProject(wsFolder: any) {
   const folder: string = wsFolder.uri ? wsFolder.uri.path : wsFolder.toString()
 
-  CΩIPC.transmit('repo:remove', { folder })
+  CAWIPC.transmit('repo:remove', { folder })
     .then(() => {
       logger.info('WORKSPACE: Folder removed from workspace: ', folder)
     })
@@ -188,7 +188,7 @@ function removeProject(wsFolder: any) {
 /************************************************************************************
  * Export module
  ************************************************************************************/
-const CΩWorkspace = {
+const CAWWorkspace = {
   addProject,
   closeTextDocument,
   dispose,
@@ -202,4 +202,4 @@ const CΩWorkspace = {
   setupTempFiles,
 }
 
-export default CΩWorkspace
+export default CAWWorkspace

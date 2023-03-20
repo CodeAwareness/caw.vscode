@@ -3,21 +3,21 @@ import * as vscode from 'vscode'
 import * as _ from 'lodash'
 import * as path from 'node:path'
 
-import { CΩStatusbar } from '@/vscode/statusbar'
+import { CAWStatusbar } from '@/vscode/statusbar'
 import { setupCommands } from '@/vscode/commands'
 
-import type { TCΩEditor } from '@/lib/cΩ.editor'
+import type { TCAWEditor } from '@/lib/caw.editor'
 
 import { initConfig } from '@/lib/settings'
-import { CΩStore } from '@/lib/cΩ.store'
+import { CAWStore } from '@/lib/caw.store'
 
 import config from '@/config'
 import logger from '@/lib/logger'
-import CΩPanel from '@/lib/cΩ.panel'
-import CΩEditor from '@/lib/cΩ.editor'
-import CΩWorkspace from '@/lib/cΩ.workspace'
-import CΩTDP from '@/lib/cΩ.tdp'
-import CΩIPC from '@/lib/cΩ.ipc'
+import CAWPanel from '@/lib/caw.panel'
+import CAWEditor from '@/lib/caw.editor'
+import CAWWorkspace from '@/lib/caw.workspace'
+import CAWTDP from '@/lib/caw.tdp'
+import CAWIPC from '@/lib/caw.ipc'
 
 let activated: boolean // extension activated !
 const deactivateTasks: Array<any> = [] // keeping track of all the disposables
@@ -31,9 +31,9 @@ export function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() {
   const promises = [
-    CΩStatusbar.dispose(),
-    CΩWorkspace.dispose(),
-    CΩIPC.dispose(),
+    CAWStatusbar.dispose(),
+    CAWWorkspace.dispose(),
+    CAWIPC.dispose(),
   ]
 
   for (const task of deactivateTasks) {
@@ -49,42 +49,42 @@ function initCodeAwareness(context: vscode.ExtensionContext) {
   activated = true
   console.log('Extension: initCodeAwareness')
   initConfig()
-  CΩIPC.init()
+  CAWIPC.init()
   setupCommands(context)
   setupWatchers(context)
   logger.info('CODEAWARENESS_EXTENSION: extension activated (workspaceFolders)', vscode.workspace.workspaceFolders)
 }
 
-const CΩDocumentContentProvider = {
+const CAWDocumentContentProvider = {
 
   // Found this trick to work out transmitting events between VSCode internals and our extension
   _onDidChange: new vscode.EventEmitter(),
 
   get onDidChange() {
-    logger.info('code∑DocumentContentProvider onDidChange')
+    logger.info('cawDocumentContentProvider onDidChange')
     return this._onDidChange.event
   },
 
   dispose() {
-    logger.info('code∑DocumentContentProvider dispose')
+    logger.info('cawDocumentContentProvider dispose')
     this._onDidChange.dispose()
   },
 
   updated(repo: any) {
-    logger.info('code∑DocumentContentProvider updated', repo)
+    logger.info('cawDocumentContentProvider updated', repo)
     // this._onDidChange.fire(Uri.parse(`${CODE∑_SCHEMA}:src/extension.js`))
   },
 
   provideTextDocumentContent(relativePath: string) {
     // @ts-ignore
     const [, wsName, uri] = /([^/]+)\/(.+)$/.exec(relativePath.path)
-    const { tmpDir, selectedContributor } = CΩStore
+    const { tmpDir, selectedContributor } = CAWStore
     const ctId = selectedContributor.user
     const userDir = path.join(tmpDir, ctId.toString(), wsName)
     const peerFile = path.join(userDir, config.EXTRACT_REPO_DIR, uri)
-    // logger.info('code∑DocumentContentProvider uri', relativePath.path, 'peerFile', peerFile)
+    // logger.info('cawDocumentContentProvider uri', relativePath.path, 'peerFile', peerFile)
 
-    return CΩIPC.transmit('repo:read-file', { fpath: peerFile })
+    return CAWIPC.transmit('repo:read-file', { fpath: peerFile })
       // TODO: find a better way to indicate deleted file, as opposed to new file created, as opposed to simply file not existing
       .catch(() => '') // if file not existing
   },
@@ -98,18 +98,18 @@ const CΩDocumentContentProvider = {
  ************************************************************************************/
 function setupWatchers(context: vscode.ExtensionContext) {
   const { subscriptions } = context
-  CΩTDP.clearWorkspace()
+  CAWTDP.clearWorkspace()
   vscode.workspace.workspaceFolders?.map(wsFolder => subscriptions.push(
-    vscode.window.registerTreeDataProvider(SCM_PEER_FILES_VIEW, CΩTDP.addPeerWorkspace(wsFolder))
+    vscode.window.registerTreeDataProvider(SCM_PEER_FILES_VIEW, CAWTDP.addPeerWorkspace(wsFolder))
   ))
   // TODO: SCM files
   subscriptions.push(
     /* @ts-ignore */
-    vscode.workspace.registerTextDocumentContentProvider(config.CΩ_SCHEMA, CΩDocumentContentProvider)
+    vscode.workspace.registerTextDocumentContentProvider(config.CAW_SCHEMA, CAWDocumentContentProvider)
   )
   // TODO: Code Lenses
   subscriptions.push(
-    // code∑CodeLensProvider()
+    // cawCodeLensProvider()
   )
   // Sync workspace folders
   subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(e => {
@@ -119,17 +119,17 @@ function setupWatchers(context: vscode.ExtensionContext) {
     try {
       // TODO: cleanup this, we have calls to TDP and CSM from here, workspace and scm..
       e.added.forEach(wsFolder => {
-        CΩWorkspace.addProject(wsFolder)
-        vscode.window.registerTreeDataProvider(SCM_PEER_FILES_VIEW, CΩTDP.addPeerWorkspace(wsFolder))
+        CAWWorkspace.addProject(wsFolder)
+        vscode.window.registerTreeDataProvider(SCM_PEER_FILES_VIEW, CAWTDP.addPeerWorkspace(wsFolder))
       })
       e.removed.forEach(wsFolder => {
-        CΩWorkspace.removeProject(wsFolder)
-        CΩTDP.removePeerWorkspace(wsFolder)
+        CAWWorkspace.removeProject(wsFolder)
+        CAWTDP.removePeerWorkspace(wsFolder)
       })
     } catch (ex) {
       // showErrorMessage(ex.message)
     } finally {
-      // e.removed.forEach(CΩSCM.removeProject)
+      // e.removed.forEach(CAWSCM.removeProject)
     }
   }))
 
@@ -137,17 +137,17 @@ function setupWatchers(context: vscode.ExtensionContext) {
    * Color theme changes
    ************************************************************************************/
   subscriptions.push(vscode.window.onDidChangeActiveColorTheme(e => {
-    CΩStore.colorTheme = e.kind
+    CAWStore.colorTheme = e.kind
     const data = { colorTheme: e.kind }
-    CΩPanel.postMessage({ command: 'setColorTheme', data })
+    CAWPanel.postMessage({ command: 'setColorTheme', data })
   }))
 
   /************************************************************************************
    * User changing the code inside the activeTextEditor
    ************************************************************************************/
-  const refreshLines = _.throttle(CΩWorkspace.refreshLines, 1000, { leading: false, trailing: true })
+  const refreshLines = _.throttle(CAWWorkspace.refreshLines, 1000, { leading: false, trailing: true })
   subscriptions.push(vscode.workspace.onDidChangeTextDocument(params => {
-    if (!CΩStore.activeTextEditor) return
+    if (!CAWStore.activeTextEditor) return
     refreshLines(params)
   }))
 
@@ -157,12 +157,12 @@ function setupWatchers(context: vscode.ExtensionContext) {
   subscriptions.push(vscode.workspace.onDidSaveTextDocument(doc => {
     // TODO: some throttle mechanism to make sure we're only sending at most once per some configured interval (subscription plan related)
     // use delay to allow the system to do other things like build and stuff, and prevent excessive use (peaks) of CPU
-    CΩIPC.transmit('repo:file-saved', { fpath: doc.fileName, doc: doc.getText() })
-      .then(CΩEditor.updateDecorations)
-      .then(CΩPanel.updateProject)
+    CAWIPC.transmit('repo:file-saved', { fpath: doc.fileName, doc: doc.getText() })
+      .then(CAWEditor.updateDecorations)
+      .then(CAWPanel.updateProject)
       .then((project: any) => {
-        Object.keys(project.changes).map((f: string) => CΩTDP.addFile(project.root, f))
-        CΩTDP.refresh()
+        Object.keys(project.changes).map((f: string) => CAWTDP.addFile(project.root, f))
+        CAWTDP.refresh()
       })
   }))
 
@@ -170,16 +170,16 @@ function setupWatchers(context: vscode.ExtensionContext) {
    * User switching to a different file
    ************************************************************************************/
   vscode.window.onDidChangeActiveTextEditor((editor: vscode.TextEditor | undefined) => {
-    logger.info('CODEAWARENESS_EXTENSION: onDidChangeActiveTextEditor (editor, cΩStore)', editor, CΩStore)
+    logger.info('CODEAWARENESS_EXTENSION: onDidChangeActiveTextEditor (editor, cawStore)', editor, CAWStore)
     if (!editor) return
-    CΩEditor.setActiveEditor(editor as TCΩEditor)
-    CΩIPC.transmit('repo:active-path', { fpath: editor.document.uri.path, doc: editor.document.getText() })
-      .then(CΩEditor.updateDecorations)
-      .then(CΩTDP.addProject)
-      .then(CΩPanel.updateProject)
+    CAWEditor.setActiveEditor(editor as TCAWEditor)
+    CAWIPC.transmit('repo:active-path', { fpath: editor.document.uri.path, doc: editor.document.getText() })
+      .then(CAWEditor.updateDecorations)
+      .then(CAWTDP.addProject)
+      .then(CAWPanel.updateProject)
       .then((project: any) => {
-        Object.keys(project.changes).map((f: string) => CΩTDP.addFile(project.root, f))
-        CΩTDP.refresh()
+        Object.keys(project.changes).map((f: string) => CAWTDP.addFile(project.root, f))
+        CAWTDP.refresh()
       })
   })
 
@@ -190,8 +190,8 @@ function setupWatchers(context: vscode.ExtensionContext) {
    * TODO: find another workaround
    ************************************************************************************/
   subscriptions.push(vscode.window.onDidChangeVisibleTextEditors(params => {
-    if (!CΩStore.activeTextEditor) return
-    CΩWorkspace.closeTextDocument(params)
+    if (!CAWStore.activeTextEditor) return
+    CAWWorkspace.closeTextDocument(params)
   }))
 
   /************************************************************************************

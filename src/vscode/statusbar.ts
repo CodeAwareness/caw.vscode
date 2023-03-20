@@ -2,7 +2,7 @@ import { window, StatusBarAlignment } from 'vscode'
 
 let statusBarItem: any = null
 
-export const CΩStatusbar = {
+export const CAWStatusbar = {
 
   init: () => {
     if (!statusBarItem) {
@@ -10,8 +10,8 @@ export const CΩStatusbar = {
       statusBarItem.show()
     }
 
-    CΩStatusbar.working('loading...')
-    CΩStatusbar.live()
+    CAWStatusbar.working('loading...')
+    CAWStatusbar.live()
   },
 
   working: (workingMsg = 'Working on it...') => {
@@ -21,7 +21,7 @@ export const CΩStatusbar = {
 
   live: () => {
     statusBarItem.text = 'CodeAwareness'
-    statusBarItem.command = 'CΩ.toggle'
+    statusBarItem.command = 'CAW.toggle'
     statusBarItem.tooltip = 'Toggle CodeAwareness panel'
   },
 

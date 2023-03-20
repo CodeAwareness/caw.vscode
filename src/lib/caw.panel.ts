@@ -7,25 +7,25 @@ import * as path from 'node:path'
 import config from '@/config'
 import logger from './logger'
 
-import { CΩStore } from './cΩ.store'
+import { CAWStore } from './caw.store'
 
-import CΩIPC from './cΩ.events'
-import CΩWorkspace from './cΩ.workspace'
-import CΩEditor from './cΩ.editor'
+import CAWIPC from './caw.events'
+import CAWWorkspace from './caw.workspace'
+import CAWEditor from './caw.editor'
 
 let panelColumn: vscode.ViewColumn = vscode.ViewColumn.Two
 
 function getPanel() {
-  return CΩStore.panel
+  return CAWStore.panel
 }
 
 function hasPanel() {
-  return !!CΩStore.panel
+  return !!CAWStore.panel
 }
 
 function dispose() {
-  if (CΩStore.panel) {
-    CΩWorkspace.dispose()
+  if (CAWStore.panel) {
+    CAWWorkspace.dispose()
   }
 }
 
@@ -39,7 +39,7 @@ function moveEditor(webviewPanel: vscode.WebviewPanel) {
 }
 
 function createPanel(extensionPath: string) {
-  CΩStore.panel = vscode.window.createWebviewPanel(
+  CAWStore.panel = vscode.window.createWebviewPanel(
     'codeAwareness',
     'Code Awareness',
     panelColumn,
@@ -53,7 +53,7 @@ function createPanel(extensionPath: string) {
     },
   )
 
-  return CΩStore.panel
+  return CAWStore.panel
 }
 
 /************************************************************************************
@@ -67,7 +67,7 @@ function createPanel(extensionPath: string) {
  ************************************************************************************/
 function toggle(context: vscode.ExtensionContext) {
   const { extensionPath } = context
-  let panel = CΩStore.panel
+  let panel = CAWStore.panel
 
   if (panel && !panel.visible) {
     panel.reveal()
@@ -88,11 +88,11 @@ function toggle(context: vscode.ExtensionContext) {
   getWebviewContentLocal(panel.webview) // DEV
   // getWebviewContent(panel.webview) // PRODUCTION
 
-  CΩEditor.focusTextEditor()
+  CAWEditor.focusTextEditor()
   console.log('VSCODE will setup IPC with panel loaded from:', config.EXT_URL)
-  CΩIPC.setup(panel.webview, context)
+  CAWIPC.setup(panel.webview, context)
   panel.onDidDispose(dispose, undefined, context.subscriptions)
-  panel.onDidChangeViewState((state: vscode.WindowState) => CΩPanel.didChangeViewState(state), undefined, context.subscriptions)
+  panel.onDidChangeViewState((state: vscode.WindowState) => CAWPanel.didChangeViewState(state), undefined, context.subscriptions)
   return true
 }
 
@@ -109,7 +109,7 @@ function getWebviewContent(webview: vscode.Webview) {
   const nonce = getNonce()
   const cspSource = 'https://vscode.codeawareness.com https://api.codeawareness.com'
   const mediaSource = 'https://codeawareness.com https://ext.codeawareness.com'
-  // TODO: everytime i publish the CΩ Panel it builds a new chunk hash, try to make this pain go away without introducing cache headaches
+  // TODO: everytime i publish the CAW Panel it builds a new chunk hash, try to make this pain go away without introducing cache headaches
   webview.html = `<!doctype html><html lang="en"><head><meta charset="UTF-8">
     <title>CodeAwareness VSCode panel</title>
     <meta http-equiv="Content-Security-Policy" content="default-src ${cspSource}; style-src ${cspSource} 'unsafe-inline'; img-src ${cspSource} ${mediaSource}; script-src 'nonce-${nonce}';">
@@ -144,14 +144,14 @@ async function getWebviewContentLocal(webview: vscode.Webview) {
  * @param data Object - data to be sent to the webview
  ************************************************************************************/
 function postMessage(data: any) {
-  if (CΩStore.panel) {
+  if (CAWStore.panel) {
     logger.info('PANEL postMessage', JSON.stringify(data))
-    CΩStore.panel.webview.postMessage(data)
+    CAWStore.panel.webview.postMessage(data)
   }
 }
 
 /************************************************************************************
- * ensure we're not focusing the cΩ panel
+ * ensure we're not focusing the caw panel
  *
  * We have to find a way to avoid opening a file in the same window group as the webview.
  * From what I could find, VSCode does not provide any means to doing that,
@@ -184,7 +184,7 @@ function updateProject(data: any) {
   return data
 }
 
-const CΩPanel = {
+const CAWPanel = {
   createPanel,
   didChangeViewState,
   dispose,
@@ -195,4 +195,4 @@ const CΩPanel = {
   updateProject,
 }
 
-export default CΩPanel
+export default CAWPanel

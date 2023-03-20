@@ -5,8 +5,8 @@
  *********************************************/
 import * as vscode from 'vscode'
 
-import { TCΩEditor } from '@/lib/cΩ.editor'
-import CΩIPC from '@/lib/cΩ.ipc'
+import { TCAWEditor } from '@/lib/caw.editor'
+import CAWIPC from '@/lib/caw.ipc'
 
 export type TDiffRange = {
   range: {
@@ -74,12 +74,12 @@ export type TUser = {
   avatar: string,
 }
 
-export const CΩStore = {
+export const CAWStore = {
   activeContext: {
     uri: '',
     dirty: false,
   },
-  activeTextEditor: null as TCΩEditor | null,
+  activeTextEditor: null as TCAWEditor | null,
   projects: [] as any[],
   activeProject: undefined as any,
   selectedContributor: undefined as any,
@@ -89,7 +89,7 @@ export const CΩStore = {
 
   colorTheme: 1 as vscode.ColorThemeKind, // 1 = Light, 2 = Dark, 3 = High Contrast
 
-  tmpDir: '/tmp/cΩ.vscode', // temp dir default value; the real value is actually received from the CodeAwareness local service
+  tmpDir: '/tmp/caw.vscode', // temp dir default value; the real value is actually received from the CodeAwareness local service
 
   /* Just a tree hash map structure, for faster locating of files and folders */
   peerFS: {} as TPeerFS,
@@ -97,35 +97,35 @@ export const CΩStore = {
   panel: undefined as any,
   tokens: undefined as TTokens | undefined,
   user: undefined as TUser | undefined,
-  ws: undefined as typeof CΩIPC | undefined,
+  ws: undefined as typeof CAWIPC | undefined,
 
   clear: () => {
     console.log('STORE CLEAR')
-    CΩStore.tokens = undefined as unknown as TTokens
-    CΩStore.user = undefined as unknown as TUser
-    CΩStore.panel = undefined
-    CΩStore.colorTheme = 1
-    CΩStore.tmpDir = '/tmp/cΩ.vscode'
-    CΩStore.peerFS = {}
-    CΩStore.doc = undefined
-    CΩStore.line = 0
+    CAWStore.tokens = undefined as unknown as TTokens
+    CAWStore.user = undefined as unknown as TUser
+    CAWStore.panel = undefined
+    CAWStore.colorTheme = 1
+    CAWStore.tmpDir = '/tmp/caw.vscode'
+    CAWStore.peerFS = {}
+    CAWStore.doc = undefined
+    CAWStore.line = 0
   },
 
   reset: () => {
     console.log('STORE RESET')
-    CΩStore.peerFS = {}
-    CΩStore.doc = undefined
-    CΩStore.line = 0
+    CAWStore.peerFS = {}
+    CAWStore.doc = undefined
+    CAWStore.line = 0
   }
 }
 
 let tokenInterval: ReturnType<typeof setTimeout>|undefined
 let syncTimer: ReturnType<typeof setTimeout>|undefined
 
-export const CΩWork = {
+export const CAWWork = {
   // terminal (optional feature: client side processing using shell commands)
   tokenInterval,
   syncTimer,
 }
 
-export default CΩStore
+export default CAWStore

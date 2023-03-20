@@ -4,27 +4,27 @@
 import * as vscode from 'vscode'
 import logger from './logger'
 
-import { CΩStore } from './cΩ.store'
-import CΩDeco from './cΩ.deco'
-import CΩDiffs from './cΩ.diffs'
+import { CAWStore } from './caw.store'
+import CAWDeco from './caw.deco'
+import CAWDiffs from './caw.diffs'
 
 // TODO: find a way to detect windows env
 
-export type TCΩEditor = vscode.TextEditor & {
+export type TCAWEditor = vscode.TextEditor & {
   _documentData: any
   _selections: Array<any>
   _visibleRanges: Array<any>
 }
 
-const getSelectedLine = (editor: TCΩEditor) => editor._selections && editor._selections[0].active.line
-const getEditorDocPath = (editor: TCΩEditor) => editor?.document.uri.path
-const getEditorDocFileName = (editor: TCΩEditor) => editor?.document.fileName
+const getSelectedLine = (editor: TCAWEditor) => editor._selections && editor._selections[0].active.line
+const getEditorDocPath = (editor: TCAWEditor) => editor?.document.uri.path
+const getEditorDocFileName = (editor: TCAWEditor) => editor?.document.fileName
 
 const closeActiveEditor = () => {
   return vscode.commands.executeCommand('workbench.action.closeActiveEditor')
 }
 
-// TODO: why TCΩEditor doesn't work here as a type (what's length and ev[0]?)
+// TODO: why TCAWEditor doesn't work here as a type (what's length and ev[0]?)
 const getSelections = (ev: any) => {
   if (!ev || !ev.length || !ev[0]) return { selections: [], visibleRanges: [], uri: '' }
   const uri = ev._documentData._uri
@@ -42,28 +42,28 @@ const getSelections = (ev: any) => {
  * @param editor Object - editor object from VSCode
  *
  ************************************************************************************/
-function setActiveEditor(editor: TCΩEditor) {
-  const { tmpDir } = CΩStore
+function setActiveEditor(editor: TCAWEditor) {
+  const { tmpDir } = CAWStore
   if (editor?.document.fileName.includes(tmpDir)) return
-  CΩStore.reset()
-  CΩDiffs.clear()
-  CΩStore.activeTextEditor = editor
+  CAWStore.reset()
+  CAWDiffs.clear()
+  CAWStore.activeTextEditor = editor
   logger.info('EDITOR: set active editor', editor)
 }
 
 /************************************************************************************
- * Mark peer changes within the current editor (gutter only when cΩ panel is not active)
+ * Mark peer changes within the current editor (gutter only when caw panel is not active)
  *
- * CΩWorkspace calls this function when we have a change or a new file open.
+ * CAWWorkspace calls this function when we have a change or a new file open.
  *
- * @param project object The `project` structure is defined in the CΩ Local Service
+ * @param project object The `project` structure is defined in the CAW Local Service
  ************************************************************************************/
 function updateDecorations(project: any) {
   logger.log('EDITOR: syncing webview (project)', project)
-  const editor = CΩStore.activeTextEditor
-  CΩStore.activeProject = project
+  const editor = CAWStore.activeTextEditor
+  CAWStore.activeProject = project
   if (!editor) return logger.error('EDITOR trying to setup editor failed; no active text editor.')
-  CΩDeco.insertDecorations()
+  CAWDeco.insertDecorations()
 
   return project
 }
@@ -76,13 +76,13 @@ function updateDecorations(project: any) {
  ************************************************************************************/
 let tryingToClose: boolean // Yeah, I don't know how to do this, VSCode seems to be stripped of fundamental window concepts, or maybe it's an Electron issue
 function closeDiffEditor() {
-  const { tmpDir } = CΩStore
+  const { tmpDir } = CAWStore
   /*
   const editors = vscode.window.visibleTextEditors
   editors.map(editor => (editor._documentData._document.uri.path.includes(tmpDir) && closeEditor(editor)))
   */
   setTimeout(() => {
-    const editor = vscode.window.activeTextEditor as TCΩEditor
+    const editor = vscode.window.activeTextEditor as TCAWEditor
     if (!editor) {
       vscode.commands.executeCommand('workbench.action.focusNextGroup')
       if (tryingToClose) {
@@ -110,15 +110,15 @@ function closeDiffEditor() {
 /************************************************************************************
  * try to focus the active editor window
  *
- * When we open the CΩ panel, we need to re-focus on our editor (not stealing focus)
+ * When we open the CAW panel, we need to re-focus on our editor (not stealing focus)
  ************************************************************************************/
 function focusTextEditor() {
-  if (CΩStore.activeTextEditor) return
-  const editors = vscode.window.visibleTextEditors as Array<TCΩEditor>
+  if (CAWStore.activeTextEditor) return
+  const editors = vscode.window.visibleTextEditors as Array<TCAWEditor>
   setActiveEditor(editors[0])
 }
 
-const CΩEditor = {
+const CAWEditor = {
   closeDiffEditor,
   focusTextEditor,
   getEditorDocPath,
@@ -128,4 +128,4 @@ const CΩEditor = {
   updateDecorations,
 }
 
-export default CΩEditor
+export default CAWEditor

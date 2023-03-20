@@ -4,26 +4,26 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as vscode from 'vscode'
 
-import type { TAuth } from './cΩ.store'
+import type { TAuth } from './caw.store'
 
 import { localize } from './locale'
-import { CΩStore } from './cΩ.store'
+import { CAWStore } from './caw.store'
 
 import logger from './logger'
-import CΩEditor from './cΩ.editor'
-import CΩDeco from './cΩ.deco'
-import CΩPanel from './cΩ.panel'
-import CΩWorkspace from './cΩ.workspace'
-import CΩTDP from '@/lib/cΩ.tdp'
-import CΩIPC from '@/lib/cΩ.ipc'
+import CAWEditor from './caw.editor'
+import CAWDeco from './caw.deco'
+import CAWPanel from './caw.panel'
+import CAWWorkspace from './caw.workspace'
+import CAWTDP from '@/lib/caw.tdp'
+import CAWIPC from '@/lib/caw.ipc'
 
 /**
  * This is the VSCode <--> VSCode Webview Events module
  */
 function init() {
-  CΩStore.colorTheme = vscode.window.activeColorTheme.kind
-  const data = { colorTheme: CΩStore.colorTheme }
-  CΩPanel.postMessage({ command: 'setColorTheme', data })
+  CAWStore.colorTheme = vscode.window.activeColorTheme.kind
+  const data = { colorTheme: CAWStore.colorTheme }
+  CAWPanel.postMessage({ command: 'setColorTheme', data })
 }
 
 const shortid = () => {
@@ -34,43 +34,43 @@ const shortid = () => {
 }
 
 const postBack = (command: string, id?: string) => (data: any) => {
-  CΩPanel.postMessage({ command, id, data })
+  CAWPanel.postMessage({ command, id, data })
 }
 
 const eventsTable: Record<string, any> = {}
 
 eventsTable['webview:loaded'] = () => {
-  console.log('Will init webview with GUID', CΩIPC.guid)
-  postBack('wssGuid')(CΩIPC.guid)
-  postBack('authInfo')({ user: CΩStore.user, tokens: CΩStore.tokens })
+  console.log('Will init webview with GUID', CAWIPC.guid)
+  postBack('wssGuid')(CAWIPC.guid)
+  postBack('authInfo')({ user: CAWStore.user, tokens: CAWStore.tokens })
 }
 
 eventsTable['auth:login'] = (data: TAuth) => {
   init()
-  CΩStore.user = data?.user
-  CΩStore.tokens = data?.tokens
+  CAWStore.user = data?.user
+  CAWStore.tokens = data?.tokens
   if (data?.user) {
-    CΩWorkspace.setupWorker()
-    CΩIPC.transmit('repo:active-path', {
-      fpath: CΩStore.activeTextEditor?.document?.uri?.path,
-      doc: CΩStore.activeTextEditor?.document?.getText()
+    CAWWorkspace.setupWorker()
+    CAWIPC.transmit('repo:active-path', {
+      fpath: CAWStore.activeTextEditor?.document?.uri?.path,
+      doc: CAWStore.activeTextEditor?.document?.getText()
     })
-      .then(CΩEditor.updateDecorations)
-      .then(CΩTDP.addProject)
-      .then(CΩPanel.updateProject)
+      .then(CAWEditor.updateDecorations)
+      .then(CAWTDP.addProject)
+      .then(CAWPanel.updateProject)
   }
 }
 
 eventsTable['auth:logout'] = () => {
-  CΩStore.clear()
-  CΩDeco.clear()
+  CAWStore.clear()
+  CAWDeco.clear()
 }
 
 eventsTable['branch:select'] = (branch: string) => {
-  const fpath = CΩStore.activeProject.activePath
+  const fpath = CAWStore.activeProject.activePath
   if (!fpath) return
-  const origin = CΩStore.activeProject.origin
-  CΩIPC.transmit('repo:diff-branch', { origin, branch, fpath })
+  const origin = CAWStore.activeProject.origin
+  CAWIPC.transmit('repo:diff-branch', { origin, branch, fpath })
     .then((info: any) => {
       const peerFileUri = vscode.Uri.file(info.peerFile)
       const userFileUri = vscode.Uri.file(info.userFile)
@@ -80,18 +80,18 @@ eventsTable['branch:select'] = (branch: string) => {
 }
 
 eventsTable['branch:unselect'] = () => {
-  CΩEditor.closeDiffEditor()
+  CAWEditor.closeDiffEditor()
 }
 
 eventsTable['branch:refresh'] = (data: any) => {
-  // TODO: refresh branches using git and display in CΩPanel
+  // TODO: refresh branches using git and display in CAWPanel
 }
 
 eventsTable['contrib:select'] = (contrib: any) => {
-  const fpath = CΩStore.activeTextEditor?.document?.uri?.path
+  const fpath = CAWStore.activeTextEditor?.document?.uri?.path
   if (!fpath) return
-  const origin = CΩStore.activeProject.origin
-  CΩIPC.transmit('repo:diff-contrib', { origin, fpath, contrib })
+  const origin = CAWStore.activeProject.origin
+  CAWIPC.transmit('repo:diff-contrib', { origin, fpath, contrib })
     .then((info: any) => {
       const peerFileUri = vscode.Uri.file(info.peerFile)
       const userFileUri = vscode.Uri.file(fpath)
@@ -101,7 +101,7 @@ eventsTable['contrib:select'] = (contrib: any) => {
 }
 
 eventsTable['contrib:unselect'] = () => {
-  CΩEditor.closeDiffEditor()
+  CAWEditor.closeDiffEditor()
 }
 
 /************************************************************************************
@@ -121,7 +121,7 @@ function processSystemEvent(key: string, data: any) {
  ************************************************************************************/
 function processAPI(id: string, key: string, data: any) {
   logger.info('EVENTS processAPI', key, data)
-  CΩIPC.transmit(key, data)
+  CAWIPC.transmit(key, data)
     .then(data => {
       const body = typeof data === 'string' ? JSON.parse(data) : data
       postBack(`res:${key}`, id)(body)
@@ -164,8 +164,8 @@ function setup(webview: any, context: any) {
   )
 }
 
-const CΩEvents = {
+const CAWEvents = {
   setup,
 }
 
-export default CΩEvents
+export default CAWEvents

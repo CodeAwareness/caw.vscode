@@ -70,7 +70,7 @@ function shiftLineMarkers(lines: number[], ranges: any[]) {
   return newLines
 }
 
-const CΩDiffs = {
+const CAWDiffs = {
   clear,
   init,
   pendingDiffs,
@@ -78,4 +78,4 @@ const CΩDiffs = {
   shiftWithLiveEdits,
 }
 
-export default CΩDiffs
+export default CAWDiffs

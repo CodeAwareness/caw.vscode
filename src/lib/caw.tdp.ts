@@ -5,7 +5,7 @@ import * as vscode from 'vscode'
 import { EventEmitter, TreeItem, TreeItemCollapsibleState } from 'vscode'
 import * as path from 'node:path'
 
-import { CΩStore } from './cΩ.store'
+import { CAWStore } from './caw.store'
 import logger from './logger'
 
 const dataChangeEvent = new EventEmitter()
@@ -39,7 +39,7 @@ const toTDItem = ({ folder, tree, fpath }: WS_TREE_TYPE) => (key: string) => {
   const collapsibleState = isFile ? TreeItemCollapsibleState.None : TreeItemCollapsibleState.Expanded
   const itemPath = path.join(fpath, key)
   const uid = isFile && tree[key]
-  const command = isFile ? { command: 'CΩ.openPeerFile', arguments: [folder, itemPath, uid] } : null
+  const command = isFile ? { command: 'CAW.openPeerFile', arguments: [folder, itemPath, uid] } : null
 
   return new TDItem({
     label: key.split('/').pop(),
@@ -62,14 +62,14 @@ const TDP = {
   addPeerWorkspace: (wsFolder: vscode.WorkspaceFolder) => {
     const fpath = wsFolder.uri?.path
     folders[fpath] = wsFolder.name
-    CΩStore.peerFS[fpath] = {}
+    CAWStore.peerFS[fpath] = {}
     return TDP
   },
 
   removePeerWorkspace: (wsFolder: vscode.WorkspaceFolder) => {
     const fPath = wsFolder.uri.path
     delete folders[fPath]
-    delete CΩStore.peerFS[fPath]
+    delete CAWStore.peerFS[fPath]
     logger.log('TDP: removePeerWorkspace', fPath)
     TDP.refresh()
   },
@@ -91,7 +91,7 @@ const TDP = {
   getChildren: (el: TDItem): Thenable<TDItem[]> => {
     if (!folders) return Promise.resolve([])
     if (!el) return Promise.resolve(makeWSItems())
-    const { peerFS } = CΩStore
+    const { peerFS } = CAWStore
     const { fpath, folder } = el
     // eslint-disable-next-line no-useless-escape
     const parts = fpath.split(/[\\\/]/).filter((a: string) => a)
@@ -123,8 +123,8 @@ const TDP = {
    * register file into the TDP
    *
    * DESIGN:
-   * We're adding files to the CΩ repository, but the user may have multiple repositories open, and we need to show diffs coresponding to multiple contributors.
-   * Our CΩ repository looks like this (where searchLib, microPost are just examples of repo names)
+   * We're adding files to the CAW repository, but the user may have multiple repositories open, and we need to show diffs coresponding to multiple contributors.
+   * Our CAW repository looks like this (where searchLib, microPost are just examples of repo names)
 
    * searchLib -> aliceId -> [ services/utils.js, main.js ]
    * searchLib -> bobId ->   [ services/logger.js, main.js ]
@@ -134,9 +134,9 @@ const TDP = {
    ************************************************************************************/
   addFile: (folder: string, fpath: string) => {
     const parts = fpath.split('/').filter(a => a)
-    let prevObj = CΩStore.peerFS[folder]
+    let prevObj = CAWStore.peerFS[folder]
     if (!prevObj) prevObj = {}
-    CΩStore.peerFS[folder] = prevObj
+    CAWStore.peerFS[folder] = prevObj
     let leaf
     for (const name of parts) {
       if (!prevObj[name]) prevObj[name] = {}

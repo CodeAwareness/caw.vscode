@@ -9,7 +9,7 @@ class IPC {
   // Use this pubsub to listen for responses to your emits
   public pubsub = new EventEmitter()
   public socket = null as Socket | null
-  public appspace = 'code∑.'
+  public appspace = 'caw.'
   public socketRoot = '/var/tmp/'
   public retryInterval = 2000 // retry connecting every 2 seconds
   public maxRetries = Infinity
@@ -20,6 +20,7 @@ class IPC {
   private path = ''
 
   constructor(guid: string) {
+    // Note: originally I wrote this IPC using WebSockets over local https, only to find out at the end of my toil that VSCode has WebSockets in dev mode only.
     this.path = this.socketRoot + this.appspace + (guid || id)
     /* TODO: Windows pipe path
     if (process.platform === 'win32' && !path.startsWith('\\\\.\\pipe\\')) {
@@ -85,7 +86,6 @@ class IPC {
         const message = JSON.parse(event)
         const { action, body, err } = message
         console.log('LS: detected event', action, body, err)
-        // Note: be careful! originally I wrote this IPC using WebSockets over local https, only to find out at the end of my toil that VSCode has WebSockets in dev mode only.
         this.pubsub.emit(action, body || err)
       })
 

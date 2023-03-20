@@ -4,9 +4,9 @@
 import * as vscode from 'vscode'
 import * as _ from 'lodash'
 
-import { CΩStore } from './cΩ.store'
+import { CAWStore } from './caw.store'
 import logger from './logger'
-import CΩPanel from './cΩ.panel'
+import CAWPanel from './caw.panel'
 
 let lastUri: string
 // try to only insert decorations in the text editor at idle times; for now: at most once a second or so
@@ -74,7 +74,7 @@ function setDecorations(options: TEditorRanges) {
 
   // We don't insert line / range highlights when the panel is closed, to allow for more zen focus mode
   // TODO: make this configurable by the user
-  const isPanelOpen = !!CΩPanel.hasPanel()
+  const isPanelOpen = !!CAWPanel.hasPanel()
   // logger.info('setDecorations ranges', ranges, isPanelOpen)
   editor.setDecorations(changeDecorationType, isPanelOpen ? vsRanges : [])
   editor.setDecorations(rulerDecorationType, vsRanges)
@@ -82,7 +82,7 @@ function setDecorations(options: TEditorRanges) {
 }
 
 function insertDecorations(leading?: boolean) {
-  const editor = CΩStore.activeTextEditor
+  const editor = CAWStore.activeTextEditor
   if (!editor) return
   const uri = getEditorDocPath(editor)
   logger.log('DECO: (leading, uri, lastUri)', leading, uri, lastUri)
@@ -96,8 +96,8 @@ function insertDecorations(leading?: boolean) {
 }
 
 function doInsert(uri: string) {
-  const project = CΩStore.activeProject
-  const editor = CΩStore.activeTextEditor
+  const project = CAWStore.activeProject
+  const editor = CAWStore.activeTextEditor
   if (!project || !editor) return
   const fpath = uri.substr(project.root.length + 1)
   logger.log('DECO: doInsert (project, uri, fpath)', project, uri, fpath)
@@ -118,14 +118,14 @@ function doInsert(uri: string) {
 }
 
 function clear() {
-  const editor = CΩStore.activeTextEditor
+  const editor = CAWStore.activeTextEditor
   if (!editor) return
   setDecorations({ editor, ranges: [] })
 }
 
-const CΩDeco = {
+const CAWDeco = {
   clear,
   insertDecorations,
 }
 
-export default CΩDeco
+export default CAWDeco
