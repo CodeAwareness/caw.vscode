@@ -17,17 +17,17 @@ const EXT_URL = DEBUG ? `https://127.0.0.1:${PORT_LOCAL}` : 'https://vscode.code
 // Where to post requests to
 const API_URL = DEBUG ? `https://127.0.0.1:${PORT_LOCAL}/api/${SERVER_VERSION}` : `https://api.codeawareness.com/${SERVER_VERSION}`
 
+// Every 5 minutes we push our code diff to the server
+const SYNC_INTERVAL = 1000 * 60 * 5
+
+// If we try pushing code diff to the server repeatedly, we throttle it at 1 minute min between pushes
+const SYNC_THRESHOLD = 1000 * 60 * 1
+
 // Local communication with CodeAwareness local service
 const SERVER_WSS = 'wss://127.0.0.1:48408'
 
 // Where to subscribe for Code Awareness local service (pipe IPC)
 const PIPE_CLIENTS = '/var/tmp/caw/clients'
-
-// Workspace: SYNC_INTERVAL gives the timer for syncing with the server
-const SYNC_INTERVAL = 1000 * 100 // download diffs from the server every minute or so
-
-// Diffs: SYNC_THRESHOLD gives the throttling interval for sending and receiving diffs
-const SYNC_THRESHOLD = 1000 // avoid too many send/receive requests per second
 
 // TODO: what are we doing with this... can't remember why we diff against 5 prev commits
 const MAX_NR_OF_SHA_TO_COMPARE = 5

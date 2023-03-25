@@ -4,7 +4,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as vscode from 'vscode'
 
-import config from '@/config'
 import logger from './logger'
 
 import { CAWStore, CAWWork } from './caw.store'
@@ -13,9 +12,11 @@ import type { TCAWEditor } from './caw.editor'
 
 import CAWDeco from './caw.deco'
 import CAWDiffs from './caw.diffs'
+import CAWEditor from './caw.editor'
 import CAWSCM from './caw.scm'
 import CAWIPC from './caw.ipc'
 
+// TODO: this doesn't quite work.
 const isWindows = !!process.env.ProgramFiles
 
 function init(data?: any) {
@@ -34,30 +35,15 @@ function dispose() {
   if (CAWWork.syncTimer) clearInterval(CAWWork.syncTimer)
   CAWStore.panel?.dispose()
   CAWStore.panel = undefined
+  CAWEditor.updateDecorations(CAWStore.activeProject)
 }
 
 function setupTempFiles() {
-  return CAWIPC.transmit('repo:get-tmp-dir')
+  return CAWIPC.transmit('repo:get-tmp-dir', CAWIPC.guid)
     .then((data: any) => {
       CAWStore.tmpDir = data.tmpDir
       logger.info('WORKSPACE: temporary folder used: ', CAWStore.tmpDir)
     })
-}
-
-/************************************************************************************
- * Synchronization routines for the client-server and extension-webview.
- * We're currently sending and downloading diffs on a timer.
- * For this we're setting up a worker (currently just an object in the CAWStore).
- *
- * TODO: add file system hook to send diffs when files are changed underneath VSCode.
- ************************************************************************************/
-function setupWorker() {
-  if (CAWWork.syncTimer) clearInterval(CAWWork.syncTimer)
-  const syncInterval: number = vscode.workspace
-    .getConfiguration('codeAwareness')
-    .get('syncInterval') || config.SYNC_INTERVAL
-  logger.info('WORKSPACE: setupWorker (syncInterval)', syncInterval)
-  // TODO: download diffs periodically
 }
 
 /************************************************************************************
@@ -198,7 +184,6 @@ const CAWWorkspace = {
   refreshLines,
   removeProject,
   saveCode,
-  setupWorker,
   setupTempFiles,
 }
 

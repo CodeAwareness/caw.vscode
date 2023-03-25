@@ -98,7 +98,7 @@ class IPC {
       console.log('LS: cannot dispatch event. No socket for', this.path)
       return
     }
-    console.log('LS: dispatching event to ', this.path, ' : ', message)
+    console.log('LS: dispatching event to ', this.path, ' : ', message.substring(0, 100))
     this.socket.write(message + delimiter)
   }
 }

@@ -50,9 +50,9 @@ eventsTable['auth:login'] = (data: TAuth) => {
   CAWStore.user = data?.user
   CAWStore.tokens = data?.tokens
   if (data?.user) {
-    CAWWorkspace.setupWorker()
     CAWIPC.transmit('repo:active-path', {
       fpath: CAWStore.activeTextEditor?.document?.uri?.path,
+      cid: CAWIPC.guid,
       doc: CAWStore.activeTextEditor?.document?.getText()
     })
       .then(CAWEditor.updateDecorations)
@@ -90,8 +90,9 @@ eventsTable['branch:refresh'] = (data: any) => {
 eventsTable['contrib:select'] = (contrib: any) => {
   const fpath = CAWStore.activeTextEditor?.document?.uri?.path
   if (!fpath) return
+  const cid = CAWIPC.guid
   const origin = CAWStore.activeProject.origin
-  CAWIPC.transmit('repo:diff-contrib', { origin, fpath, contrib })
+  CAWIPC.transmit('repo:diff-contrib', { origin, fpath, cid, contrib })
     .then((info: any) => {
       const peerFileUri = vscode.Uri.file(info.peerFile)
       const userFileUri = vscode.Uri.file(fpath)

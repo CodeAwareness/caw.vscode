@@ -80,8 +80,8 @@ export const CAWStore = {
     dirty: false,
   },
   activeTextEditor: null as TCAWEditor | null,
-  projects: [] as any[],
   activeProject: undefined as any,
+  projects: [] as any[],
   selectedContributor: undefined as any,
 
   doc: undefined as any | undefined, // active document (specific doc format for Atom, VSCode)
@@ -89,7 +89,7 @@ export const CAWStore = {
 
   colorTheme: 1 as vscode.ColorThemeKind, // 1 = Light, 2 = Dark, 3 = High Contrast
 
-  tmpDir: '/tmp/caw.vscode', // temp dir default value; the real value is actually received from the CodeAwareness local service
+  tmpDir: '/tmp/caw.vscode', // temp dir default value; the real value is actually received from the CodeAwareness local service, during the init phase
 
   /* Just a tree hash map structure, for faster locating of files and folders */
   peerFS: {} as TPeerFS,

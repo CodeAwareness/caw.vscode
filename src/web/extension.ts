@@ -57,7 +57,7 @@ function initCodeAwareness(context: vscode.ExtensionContext) {
 
 const CAWDocumentContentProvider = {
 
-  // Found this trick to work out transmitting events between VSCode internals and our extension
+  // Found this trick to transmit events between VSCode internals and our extension
   _onDidChange: new vscode.EventEmitter(),
 
   get onDidChange() {
@@ -173,7 +173,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
     logger.info('CODEAWARENESS_EXTENSION: onDidChangeActiveTextEditor (editor, cawStore)', editor, CAWStore)
     if (!editor) return
     CAWEditor.setActiveEditor(editor as TCAWEditor)
-    CAWIPC.transmit('repo:active-path', { fpath: editor.document.uri.path, doc: editor.document.getText() })
+    CAWIPC.transmit('repo:active-path', { fpath: editor.document.uri.path, cid: CAWIPC.guid, doc: editor.document.getText() })
       .then(CAWEditor.updateDecorations)
       .then(CAWTDP.addProject)
       .then(CAWPanel.updateProject)
