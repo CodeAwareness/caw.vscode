@@ -2,6 +2,7 @@
  * CodeAwareness Inter Process Communication with the local service
  ******************************************************************/
 import IPC from '@/lib/ipc'
+import config from '@/config'
 import { CAWStatusbar } from '@/vscode/statusbar'
 
 import CAWWorkspace from './caw.workspace'
@@ -17,7 +18,7 @@ const shortid = () => {
  */
 const guid = shortid()
 const ipcClient = new IPC(guid) // FIFO pipe for operations
-const ipcCatalog = new IPC('catalog') // the local service watches this file to connect to all clients
+const ipcCatalog = new IPC(config.PIPE_CATALOG) // the local service watches this file to connect to all clients
 
 function initServer() {
   return new Promise(resolve => {

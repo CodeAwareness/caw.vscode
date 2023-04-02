@@ -1,0 +1,1 @@
+sed -i '' -e 's/DEBUG = true/DEBUG = false/' src/config.ts

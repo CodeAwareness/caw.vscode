@@ -2,7 +2,7 @@
   "name": "code-awareness",
   "displayName": "Code Awareness",
   "description": "Low noise collaboration.",
-  "icon": "ca-logo.png",
+  "icon": "https://codeawareness.com/img/cA-logo.png",
   "version": "1.0.0",
   "publisher": "CodeAwareness",
   "author": "Mark Vasile",
@@ -219,7 +219,7 @@
     "package": "npm run package-web && vsce package",
     "compile-web": "webpack",
     "watch-web": "NODE_ENV=development DEBUG=1 webpack --watch",
-    "package-web": "webpack --mode production --devtool hidden-source-map",
+    "package-web": "./prepare-prod.sh ; webpack --mode production --devtool hidden-source-map",
     "lint": "eslint src --ext ts",
     "run-in-browser": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. ."
   },

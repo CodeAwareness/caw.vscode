@@ -84,9 +84,8 @@ function toggle(context: vscode.ExtensionContext) {
 
   if (!panel.webview) return
 
-  // TODO: find a way to detect DEV vs PROD execution mode, so we don't have to keep on switching these two lines:
-  getWebviewContentLocal(panel.webview) // DEV
-  // getWebviewContent(panel.webview) // PRODUCTION
+  if (config.DEBUG) getWebviewContentLocal(panel.webview) // DEV
+  else getWebviewContent(panel.webview) // PRODUCTION
 
   CAWEditor.focusTextEditor()
   console.log('VSCODE will setup IPC with panel loaded from:', config.EXT_URL)

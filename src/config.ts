@@ -1,7 +1,9 @@
 import process from 'process'
 // TODO: move some/all these into VSCode extension configuration instead
 
-const DEBUG = false
+// TODO: find a way to detect DEV vs PROD execution mode, so we don't have to keep on switching DEBUG on and off in the config.
+// To work in dev-mode set DEBUG to true. This will trigger loading the webpanel from localhost instead of codeawareness.com
+const DEBUG = true
 
 // Dev mode, please configure local nginx
 const PORT_LOCAL = 8885
@@ -18,8 +20,8 @@ const EXT_URL = DEBUG ? `https://127.0.0.1:${PORT_LOCAL}` : 'https://vscode.code
 // Where to post requests to
 const API_URL = DEBUG ? `https://127.0.0.1:${PORT_LOCAL}/api/${SERVER_VERSION}` : `https://api.codeawareness.com/${SERVER_VERSION}`
 
-// Where to subscribe for Code Awareness local service (pipe IPC)
-const PIPE_CLIENTS = '/var/tmp/caw/clients'
+// Add this extension to the catalog of clients on CodeAwareness Local Service
+const PIPE_CATALOG = DEBUG ? 'catalog_dev' : 'catalog'
 
 // In the getLinesChangedLocally we aggregate changes against multiple SHA values. This is the maximum nr of previous commits we consider for our diffs.
 const MAX_NR_OF_SHA_TO_COMPARE = 5
@@ -41,6 +43,7 @@ const EXTRACT_PEER_DIR = 'e'
 export default {
   API_URL,
   CAW_SCHEMA,
+  DEBUG,
   EXT_URL,
   EXTRACT_BRANCH_DIR,
   EXTRACT_LOCAL_DIR,
@@ -48,7 +51,7 @@ export default {
   EXTRACT_REPO_DIR,
   LOG_LEVEL,
   MAX_NR_OF_SHA_TO_COMPARE,
-  PIPE_CLIENTS,
+  PIPE_CATALOG,
   PORT_LOCAL,
   SERVER_VERSION,
 }
