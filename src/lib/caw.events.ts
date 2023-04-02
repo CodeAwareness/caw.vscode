@@ -13,9 +13,9 @@ import logger from './logger'
 import CAWEditor from './caw.editor'
 import CAWDeco from './caw.deco'
 import CAWPanel from './caw.panel'
-import CAWWorkspace from './caw.workspace'
 import CAWTDP from '@/lib/caw.tdp'
 import CAWIPC from '@/lib/caw.ipc'
+import CAWWorkspace from './caw.workspace'
 
 /**
  * This is the VSCode <--> VSCode Webview Events module
@@ -58,6 +58,7 @@ eventsTable['auth:login'] = (data: TAuth) => {
       .then(CAWEditor.updateDecorations)
       .then(CAWTDP.addProject)
       .then(CAWPanel.updateProject)
+      .then(CAWWorkspace.setupSync)
   }
 }
 

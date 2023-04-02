@@ -14,6 +14,7 @@ class IPC {
   public retryInterval = 2000 // retry connecting every 2 seconds
   public maxRetries = Infinity
 
+  private guid = ''
   private retriesRemaining = Infinity
   private explicitlyDisconnected = false
   private ipcBuffer = '' as string
@@ -21,14 +22,13 @@ class IPC {
 
   constructor(guid: string) {
     // Note: originally I wrote this IPC using WebSockets over local https, only to find out at the end of my toil that VSCode has WebSockets in dev mode only.
-    this.path = this.socketRoot + this.appspace + (guid || id)
-    /* TODO: Windows pipe path
+    let path = this.path = this.socketRoot + this.appspace + (guid || id)
+    this.guid = guid
     if (process.platform === 'win32' && !path.startsWith('\\\\.\\pipe\\')) {
       path = path.replace(/^\//, '')
       path = path.replace(/\//g, '-')
-      path = `\\\\.\\pipe\\${options.path}`
+      this.path = `\\\\.\\pipe\\${path}`
     }
-    */
   }
 
   connect(callback?: any) {
@@ -72,7 +72,7 @@ class IPC {
     })
 
     socket.on('data', data => {
-      console.log('LS: received data', this.path, data)
+      // console.log('LS: received data', this.path, data)
       this.ipcBuffer += data.toString()
 
       if (this.ipcBuffer.indexOf(delimiter) === -1) {

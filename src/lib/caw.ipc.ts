@@ -31,6 +31,8 @@ function initServer() {
 
 const CAWIPC = {
   guid,
+  ipcClient,
+  ipcCatalog,
 
   init: async function(): Promise<void> {
     ipcCatalog.connect(() => {
@@ -46,14 +48,12 @@ const CAWIPC = {
   transmit: function(action: string, data?: any) {
     return new Promise((resolve, reject) => {
       const handler = (body: any) => {
-        console.info('WSS: resolved action', action, body)
-        // ipcClient.pubsub.removeListener(action, handler)
+        console.info('IPC: resolved action', action, body)
         const data = typeof body === 'string' ? JSON.parse(body) : body
         resolve(data)
       }
       const errHandler = (err: any) => {
         console.info('IPC: socket error', action, err)
-        // ipcClient.pubsub.removeListener(action, errHandler)
         const data = typeof err === 'string' ? JSON.parse(err) : err
         reject(data)
       }

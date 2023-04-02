@@ -1,3 +1,4 @@
+import process from 'process'
 // TODO: move some/all these into VSCode extension configuration instead
 
 const DEBUG = false
@@ -17,19 +18,10 @@ const EXT_URL = DEBUG ? `https://127.0.0.1:${PORT_LOCAL}` : 'https://vscode.code
 // Where to post requests to
 const API_URL = DEBUG ? `https://127.0.0.1:${PORT_LOCAL}/api/${SERVER_VERSION}` : `https://api.codeawareness.com/${SERVER_VERSION}`
 
-// Every 5 minutes we push our code diff to the server
-const SYNC_INTERVAL = 1000 * 60 * 5
-
-// If we try pushing code diff to the server repeatedly, we throttle it at 1 minute min between pushes
-const SYNC_THRESHOLD = 1000 * 60 * 1
-
-// Local communication with CodeAwareness local service
-const SERVER_WSS = 'wss://127.0.0.1:48408'
-
 // Where to subscribe for Code Awareness local service (pipe IPC)
 const PIPE_CLIENTS = '/var/tmp/caw/clients'
 
-// TODO: what are we doing with this... can't remember why we diff against 5 prev commits
+// In the getLinesChangedLocally we aggregate changes against multiple SHA values. This is the maximum nr of previous commits we consider for our diffs.
 const MAX_NR_OF_SHA_TO_COMPARE = 5
 
 const LOG_LEVEL = process.env.LOG_LEVEL || 'debug' // ['verbose', 'debug', 'error']
@@ -59,7 +51,4 @@ export default {
   PIPE_CLIENTS,
   PORT_LOCAL,
   SERVER_VERSION,
-  SERVER_WSS,
-  SYNC_INTERVAL,
-  SYNC_THRESHOLD,
 }

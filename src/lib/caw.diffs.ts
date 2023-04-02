@@ -1,13 +1,13 @@
 /**************************
  * CodeAwareness code diffs
  **************************/
-import * as vscode from 'vscode'
+import process from 'process'
 // import replaceStream from 'replacestream' // doesn't work (!)
 
 import config from '@/config'
 
 /* @ts-ignore */
-const isWindows = !!vscode.process?.env.ProgramFiles
+const isWindows = !!process?.env.ProgramFiles // vscode.process in previous versions
 
 const pendingDiffs = {} as Record<string, any>
 
@@ -20,7 +20,7 @@ function init() {
 }
 
 function clear() {
-  // TODO
+  // TODO: clear diffs when changing to a different file
 }
 
 /**

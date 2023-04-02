@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as vscode from 'vscode'
-import * as _ from 'lodash'
 import * as path from 'node:path'
 
 import { CAWStatusbar } from '@/vscode/statusbar'
@@ -45,9 +44,8 @@ export function deactivate() {
 }
 
 function initCodeAwareness(context: vscode.ExtensionContext) {
-  // TODO: when no projects / repos available we should skip init; at the moment we are getting "cannot read property 'document' of undefined
+  // TODO: when no projects / repos available we should skip init; currently we are getting "cannot read property 'document' of undefined
   activated = true
-  console.log('Extension: initCodeAwareness')
   initConfig()
   CAWIPC.init()
   setupCommands(context)
@@ -72,7 +70,7 @@ const CAWDocumentContentProvider = {
 
   updated(repo: any) {
     logger.info('cawDocumentContentProvider updated', repo)
-    // this._onDidChange.fire(Uri.parse(`${CODE∑_SCHEMA}:src/extension.js`))
+    // this._onDidChange.fire(Uri.parse(`${CAW_SCHEMA}:src/extension.js`))
   },
 
   provideTextDocumentContent(relativePath: string) {
@@ -143,25 +141,16 @@ function setupWatchers(context: vscode.ExtensionContext) {
   }))
 
   /************************************************************************************
-   * User changing the code inside the activeTextEditor
-   ************************************************************************************/
-  const refreshLines = _.throttle(CAWWorkspace.refreshLines, 1000, { leading: false, trailing: true })
-  subscriptions.push(vscode.workspace.onDidChangeTextDocument(params => {
-    if (!CAWStore.activeTextEditor) return
-    refreshLines(params)
-  }))
-
-  /************************************************************************************
    * User saving the activeTextEditor
    ************************************************************************************/
   subscriptions.push(vscode.workspace.onDidSaveTextDocument(doc => {
     // TODO: some throttle mechanism to make sure we're only sending at most once per some configured interval (subscription plan related)
     // use delay to allow the system to do other things like build and stuff, and prevent excessive use (peaks) of CPU
-    CAWIPC.transmit('repo:file-saved', { fpath: doc.fileName, doc: doc.getText() })
+    CAWIPC.transmit('repo:file-saved', { fpath: doc.fileName, doc: doc.getText(), cid: CAWIPC.guid })
       .then(CAWEditor.updateDecorations)
       .then(CAWPanel.updateProject)
       .then((project: any) => {
-        Object.keys(project.changes).map((f: string) => CAWTDP.addFile(project.root, f))
+        Object.keys(project.changes).map(CAWTDP.addFile(project.root))
         CAWTDP.refresh()
       })
   }))
@@ -178,7 +167,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
       .then(CAWTDP.addProject)
       .then(CAWPanel.updateProject)
       .then((project: any) => {
-        Object.keys(project.changes).map((f: string) => CAWTDP.addFile(project.root, f))
+        Object.keys(project.changes).map(CAWTDP.addFile(project.root))
         CAWTDP.refresh()
       })
   })
@@ -199,6 +188,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
    ************************************************************************************/
   const folders = vscode.workspace.workspaceFolders as vscode.WorkspaceFolder[]
   if (!folders) return
+  // TODO: do we still need to do anything here?
 
   /************************************************************************************
    * VSCode Telemetry

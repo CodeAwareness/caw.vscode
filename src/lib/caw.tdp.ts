@@ -78,8 +78,8 @@ const TDP = {
     folders = {}
   },
 
-  provideTextDocumentContent: (uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<string> => {
-    // TODO: provide text document content
+  provideTextDocumentContent: (/* uri: vscode.Uri, token: vscode.CancellationToken */): vscode.ProviderResult<string> => {
+    // TODO: provide text document content; do we still need this?
     return 'TEST'
   },
 
@@ -132,7 +132,7 @@ const TDP = {
 
    * When we're adding files from downloadDiff, we store them in this format, and we combine all the file paths into a list for VSCode Source Control Manager.
    ************************************************************************************/
-  addFile: (folder: string, fpath: string) => {
+  addFile: (folder: string) => (fpath: string) => {
     const parts = fpath.split('/').filter(a => a)
     let prevObj = CAWStore.peerFS[folder]
     if (!prevObj) prevObj = {}

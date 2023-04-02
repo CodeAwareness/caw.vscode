@@ -22,77 +22,77 @@
   "contributes": {
     "commands": [
       {
-        "command": "cΩ.toggle",
+        "command": "caw.toggle",
         "title": "%extension.toggle%"
       },
       {
-        "command": "cΩ.nextContributor",
+        "command": "caw.nextContributor",
         "title": "%extension.nextContributor%"
       },
       {
-        "command": "cΩ.prevContributor",
+        "command": "caw.prevContributor",
         "title": "%extension.prevContributor%"
       },
       {
-        "command": "cΩ.nextContribution",
+        "command": "caw.nextContribution",
         "title": "%extension.nextContribution%"
       },
       {
-        "command": "cΩ.prevContribution",
+        "command": "caw.prevContribution",
         "title": "%extension.prevContribution%"
       },
       {
-        "command": "cΩ.mergeSlice",
+        "command": "caw.mergeSlice",
         "title": "%extension.mergeSlice%"
       },
       {
-        "command": "cΩ.mergeAll",
+        "command": "caw.mergeAll",
         "title": "%extension.mergeAll%"
       },
       {
-        "command": "cΩ.openPeerFile",
+        "command": "caw.openPeerFile",
         "title": "%extension.openPeerFile%"
       },
       {
-        "command": "cΩ.openDiff",
+        "command": "caw.openDiff",
         "title": "%extension.openDiff%"
       },
       {
-        "command": "cΩ.refresh",
+        "command": "caw.refresh",
         "title": "%extension.refresh%"
       },
       {
-        "command": "cΩ.selectRange",
+        "command": "caw.selectRange",
         "title": "%extension.selectRange%"
       },
       {
-        "command": "cΩ.openFile",
+        "command": "caw.openFile",
         "title": "%extension.openFile%"
       }
     ],
     "keybindings": [
       {
-        "command": "cΩ.toggle",
+        "command": "caw.toggle",
         "key": "ctrl+alt+p",
         "mac": "cmd+alt+p"
       },
       {
-        "command": "cΩ.highlight",
+        "command": "caw.highlight",
         "key": "shift+f12",
         "mac": "shift+f12"
       },
       {
-        "command": "cΩ.nextContributor",
+        "command": "caw.nextContributor",
         "key": "ctrl+alt+.",
         "mac": "cmd+alt+,"
       },
       {
-        "command": "cΩ.prevContributor",
+        "command": "caw.prevContributor",
         "key": "ctrl+alt+,",
         "mac": "cmd+alt+,"
       },
       {
-        "command": "cΩ.mergeSlice",
+        "command": "caw.mergeSlice",
         "key": "ctrl+alt+m",
         "mac": "cmd+alt+m"
       }
@@ -111,81 +111,81 @@
     "menus": {
       "commandPalette": [
         {
-          "command": "cΩ.toggle",
-          "when": "config.cΩ.enabled"
+          "command": "caw.toggle",
+          "when": "config.caw.enabled"
         },
         {
-          "command": "cΩ.nextContributor",
-          "when": "config.cΩ.enabled"
+          "command": "caw.nextContributor",
+          "when": "config.caw.enabled"
         },
         {
-          "command": "cΩ.prevContributor",
-          "when": "config.cΩ.enabled"
+          "command": "caw.prevContributor",
+          "when": "config.caw.enabled"
         },
         {
-          "command": "cΩ.nextContribution",
-          "when": "config.cΩ.enabled"
+          "command": "caw.nextContribution",
+          "when": "config.caw.enabled"
         },
         {
-          "command": "cΩ.prevContribution",
-          "when": "config.cΩ.enabled"
+          "command": "caw.prevContribution",
+          "when": "config.caw.enabled"
         },
         {
-          "command": "cΩ.mergeAll",
-          "when": "config.cΩ.enabled"
+          "command": "caw.mergeAll",
+          "when": "config.caw.enabled"
         },
         {
-          "command": "cΩ.mergeSlice",
-          "when": "config.cΩ.enabled"
+          "command": "caw.mergeSlice",
+          "when": "config.caw.enabled"
         },
         {
-          "command": "cΩ.selectRange",
-          "when": "config.cΩ.enabled"
+          "command": "caw.selectRange",
+          "when": "config.caw.enabled"
         }
       ],
       "scm/resourceGroup/context": [
         {
-          "command": "cΩ.mergeAll",
+          "command": "caw.mergeAll",
           "when": "scmProvider == cΩ",
           "group": "1_modification"
         }
       ],
       "scm/resourceFolder/context": [
         {
-          "command": "cΩ.mergeAll",
+          "command": "caw.mergeAll",
           "when": "scmProvider == cΩ",
           "group": "inline"
         }
       ],
       "scm/resourceState/context": [
         {
-          "command": "cΩ.openFile",
+          "command": "caw.openFile",
           "when": "scmProvider == cΩ",
           "group": "navigation"
         },
         {
-          "command": "cΩ.openDiff",
+          "command": "caw.openDiff",
           "when": "scmProvider == cΩ",
           "group": "navigation"
         }
       ],
       "editor/title": [
         {
-          "command": "cΩ.openFile",
+          "command": "caw.openFile",
           "when": "scmProvider == cΩ",
           "group": "navigation"
         }
       ],
       "editor/context": [
         {
-          "command": "cΩ.selectRange",
+          "command": "caw.selectRange",
           "when": "scmProvider == cΩ",
           "group": "2_cΩ@1"
         }
       ],
       "scm/change/title": [
         {
-          "command": "cΩ.mergeSlice",
+          "command": "caw.mergeSlice",
           "when": "scmProvider == cΩ"
         }
       ]
@@ -193,18 +193,18 @@
     "configuration": {
       "title": "Code Awareness",
       "properties": {
-        "cΩ.maxCommitsInLog": {
+        "caw.maxCommitsInLog": {
           "type": "number",
           "default": 200,
-          "description": "%cΩ.config.maxCommitsInLog%",
+          "description": "%caw.config.maxCommitsInLog%",
           "minimum": 50,
           "maximum": 1000,
           "scope": "machine-overridable"
         },
-        "cΩ.syncInterval": {
+        "caw.syncInterval": {
           "type": "number",
           "default": 14400,
-          "description": "%cΩ.config.syncInterval%",
+          "description": "%caw.config.syncInterval%",
           "minimum": 60,
           "maximum": 43200,
           "scope": "machine-overridable"
@@ -229,7 +229,6 @@
     "@types/lodash": "^4.14.188",
     "@types/mocha": "^10.0.0",
     "@types/node": "^18.11.9",
-    "@types/node-ipc": "^9.2.0",
     "@types/vscode": "^1.72.0",
     "@types/webpack-env": "^1.18.0",
     "@typescript-eslint/eslint-plugin": "^5.42.0",
@@ -252,7 +251,6 @@
     "mocha": "^10.1.0",
     "node-sass": "^7.0.3",
     "path": "^0.12.7",
-    "process": "^0.11.10",
     "ts-jest": "^29.0.3",
     "ts-loader": "^9.4.1",
     "tsconfig-paths": "^4.1.0",
@@ -262,6 +260,7 @@
   },
   "dependencies": {
     "lodash": "^4.17.21",
+    "process": "^0.11.10",
     "vscode-nls": "^5.2.0"
   }
 }

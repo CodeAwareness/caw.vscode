@@ -11,8 +11,8 @@ import CAWPanel from './caw.panel'
 let lastUri: string
 // try to only insert decorations in the text editor at idle times; for now: at most once a second or so
 // TODO: make 2000 wait time into a configurable value
-const insertAfterSomeTime = _.throttle(doInsert, 1000, { trailing: true })
-const insertThenWaitSomeTime = _.throttle(doInsert, 1000, { leading: true })
+const insertAfterSomeTime = _.throttle(doInsert, 500, { trailing: true })
+const insertThenWaitSomeTime = _.throttle(doInsert, 500, { leading: true })
 const getEditorDocPath = (editor: vscode.TextEditor) => editor?.document.uri.path
 
 type TEditorRanges = {

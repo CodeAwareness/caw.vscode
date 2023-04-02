@@ -9,7 +9,7 @@ import logger from './logger'
 
 import { CAWStore } from './caw.store'
 
-import CAWIPC from './caw.events'
+import CAWEvents from './caw.events'
 import CAWWorkspace from './caw.workspace'
 import CAWEditor from './caw.editor'
 
@@ -90,7 +90,7 @@ function toggle(context: vscode.ExtensionContext) {
 
   CAWEditor.focusTextEditor()
   console.log('VSCODE will setup IPC with panel loaded from:', config.EXT_URL)
-  CAWIPC.setup(panel.webview, context)
+  CAWEvents.setup(panel.webview, context)
   panel.onDidDispose(dispose, undefined, context.subscriptions)
   panel.onDidChangeViewState((state: vscode.WindowState) => CAWPanel.didChangeViewState(state), undefined, context.subscriptions)
   return true
@@ -179,9 +179,9 @@ function didChangeViewState(state: any) {
  * @param data Object - the project (received from VSCode API)
  *
  ************************************************************************************/
-function updateProject(data: any) {
-  postMessage({ command: 'setProject', data })
-  return data
+function updateProject(project: any) {
+  postMessage({ command: 'setProject', data: project })
+  return project
 }
 
 const CAWPanel = {
