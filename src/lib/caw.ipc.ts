@@ -20,16 +20,6 @@ const guid = shortid()
 const ipcClient = new IPC(guid) // FIFO pipe for operations
 const ipcCatalog = new IPC(config.PIPE_CATALOG) // the local service watches this file to connect to all clients
 
-function initServer() {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      ipcClient.connect(() => {
-        setTimeout(resolve, 2000)
-      })
-    }, 2000) // let the VSCode and its extensions settle down, plus local service needs to create a client pipe connection
-  })
-}
-
 const CAWIPC = {
   guid,
   ipcClient,
@@ -69,6 +59,17 @@ const CAWIPC = {
   dispose: function() {
     // TODO: cleanup IPC
   },
+}
+
+function initServer() {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      ipcClient.connect(() => {
+        setTimeout(resolve, 2000)
+      })
+      ipcClient.pubsub.on('reset', CAWIPC.init)
+    }, 2000) // let the VSCode and its extensions settle down, plus local service needs to create a client pipe connection
+  })
 }
 
 export default CAWIPC

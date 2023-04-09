@@ -113,15 +113,11 @@ function setupWatchers(context: vscode.ExtensionContext) {
   subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(e => {
     if (!activated) initCodeAwareness(context)
     logger.info('CODEAWARENESS_EXTENSION: onDidChangeWorkspaceFolders (events)', e)
-    // TODO: can we not mix promises and try catch?
     try {
-      // TODO: cleanup this, we have calls to TDP and CSM from here, workspace and scm..
       e.added.forEach(wsFolder => {
-        CAWWorkspace.addProject(wsFolder)
         vscode.window.registerTreeDataProvider(SCM_PEER_FILES_VIEW, CAWTDP.addPeerWorkspace(wsFolder))
       })
       e.removed.forEach(wsFolder => {
-        CAWWorkspace.removeProject(wsFolder)
         CAWTDP.removePeerWorkspace(wsFolder)
       })
     } catch (ex) {
@@ -159,17 +155,9 @@ function setupWatchers(context: vscode.ExtensionContext) {
    * User switching to a different file
    ************************************************************************************/
   vscode.window.onDidChangeActiveTextEditor((editor: vscode.TextEditor | undefined) => {
-    logger.info('CODEAWARENESS_EXTENSION: onDidChangeActiveTextEditor (editor, cawStore)', editor, CAWStore)
     if (!editor) return
     CAWEditor.setActiveEditor(editor as TCAWEditor)
-    CAWIPC.transmit('repo:active-path', { fpath: editor.document.uri.path, cid: CAWIPC.guid, doc: editor.document.getText() })
-      .then(CAWEditor.updateDecorations)
-      .then(CAWTDP.addProject)
-      .then(CAWPanel.updateProject)
-      .then((project: any) => {
-        Object.keys(project.changes).map(CAWTDP.addFile(project.root))
-        CAWTDP.refresh()
-      })
+    CAWWorkspace.refreshActiveFile()
   })
 
   /************************************************************************************

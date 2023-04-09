@@ -179,6 +179,7 @@ function didChangeViewState(state: any) {
  *
  ************************************************************************************/
 function updateProject(project: any) {
+  console.log('UPDATE PANEL with project', project)
   postMessage({ command: 'setProject', data: project })
   return project
 }

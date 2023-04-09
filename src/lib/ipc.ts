@@ -19,6 +19,7 @@ class IPC {
   private explicitlyDisconnected = false
   private ipcBuffer = '' as string
   private path = ''
+  private resetTimer = 0
 
   constructor(guid: string) {
     // Note: originally I wrote this IPC using WebSockets over local https, only to find out at the end of my toil that VSCode has WebSockets in dev mode only.
@@ -37,27 +38,46 @@ class IPC {
     }
     if (this.socket) this.socket.destroy()
 
-    const socket = net.connect({ path: this.path })
+    const socket = net.createConnection({ path: this.path })
     socket.setEncoding('utf8')
     this.socket = socket
 
-    socket.on('error', function(err) {
-      console.log('\n\n######\nLS socket error: ', err)
+    socket.on('error', err => {
+      console.log('LS: socket error: ', err)
+      if (this.resetTimer++ > 10) this.pubsub.emit('reset')
     })
 
     socket.on('connect', () => {
-      console.log('LS socket connected', this.path)
+      console.log('LS: socket connected', this.path)
       this.retriesRemaining = this.maxRetries
+      this.resetTimer = 0
       if (callback) callback()
     })
 
-    socket.on('close', () => {
-      console.log('LS connection closed', this.path,
-        this.retriesRemaining, 'tries remaining of', this.maxRetries
+    socket.on('drain', (e: any) => {
+      console.log('LS: Socket draining', e)
+    })
+
+    socket.on('ready', () => {
+      console.log('LS: Socket ready')
+    })
+
+    socket.on('timeout', (e: any) => {
+      console.log('LS: Socket timeout', e)
+    })
+
+    socket.on('end', (e: any) => {
+      console.log('LS: Socket ended', e)
+    })
+
+    socket.on('close', (e: any) => {
+      console.log('LS: connection closed', this.path,
+        this.retriesRemaining, 'tries remaining of', this.maxRetries,
+        e
       )
 
       if (this.retriesRemaining < 1 || this.explicitlyDisconnected) {
-        console.log('LS connection failed. Exceeded the maximum retries.', this.path)
+        console.log('LS: connection failed. Exceeded the maximum retries.', this.path)
         socket.destroy()
         return
       }
@@ -76,7 +96,7 @@ class IPC {
       this.ipcBuffer += data.toString()
 
       if (this.ipcBuffer.indexOf(delimiter) === -1) {
-        console.log('LS. Messages are pretty large, is this really necessary?')
+        console.log('LS: Messages are pretty large, is this really necessary?')
         return
       }
 
@@ -98,7 +118,7 @@ class IPC {
       console.log('LS: cannot dispatch event. No socket for', this.path)
       return
     }
-    console.log('LS: dispatching event to ', this.path, ' : ', message.substring(0, 100))
+    console.log('LS: dispatching event to ', this.path, ' : ', message)
     this.socket.write(message + delimiter)
   }
 }

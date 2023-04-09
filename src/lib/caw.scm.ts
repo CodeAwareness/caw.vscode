@@ -9,13 +9,13 @@ import logger from './logger'
 import CAWRepository from './caw.repo'
 import CAWStore from './caw.store'
 
-async function addProject(wsFolder: any) {
-  logger.info('SCM addProject', wsFolder)
-  const root = wsFolder.uri ? wsFolder.uri.path : wsFolder.toString()
+async function addProject(project: any) {
+  logger.info('SCM addProject', project)
+  const root = project.root
   const name = basename(root)
   const scm = vscode.scm.createSourceControl('caw', 'CAW: ' + name)
   const scIndex = scm.createResourceGroup('workingTree', 'Peer Changes')
-  const repo = typeof wsFolder === 'object' ? CAWRepository.createFrom(wsFolder) : ''
+  const repo = CAWRepository.createFrom(project)
   // TODO: add origin and enable SCM
   CAWStore.projects.push({ repo, scIndex, root })
 }

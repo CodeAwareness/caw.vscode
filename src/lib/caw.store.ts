@@ -81,7 +81,7 @@ export const CAWStore = {
   },
   activeTextEditor: null as TCAWEditor | null,
   activeProject: undefined as any,
-  projects: [] as any[],
+  projects: [] as any[], // [{ repo, scIndex, root }]
   selectedContributor: undefined as any,
 
   doc: undefined as any | undefined, // active document (specific doc format for Atom, VSCode)

@@ -50,15 +50,8 @@ eventsTable['auth:login'] = (data: TAuth) => {
   CAWStore.user = data?.user
   CAWStore.tokens = data?.tokens
   if (data?.user) {
-    CAWIPC.transmit('repo:active-path', {
-      fpath: CAWStore.activeTextEditor?.document?.uri?.path,
-      cid: CAWIPC.guid,
-      doc: CAWStore.activeTextEditor?.document?.getText()
-    })
-      .then(CAWEditor.updateDecorations)
-      .then(CAWTDP.addProject)
-      .then(CAWPanel.updateProject)
-      .then(CAWWorkspace.setupSync)
+    CAWWorkspace.refreshActiveFile()
+    CAWWorkspace.setupSync()
   }
 }
 

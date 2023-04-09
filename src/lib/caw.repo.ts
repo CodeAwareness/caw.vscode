@@ -10,16 +10,16 @@ type TNamePath = {
 }
 
 const CAWRepository = {
-  createFrom(wsFolder: vscode.WorkspaceFolder) {
-    return new Repository(wsFolder)
+  createFrom(project: any) {
+    return new Repository(project.root)
   },
 }
 
 class Repository {
   root: string
 
-  constructor(wsFolder: vscode.WorkspaceFolder) {
-    this.root = wsFolder.uri.path
+  constructor(root: string) {
+    this.root = root
   }
 
   provideOriginalResource(options: TNamePath) {

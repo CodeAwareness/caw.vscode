@@ -21,7 +21,7 @@ const isWindows = !!process.env.ProgramFiles
 
 // Sync actions from LS are defined here
 const actionTable: Record<string, any> = {
-  refresh: refreshProject,
+  refresh: refreshActiveFile,
 }
 
 function init(data?: any) {
@@ -98,40 +98,26 @@ function getSavedCode() {
 }
 
 // TODO: add heartbeat so that we can clean up duplicate projects (which accumulate on Local Service due to restarting VSCode)
-async function addProject(wsFolder: any) {
-  const folder: string = wsFolder.uri ? wsFolder.uri.path : wsFolder.toString()
-  logger.log('WORKSPACE: addProject', folder)
-
-  CAWIPC.transmit('repo:add', { folder })
-    .then(() => {
-      CAWSCM.addProject(wsFolder)
-      logger.info('WORKSPACE: Folder added to workspace: ', folder)
-    })
-
-  CAWIPC.transmit('repo:add-submodules', { folder })
-    .then((subs: any) => {
-      subs?.map((p: any) => CAWSCM.addProject(p))
-      logger.info('WORKSPACE: Folder submodules added to workspace: ', subs)
-    })
+// Update: i think i solved this issue by cleaning up in the socket.on('close') event listener in LS
+function addProject(project: any) {
+  logger.log('WORKSPACE: addProject', project)
+  CAWSCM.addProject(project)
+  CAWTDP.addProject(project)
+  return project
 }
 
-function removeProject(wsFolder: any) {
-  const folder: string = wsFolder.uri ? wsFolder.uri.path : wsFolder.toString()
+function refreshActiveFile() {
+  console.log('refreshing active file')
+  if (!CAWStore.activeTextEditor) { console.log('no active text editor'); return }
 
-  CAWIPC.transmit('repo:remove', { folder })
-    .then(() => {
-      logger.info('WORKSPACE: Folder removed from workspace: ', folder)
+  return CAWIPC.transmit('repo:active-path', { fpath: CAWStore.activeTextEditor.document.uri.path, cid: CAWIPC.guid, doc: CAWStore.activeTextEditor.document.getText() })
+    .then(addProject)
+    .then(CAWEditor.updateDecorations)
+    .then(CAWPanel.updateProject)
+    .then((project: any) => {
+      Object.keys(project.changes).map(CAWTDP.addFile(project.root))
+      CAWTDP.refresh()
     })
-}
-
-function refreshProject(data: any) {
-  console.log('refreshing project', data.root)
-  const project = CAWStore.projects.filter(p => p.root === data.root)[0]
-  if (!project) return
-  CAWEditor.updateDecorations(project)
-  CAWPanel.updateProject(project)
-  Object.keys(project.changes).map(CAWTDP.addFile(project.root))
-  CAWTDP.refresh()
 }
 
 /************************************************************************************
@@ -144,7 +130,7 @@ const CAWWorkspace = {
   getSavedCode,
   highlight,
   init,
-  removeProject,
+  refreshActiveFile,
   saveCode,
   setupSync,
   setupTempFiles,
