@@ -26,6 +26,7 @@ const CAWIPC = {
   ipcCatalog,
 
   init: async function(): Promise<void> {
+    ipcClient.pubsub.removeAllListeners()
     ipcCatalog.connect(() => {
       ipcCatalog.emit(JSON.stringify({ action: 'clientId', data: guid })) // add this client to the list of clients managed by the local service
       initServer()
