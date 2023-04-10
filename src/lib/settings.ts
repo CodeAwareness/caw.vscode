@@ -15,19 +15,16 @@ import { CAWStore } from './caw.store'
  * These .caw files function in a similar way to .eslintrc and .editorconfig files
  */
 function checkConfiguration(/* context */) {
-  const vscodeConfig = vscode.workspace.getConfiguration('codeAwareness')
-  logger.info('SETTINGS configuration', vscodeConfig) // TODO: add settings
-
   if (!vscode.workspace.workspaceFolders) return Promise.resolve()
 
-  // TODO: configure ... all things
+  // TODO: configure ... all the things
   return Promise.resolve()
 }
 
 function initConfig() {
   return checkConfiguration()
     .then(() => {
-      logger.info('CONFIGURATION READY')
+      logger.info('Configuration ready')
       CAWStore.colorTheme = vscode.window.activeColorTheme.kind
     })
 }

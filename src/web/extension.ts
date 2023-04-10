@@ -39,7 +39,7 @@ export function deactivate() {
     promises.push(task())
   }
 
-  logger.info('CODEAWARENESS_EXTENSION: extension deactivated')
+  logger.info('CodeAwareness: extension deactivated')
   return Promise.all(promises)
 }
 
@@ -50,7 +50,7 @@ function initCodeAwareness(context: vscode.ExtensionContext) {
   CAWIPC.init()
   setupCommands(context)
   setupWatchers(context)
-  logger.info('CODEAWARENESS_EXTENSION: extension activated (workspaceFolders)', vscode.workspace.workspaceFolders)
+  logger.info('CodeAwareness: extension activated (workspaceFolders)', vscode.workspace.workspaceFolders)
 }
 
 const CAWDocumentContentProvider = {
@@ -59,17 +59,17 @@ const CAWDocumentContentProvider = {
   _onDidChange: new vscode.EventEmitter(),
 
   get onDidChange() {
-    logger.info('cawDocumentContentProvider onDidChange')
+    logger.info('CodeAwareness: cawDocumentContentProvider onDidChange')
     return this._onDidChange.event
   },
 
   dispose() {
-    logger.info('cawDocumentContentProvider dispose')
+    logger.info('CodeAwareness: cawDocumentContentProvider dispose')
     this._onDidChange.dispose()
   },
 
   updated(repo: any) {
-    logger.info('cawDocumentContentProvider updated', repo)
+    logger.info('CodeAwareness: cawDocumentContentProvider updated', repo)
     // this._onDidChange.fire(Uri.parse(`${CAW_SCHEMA}:src/extension.js`))
   },
 
@@ -80,7 +80,7 @@ const CAWDocumentContentProvider = {
     const ctId = selectedContributor.user
     const userDir = path.join(tmpDir, ctId.toString(), wsName)
     const peerFile = path.join(userDir, config.EXTRACT_REPO_DIR, uri)
-    // logger.info('cawDocumentContentProvider uri', relativePath.path, 'peerFile', peerFile)
+    // logger.info('CodeAwareness: cawDocumentContentProvider uri', relativePath.path, 'peerFile', peerFile)
 
     return CAWIPC.transmit('repo:read-file', { fpath: peerFile })
       // TODO: find a better way to indicate deleted file, as opposed to new file created, as opposed to simply file not existing
@@ -112,7 +112,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
   // Sync workspace folders
   subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(e => {
     if (!activated) initCodeAwareness(context)
-    logger.info('CODEAWARENESS_EXTENSION: onDidChangeWorkspaceFolders (events)', e)
+    logger.info('CodeAwareness: onDidChangeWorkspaceFolders (events)', e)
     try {
       e.added.forEach(wsFolder => {
         vscode.window.registerTreeDataProvider(SCM_PEER_FILES_VIEW, CAWTDP.addPeerWorkspace(wsFolder))
@@ -185,9 +185,8 @@ function setupWatchers(context: vscode.ExtensionContext) {
   /*
   const { name, version, aiKey } = require('../package.json')
   const telemetryReporter = new TelemetryReporter(name, version, aiKey)
-  logger.info('CODEAWARENESS_EXTENSION: deactivateTasks', deactivateTasks)
   deactivateTasks.push(() => telemetryReporter.dispose())
   */
 
-  logger.log('setup watchers complete.')
+  logger.log('CodeAwareness: setup watchers complete.')
 }
