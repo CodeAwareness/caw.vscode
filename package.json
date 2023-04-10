@@ -193,21 +193,11 @@
     "configuration": {
       "title": "Code Awareness",
       "properties": {
-        "caw.maxCommitsInLog": {
-          "type": "number",
-          "default": 200,
-          "description": "%caw.config.maxCommitsInLog%",
-          "minimum": 50,
-          "maximum": 1000,
-          "scope": "machine-overridable"
-        },
-        "caw.syncInterval": {
-          "type": "number",
-          "default": 14400,
-          "description": "%caw.config.syncInterval%",
-          "minimum": 60,
-          "maximum": 43200,
-          "scope": "machine-overridable"
+        "codeAwareness.catalog": {
+          "type": "string",
+          "default": "catalog",
+          "description": "%caw.config.catalog%",
+          "scope": "application"
         }
       }
     }
@@ -218,8 +208,8 @@
     "vscode:prepublish": "npm run package-web",
     "package": "npm run package-web && vsce package",
     "compile-web": "webpack",
-    "watch-web": "NODE_ENV=development DEBUG=1 webpack --watch",
     "package-web": "./prepare-prod.sh ; webpack --mode production --devtool hidden-source-map",
+    "watch-web": "webpack --watch",
     "lint": "eslint src --ext ts",
     "run-in-browser": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. ."
   },
