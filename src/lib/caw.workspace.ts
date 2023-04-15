@@ -30,7 +30,7 @@ function init(data?: any) {
     CAWStore.user = data.user
     CAWStore.tokens = data.tokens
     CAWDiffs.init()
-    setupSync()
+    setupSync() // TODO: when we restart LS the client reconnects but we lose the sync (and it seems auth:info returns undefined?)
   }
   return setupTempFiles()
 }

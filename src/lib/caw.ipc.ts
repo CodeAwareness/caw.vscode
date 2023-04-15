@@ -52,6 +52,8 @@ const CAWIPC = {
 
       data = Object.assign(data || {}, { caw: guid })
       ipcClient.emit(JSON.stringify({ action, data })) // send data to the pipe
+      ipcClient.pubsub.removeAllListeners(`res:${action}`)
+      ipcClient.pubsub.removeAllListeners(`err:${action}`)
       ipcClient.pubsub.on(`res:${action}`, handler)    // process successful response
       ipcClient.pubsub.on(`err:${action}`, errHandler) // process error response
     })
