@@ -22,6 +22,7 @@ type TEditorRanges = {
 
 const rulerDecorationType = vscode.window.createTextEditorDecorationType({
   isWholeLine: true,
+  // TODO: add a user setting to allow marking line changes with gutter icons instead of overviewRulerLane
   overviewRulerColor: 'red',
   overviewRulerLane: vscode.OverviewRulerLane.Right,
   light: {

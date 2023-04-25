@@ -58,10 +58,8 @@ function setActiveEditor(editor: TCAWEditor) {
  *
  * @param project object The `project` structure is defined in the CAW Local Service
  ************************************************************************************/
-function updateDecorations(project: any) {
-  logger.log('EDITOR: syncing webview (project)', project)
+function updateDecorations(project?: any) {
   const editor = CAWStore.activeTextEditor
-  CAWStore.activeProject = project
   if (!editor) return logger.error('EDITOR trying to setup editor failed; no active text editor.')
   CAWDeco.insertDecorations()
 

@@ -6,8 +6,6 @@ import logger from './logger'
 
 import { CAWStore, CAWWork } from './caw.store'
 
-import type { TCAWEditor } from './caw.editor'
-
 import CAWDiffs from './caw.diffs'
 import CAWEditor from './caw.editor'
 import CAWSCM from './caw.scm'
@@ -41,7 +39,7 @@ function dispose() {
   if (CAWWork.syncTimer) clearInterval(CAWWork.syncTimer)
   CAWStore.panel?.dispose()
   CAWStore.panel = undefined
-  CAWEditor.updateDecorations(CAWStore.activeProject)
+  CAWEditor.updateDecorations()
 }
 
 function setupTempFiles() {
@@ -57,11 +55,6 @@ function setupSync() {
   CAWIPC.ipcClient.pubsub.on('res:sync:setup', syncGardener)
 }
 
-/************************************************************************************
- * Close text document
- *
- * (cleanup)
- ************************************************************************************/
 function closeTextDocument(params: any) {
   console.log('WORKSPACE: closeTextDocument', params)
 }
@@ -84,25 +77,13 @@ function highlight() {
   // TODO: cycle through the changes while highlighting changes existing at peers
 }
 
-const getCode = (editor: TCAWEditor) => editor?.document.getText()
-
-function saveCode() {
-  if (!CAWStore.activeTextEditor) return Promise.reject(new Error('No active editor')) // TODO:
-  const existingCode = getCode(CAWStore.activeTextEditor)
-  // TODO:
-  return Promise.resolve()
-}
-
-function getSavedCode() {
-  // TODO: return readFile(_tmpFile).catch(err => null && err)
-}
-
 // TODO: add heartbeat so that we can clean up duplicate projects (which accumulate on Local Service due to restarting VSCode)
 // Update: i think i solved this issue by cleaning up in the socket.on('close') event listener in LS
 function addProject(project: any) {
   logger.log('WORKSPACE: addProject', project)
   CAWSCM.addProject(project)
   CAWTDP.addProject(project)
+  CAWStore.activeProject = project
   return project
 }
 
@@ -127,11 +108,9 @@ const CAWWorkspace = {
   addProject,
   closeTextDocument,
   dispose,
-  getSavedCode,
   highlight,
   init,
   refreshActiveFile,
-  saveCode,
   setupSync,
   setupTempFiles,
 }

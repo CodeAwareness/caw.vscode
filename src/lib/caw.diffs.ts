@@ -12,7 +12,7 @@ const isWindows = !!process?.env.ProgramFiles // vscode.process in previous vers
 const pendingDiffs = {} as Record<string, any>
 
 /************************************************************************************
- * Initialization
+ * Initialization, cleanup
  ************************************************************************************/
 
 function init() {
@@ -23,12 +23,9 @@ function clear() {
   // TODO: clear diffs when changing to a different file
 }
 
-/**
- * Shift the highlights based on the live edits you're making to the code (new / delete lines)
- * @param project object
- * @param fpath string
- * @returns void
- */
+/************************************************************************************
+ * Keep the change highlights in sync with local changes
+ ************************************************************************************/
 function shiftWithLiveEdits(project: any, fpath: string) {
   if (!project.changes || !project.changes[fpath]) return
   const shas = Object.keys(project.changes[fpath].alines).slice(0, config.MAX_NR_OF_SHA_TO_COMPARE)

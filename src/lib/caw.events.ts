@@ -41,6 +41,7 @@ const eventsTable: Record<string, any> = {}
 
 eventsTable['webview:loaded'] = () => {
   console.log('Will init webview with GUID', CAWIPC.guid)
+  init()
   postBack('wssGuid')(CAWIPC.guid)
   postBack('authInfo')({ user: CAWStore.user, tokens: CAWStore.tokens })
 }
