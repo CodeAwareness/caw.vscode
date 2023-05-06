@@ -19,14 +19,11 @@ import CAWTDP from '@/lib/caw.tdp'
 import CAWIPC from '@/lib/caw.ipc'
 
 let activated: boolean // extension activated !
-const deactivateTasks: Array<any> = [] // keeping track of all the disposables
+const deactivateTasks: Array<any> = [] // keeping track of all the disposables (TODO: cleanup)
 
 export const SCM_PEER_FILES_VIEW = 'codeAwareness'
 
-export function activate(context: vscode.ExtensionContext) {
-  // The commandId parameter must match the command field in package.json
-  initCodeAwareness(context)
-}
+export const activate = initCodeAwareness
 
 export function deactivate() {
   const promises = [
@@ -91,7 +88,7 @@ const CAWDocumentContentProvider = {
 /************************************************************************************
  * Watch the workspace folder list, and register / unregister as projects.
  *
- * TDP: CodeAwareness Explorer panel: showing all files affected by changes at peers.
+ * TDP: Tree Data Provider: showing all files affected by changes at peers (left panel)
  * SCM: Source Control Manager: trying to use internal VSCode SCM here.
  ************************************************************************************/
 function setupWatchers(context: vscode.ExtensionContext) {
@@ -140,8 +137,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
    * User saving the activeTextEditor
    ************************************************************************************/
   subscriptions.push(vscode.workspace.onDidSaveTextDocument(doc => {
-    // TODO: some throttle mechanism to make sure we're only sending at most once per some configured interval (subscription plan related)
-    // use delay to allow the system to do other things like build and stuff, and prevent excessive use (peaks) of CPU
+    // TODO: some throttle mechanism to make sure we're only sending at most once per some configured interval
     CAWIPC.transmit('repo:file-saved', { fpath: doc.fileName, doc: doc.getText(), cid: CAWIPC.guid })
       .then(CAWEditor.updateDecorations)
       .then(CAWPanel.updateProject)

@@ -6,7 +6,6 @@ import logger from './logger'
 
 import { CAWStore } from './caw.store'
 import CAWDeco from './caw.deco'
-import CAWDiffs from './caw.diffs'
 
 // TODO: find a way to detect windows env
 
@@ -46,7 +45,6 @@ function setActiveEditor(editor: TCAWEditor) {
   const { tmpDir } = CAWStore
   if (editor?.document.fileName.includes(tmpDir)) return
   CAWStore.reset()
-  CAWDiffs.clear()
   CAWStore.activeTextEditor = editor
   logger.info('EDITOR: set active editor', editor)
 }

@@ -107,7 +107,7 @@ function getNonce() {
 function getWebviewContent(webview: vscode.Webview) {
   const nonce = getNonce()
   const cspSource = 'https://vscode.codeawareness.com https://api.codeawareness.com'
-  const mediaSource = 'https://codeawareness.com https://ext.codeawareness.com'
+  const mediaSource = 'https://vscode.codeawareness.com'
   // TODO: everytime i publish the CAW Panel it builds a new chunk hash, try to make this pain go away without introducing cache headaches
   webview.html = `<!doctype html><html lang="en"><head><meta charset="UTF-8">
     <title>CodeAwareness VSCode panel</title>
@@ -123,11 +123,9 @@ function getWebviewContent(webview: vscode.Webview) {
 }
 
 async function getWebviewContentLocal(webview: vscode.Webview) {
-  // webview.html = (await got('https://127.0.0.1:8885')).body
-
   const nonce = getNonce()
   const cspSource = 'https://127.0.0.1:8885'
-  const mediaSource = 'https://codeawareness.com https://ext.codeawareness.com'
+  const mediaSource = 'https://vscode.codeawareness.com'
   webview.html = `<!doctype html><html lang="en"><head><meta charset="UTF-8">
     <title>CodeAwareness VSCode panel</title>
     <meta http-equiv="Content-Security-Policy" content="default-src ${cspSource}; style-src ${cspSource} 'unsafe-inline'; img-src ${cspSource} ${mediaSource}; script-src 'nonce-${nonce}' 'unsafe-eval';">

@@ -46,8 +46,16 @@ const CAWIPC = {
       }
       const errHandler = (err: any) => {
         console.info('IPC: socket error', action, err)
-        const data = typeof err === 'string' ? JSON.parse(err) : err
-        reject(data)
+        let data
+        if (typeof err === 'string') {
+          try {
+            data = JSON.parse(err)
+          } catch (err) {
+            reject('Operation failed.')
+          }
+        } else {
+          reject(err)
+        }
       }
 
       data = Object.assign(data || {}, { caw: guid })

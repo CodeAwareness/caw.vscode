@@ -33,6 +33,7 @@ const rulerDecorationType = vscode.window.createTextEditorDecorationType({
   },
 })
 
+/* Decoration indicating a change by others */
 const changeDecorationType = vscode.window.createTextEditorDecorationType({
   isWholeLine: true,
   light: {
@@ -43,6 +44,7 @@ const changeDecorationType = vscode.window.createTextEditorDecorationType({
   },
 })
 
+/* Decoration indicating the code shown is peer's code, not local */
 const peerDecorationType = vscode.window.createTextEditorDecorationType({
   isWholeLine: true,
   light: {
@@ -53,6 +55,7 @@ const peerDecorationType = vscode.window.createTextEditorDecorationType({
   },
 })
 
+/* Decoration indicating the code shown is merged code. This indicates accepted line from peer code. */
 const mergeDecorationType = vscode.window.createTextEditorDecorationType({
   isWholeLine: true,
   light: {

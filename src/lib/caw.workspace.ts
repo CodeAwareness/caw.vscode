@@ -6,7 +6,6 @@ import logger from './logger'
 
 import { CAWStore, CAWWork } from './caw.store'
 
-import CAWDiffs from './caw.diffs'
 import CAWEditor from './caw.editor'
 import CAWSCM from './caw.scm'
 import CAWIPC from './caw.ipc'
@@ -27,7 +26,6 @@ function init(data?: any) {
   if (data?.user) {
     CAWStore.user = data.user
     CAWStore.tokens = data.tokens
-    CAWDiffs.init()
     setupSync() // TODO: when we restart LS the client reconnects but we lose the sync (and it seems auth:info returns undefined?)
   }
   return setupTempFiles()
