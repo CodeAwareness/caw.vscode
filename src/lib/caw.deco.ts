@@ -40,7 +40,7 @@ const changeDecorationType = vscode.window.createTextEditorDecorationType({
     backgroundColor: '#00b1a420',
   },
   dark: {
-    backgroundColor: '#00b1a420',
+    backgroundColor: '#03445f',
   },
 })
 

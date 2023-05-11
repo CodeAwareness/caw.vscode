@@ -54,7 +54,7 @@ Limitations:
 
 Install the extension from the VSCode marketplace.
 
-To load the nightly prebuilt extension, download it from [https://ext.codeawareness.com/nightly/code-awareness-nightly.vsix](https://ext.codeawareness.com/nightly) and load it in VSCode: go to the Extention explorer, click the ellipsis menu at the top, and select "Install from VSIX".
+To load the nightly prebuilt extension, download it from [https://vscode.codeawareness.com/nightly/code-awareness-nightly.vsix](https://vscode.codeawareness.com/nightly) and load it in VSCode: go to the Extention explorer, click the ellipsis menu at the top, and select "Install from VSIX".
 
 Install and run the [Code Awareness local service](https://github.com/CodeAwareness/cA.localservice).
 
