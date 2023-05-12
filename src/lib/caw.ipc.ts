@@ -1,5 +1,5 @@
 /******************************************************************
- * CodeAwareness Inter Process Communication with the local service
+ * CodeAwareness Inter Process Communication with the Local Service
  ******************************************************************/
 import IPC from '@/lib/ipc'
 import config from '@/config'

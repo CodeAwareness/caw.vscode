@@ -1,6 +1,9 @@
-/*********************
+/**********************************************************
  * VSCode Decorations
- *********************/
+ *
+ * Defines and handles the gutter decorations,
+ * as well as the line highlights inside the text editor.
+ **********************************************************/
 import * as vscode from 'vscode'
 import * as _ from 'lodash'
 
@@ -9,7 +12,6 @@ import logger from './logger'
 import CAWPanel from './caw.panel'
 
 let lastUri: string
-// try to only insert decorations in the text editor at idle times; for now: at most once a second or so
 // TODO: make 2000 wait time into a configurable value
 const insertAfterSomeTime = _.throttle(doInsert, 500, { trailing: true })
 const insertThenWaitSomeTime = _.throttle(doInsert, 500, { leading: true })

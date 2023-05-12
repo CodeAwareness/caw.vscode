@@ -130,7 +130,7 @@ const TDP = {
    * searchLib -> bobId ->   [ services/logger.js, main.js ]
    * microPost -> bobId ->   [ settings/app.js, components/crispy.js ]
 
-   * When we're adding files from downloadDiff, we store them in this format, and we combine all the file paths into a list for VSCode Source Control Manager.
+   * When we're adding files from downloaded diffs, we store them in this format, and we combine all the file paths into a list for VSCode Source Control Manager.
    ************************************************************************************/
   addFile: (folder: string) => (fpath: string) => {
     const parts = fpath.split('/').filter(a => a)

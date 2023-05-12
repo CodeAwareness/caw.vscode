@@ -13,8 +13,7 @@ import logger from './logger'
 import CAWEditor from './caw.editor'
 import CAWDeco from './caw.deco'
 import CAWPanel from './caw.panel'
-import CAWTDP from '@/lib/caw.tdp'
-import CAWIPC from '@/lib/caw.ipc'
+import CAWIPC from './caw.ipc'
 import CAWWorkspace from './caw.workspace'
 
 /**
@@ -26,6 +25,7 @@ function init() {
   CAWPanel.postMessage({ command: 'setColorTheme', data })
 }
 
+// TODO: do we still need a short ID anywhere?
 const shortid = () => {
   const n = String.fromCharCode(Math.floor(Math.random() * 10 + 48))
   const l = String.fromCharCode(Math.floor(Math.random() * 26 + 97))
@@ -37,6 +37,7 @@ const postBack = (command: string, id?: string) => (data: any) => {
   CAWPanel.postMessage({ command, id, data })
 }
 
+// The eventsTable is a map of event names received from the webview and their actions (functions).
 const eventsTable: Record<string, any> = {}
 
 eventsTable['webview:loaded'] = () => {
@@ -110,9 +111,9 @@ function processSystemEvent(key: string, data: any) {
 }
 
 /************************************************************************************
+ * @param string - id: a unique ID to keep the req-res correlation.
+ * For example, key can be: `auth:info:1kG9`.
  * @param string - key: the event key, indicating an action to be taken,
- * plus a unique ID to keep the req-res correlation.
- * For example, key can be: `auth:info:1kG9`
  * @param object - data: the data to be processed inside the action
  ************************************************************************************/
 function processAPI(id: string, key: string, data: any) {
