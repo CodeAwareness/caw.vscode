@@ -6,9 +6,9 @@ const cawConfig = vscode.workspace.getConfiguration('codeAwareness')
 
 // TODO: find a way to detect DEV vs PROD execution mode, so we don't have to keep on switching DEBUG on and off in the config.
 // To work in dev-mode set DEBUG to true. This will trigger loading the webpanel from localhost instead of codeawareness.com
-const DEBUG = true
+const DEBUG = false
 
-// Dev mode, please configure local nginx
+// Dev mode when you have CodeAwareness VSCode Panel running locally; please configure local nginx.
 const PORT_LOCAL = 8885
 
 // SCHEMA used by VSCode to handle repository, SCM, etc
@@ -27,9 +27,6 @@ const API_URL = DEBUG ? `https://127.0.0.1:${PORT_LOCAL}/api/${SERVER_VERSION}` 
 const CATALOG: string = cawConfig.get('catalog') || 'catalog'
 const PIPE_CATALOG = CATALOG + (DEBUG ? '_dev' : '')
 console.log('PIPE_CATALOG', PIPE_CATALOG)
-
-// In the getLinesChangedLocally we aggregate changes against multiple SHA values. This is the maximum nr of previous commits we consider for our diffs.
-const MAX_NR_OF_SHA_TO_COMPARE = 5
 
 const LOG_LEVEL = process.env.LOG_LEVEL || 'debug' // ['verbose', 'debug', 'error']
 
@@ -55,7 +52,6 @@ export default {
   EXTRACT_PEER_DIR,
   EXTRACT_REPO_DIR,
   LOG_LEVEL,
-  MAX_NR_OF_SHA_TO_COMPARE,
   PIPE_CATALOG,
   PORT_LOCAL,
   SERVER_VERSION,

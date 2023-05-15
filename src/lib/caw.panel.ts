@@ -113,7 +113,7 @@ function getWebviewContent(webview: vscode.Webview) {
     <title>CodeAwareness VSCode panel</title>
     <meta http-equiv="Content-Security-Policy" content="default-src ${cspSource}; style-src ${cspSource} 'unsafe-inline'; img-src ${cspSource} ${mediaSource}; script-src 'nonce-${nonce}';">
     <script defer="defer" nonce="${nonce}" src="https://vscode.codeawareness.com/runtime.js"></script>
-    <script defer="defer" nonce="${nonce}" src="https://vscode.codeawareness.com/110.js?t=${new Date().valueOf()}"></script>
+    <script defer="defer" nonce="${nonce}" src="https://vscode.codeawareness.com/706.js?t=${new Date().valueOf()}"></script>
     <script defer="defer" nonce="${nonce}" src="https://vscode.codeawareness.com/main.js?t=${new Date().valueOf()}"></script>
     <link nonce="${nonce}" href="https://vscode.codeawareness.com/main.css" rel="stylesheet"></head>
     <body>

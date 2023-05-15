@@ -18,13 +18,15 @@ Note about privacy and intellectual property: Code Awareness does not require ac
 ## Requirements
 
 1. Install the [Code Awareness local service](https://github.com/CodeAwareness/cA.localservice)
-2. When developing, you'll also need the [Code Awareness VSCode panel](https://github.com/CodeAwareness/cA.vscode.panel).
+2. When developing, you may also need the [Code Awareness VSCode panel](https://github.com/CodeAwareness/cA.vscode.panel).
 
 ## Extension Settings
 
 ## Known Issues
 
 Beta release. Much work remaining to be done.
+
+If something hangs, please restart VSCode.
 
 ## Release Notes
 
