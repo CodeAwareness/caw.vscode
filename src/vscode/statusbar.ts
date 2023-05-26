@@ -21,7 +21,7 @@ export const CAWStatusbar = {
 
   live: () => {
     statusBarItem.text = 'CodeAwareness'
-    statusBarItem.command = 'CAW.toggle'
+    statusBarItem.command = 'caw.toggle'
     statusBarItem.tooltip = 'Toggle CodeAwareness panel'
   },
 

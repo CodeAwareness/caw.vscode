@@ -7,7 +7,7 @@ import { CAWStatusbar } from '@/vscode/statusbar'
 
 import CAWWorkspace from './caw.workspace'
 
-export type Class<T> = new (...args: any[]) => T
+export type TClass<T> = new (...args: any[]) => T
 
 const shortid = () => {
   return new Date().valueOf().toString() // we run multiple editors, yes, but we run them as a user on a local computer, so this is fine.
@@ -37,8 +37,8 @@ const CAWIPC = {
   },
 
   /* Transmit an action, and perhaps some data. Recommend a namespacing format for the action, something like `<domain>:<action>`, e.g. `auth:login` or `users:query`. */
-  transmit: function(action: string, data?: any) {
-    return new Promise((resolve, reject) => {
+  transmit: function<T>(action: string, data?: any) {
+    return new Promise<T>((resolve, reject) => {
       const handler = (body: any) => {
         console.info('IPC: resolved action', action, body)
         const data = typeof body === 'string' ? JSON.parse(body) : body
@@ -51,7 +51,7 @@ const CAWIPC = {
           try {
             data = JSON.parse(err)
           } catch (err) {
-            reject('Operation failed.')
+            reject(new Error('Operation failed.'))
           }
         } else {
           reject(err)

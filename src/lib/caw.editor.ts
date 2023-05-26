@@ -57,10 +57,7 @@ function setActiveEditor(editor: TCAWEditor) {
  * @param project object The `project` structure is defined in the CAW Local Service
  ************************************************************************************/
 function updateDecorations(project?: any) {
-  const editor = CAWStore.activeTextEditor
-  if (!editor) return logger.error('EDITOR trying to setup editor failed; no active text editor.')
   CAWDeco.insertDecorations()
-
   return project
 }
 

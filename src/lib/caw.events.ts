@@ -16,6 +16,13 @@ import CAWPanel from './caw.panel'
 import CAWIPC from './caw.ipc'
 import CAWWorkspace from './caw.workspace'
 
+export type TDiffResponse = {
+  title: string
+  extractDir: string
+  peerFile: string
+  fpath: string
+}
+
 /**
  * This is the VSCode <--> VSCode Webview Events module
  */
@@ -88,8 +95,9 @@ eventsTable['contrib:select'] = (contrib: any) => {
   if (!fpath) return
   const cid = CAWIPC.guid
   const origin = CAWStore.activeProject.origin
-  CAWIPC.transmit('repo:diff-contrib', { origin, fpath, cid, contrib })
-    .then((info: any) => {
+  const doc = CAWStore.activeTextEditor?.document.getText()
+  CAWIPC.transmit<TDiffResponse>('repo:diff-contrib', { origin, fpath, cid, contrib, doc })
+    .then((info) => {
       const peerFileUri = vscode.Uri.file(info.peerFile)
       const userFileUri = vscode.Uri.file(fpath)
       // logger.info('OPEN DIFF with', fpath, info)
@@ -105,7 +113,7 @@ eventsTable['contrib:unselect'] = () => {
  * @param string - key: the event key, indicating an action to be taken
  * @param object - data: the data to be processed inside the action
  ************************************************************************************/
-function processSystemEvent(key: string, data: any) {
+function processSystemEvent(key: string, data: any): void {
   logger.info('EVENTS processSystemEvent', key, data)
   if (eventsTable[key]) eventsTable[key](data)
 }
@@ -116,7 +124,7 @@ function processSystemEvent(key: string, data: any) {
  * @param string - key: the event key, indicating an action to be taken,
  * @param object - data: the data to be processed inside the action
  ************************************************************************************/
-function processAPI(id: string, key: string, data: any) {
+function processAPI(id: string, key: string, data: any): void {
   logger.info('EVENTS processAPI', key, data)
   CAWIPC.transmit(key, data)
     .then(data => {

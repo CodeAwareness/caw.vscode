@@ -83,13 +83,13 @@
       },
       {
         "command": "caw.nextContributor",
-        "key": "ctrl+alt+.",
-        "mac": "cmd+alt+,"
+        "key": "ctrl+alt+]",
+        "mac": "cmd+alt+]"
       },
       {
         "command": "caw.prevContributor",
-        "key": "ctrl+alt+,",
-        "mac": "cmd+alt+,"
+        "key": "ctrl+alt+[",
+        "mac": "cmd+alt+["
       },
       {
         "command": "caw.mergeSlice",

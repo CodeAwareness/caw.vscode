@@ -4,6 +4,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import logger from './logger'
 
+import type { TProject } from './caw.store'
+
 import { CAWStore, CAWWork } from './caw.store'
 
 import CAWEditor from './caw.editor'
@@ -11,7 +13,7 @@ import CAWSCM from './caw.scm'
 import CAWIPC from './caw.ipc'
 import CAWPanel from '@/lib/caw.panel'
 import CAWTDP from '@/lib/caw.tdp'
-// import { CodeActionTriggerKind } from 'vscode'
+import { Position, Range /*, CodeActionTriggerKind */} from 'vscode'
 
 // TODO: this doesn't quite work.
 const isWindows = !!process.env.ProgramFiles
@@ -77,7 +79,7 @@ function highlight() {
 
 // TODO: add heartbeat so that we can clean up duplicate projects (which accumulate on Local Service due to restarting VSCode)
 // Update: i think i solved this issue by cleaning up in the socket.on('close') event listener in LS
-function addProject(project: any) {
+function addProject(project: TProject) {
   logger.log('WORKSPACE: addProject', project)
   CAWSCM.addProject(project)
   CAWTDP.addProject(project)
@@ -89,7 +91,7 @@ function refreshActiveFile() {
   console.log('refreshing active file')
   if (!CAWStore.activeTextEditor) { console.log('no active text editor'); return }
 
-  return CAWIPC.transmit('repo:active-path', { fpath: CAWStore.activeTextEditor.document.uri.path, cid: CAWIPC.guid, doc: CAWStore.activeTextEditor.document.getText() })
+  return CAWIPC.transmit<TProject>('repo:active-path', { fpath: CAWStore.activeTextEditor.document.uri.path, cid: CAWIPC.guid, doc: CAWStore.activeTextEditor.document.getText() })
     .then(addProject)
     .then(CAWEditor.updateDecorations)
     .then(CAWPanel.updateProject)
@@ -99,12 +101,55 @@ function refreshActiveFile() {
     })
 }
 
+export type TContribBlock = {
+  range: {
+    line: number
+    len: number
+    content: string[]
+  }
+  replaceLen: number
+}
+
+function cycleContribution(direction: number) {
+  if (!CAWStore.activeTextEditor) { console.log('no active text editor'); return }
+
+  CAWIPC.transmit<TContribBlock>('repo:cycle-contrib', {
+    cid: CAWIPC.guid,
+    origin: CAWStore.activeProject.origin,
+    fpath: CAWStore.activeTextEditor.document.uri.path,
+    doc: CAWStore.activeTextEditor.document.getText(),
+    line: CAWStore.activeTextEditor.selections[0].active.line + 1,
+    direction,
+  })
+    .then(data => {
+      console.log('CYCLE RESPONSE', data)
+      const editor = CAWStore.activeTextEditor
+      if (!data?.range || !editor) return
+      const start = new Position((data.range.line || 1) - 1, 0)
+      const end = editor.document.lineAt((data.range.line || 1) - 1).range.end
+      const content = data.range.content.join('\n') // TODO: what about Windows platform?
+
+      editor.edit(editBuilder => {
+        if (data.replaceLen && !data.range.len) {
+          const insStart = new Position(data.range.line, 0)
+          editBuilder.insert(insStart, content + '\n')
+        } else if (!data.replaceLen) {
+          const delEnd = new Position((data.range.line || 1) + data.range.len - 1, 0)
+          editBuilder.delete(new Range(start, delEnd))
+        } else {
+          editBuilder.replace(new Range(start, end), content)
+        }
+      })
+    })
+}
+
 /************************************************************************************
  * Export module
  ************************************************************************************/
 const CAWWorkspace = {
   addProject,
   closeTextDocument,
+  cycleContribution,
   dispose,
   highlight,
   init,

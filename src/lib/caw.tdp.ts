@@ -39,7 +39,7 @@ const toTDItem = ({ folder, tree, fpath }: WS_TREE_TYPE) => (key: string) => {
   const collapsibleState = isFile ? TreeItemCollapsibleState.None : TreeItemCollapsibleState.Expanded
   const itemPath = path.join(fpath, key)
   const uid = isFile && tree[key]
-  const command = isFile ? { command: 'CAW.openPeerFile', arguments: [folder, itemPath, uid] } : null
+  const command = isFile ? { command: 'caw.openPeerFile', arguments: [folder, itemPath, uid] } : null
 
   return new TDItem({
     label: key.split('/').pop(),

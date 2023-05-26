@@ -8,6 +8,21 @@ import * as vscode from 'vscode'
 import { TCAWEditor } from '@/lib/caw.editor'
 import CAWIPC from '@/lib/caw.ipc'
 
+export type TProject = {
+  name: string
+  root: string
+  origin: string
+  repo: string
+  branch: string
+  branches: Array<string>
+  head: string
+  cSHA: string
+  contributors: Array<any> // TODO
+  activePath: string
+  line: number
+  changes: Record<string, any>
+}
+
 export type TDiffRange = {
   range: {
     line: number,

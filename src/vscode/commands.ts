@@ -5,46 +5,54 @@ import logger from '@/lib/logger'
 
 import CAWPanel from '@/lib/caw.panel'
 import CAWIPC from '@/lib/caw.ipc'
+import CAWWorkspace from '@/lib/caw.workspace'
 
 const { registerCommand } = vscode.commands
 
 function setupCommands(context: vscode.ExtensionContext) {
-  context.subscriptions.push(registerCommand('CAW.toggle', function() {
+  context.subscriptions.push(registerCommand('caw.toggle', function() {
     CAWPanel.toggle(context)
   }))
 
-  context.subscriptions.push(registerCommand('CAW.highlight', function() {
+  context.subscriptions.push(registerCommand('caw.highlight', function() {
     logger.log('COMMAND: highlight request received')
     // TODO: highlight a range (slice)
   }))
 
-  context.subscriptions.push(registerCommand('CAW.nextContributor', function() {
-    // CAWDiffs.cycleContribution()
+  context.subscriptions.push(registerCommand('caw.nextContributor', function() {
+    try {
+      CAWWorkspace.cycleContribution(1)
+    } catch (err) {
+      console.error(err)
+    }
   }))
 
-  context.subscriptions.push(registerCommand('CAW.prevContributor', function() {
-    // CAWDiffs.cycleContribution(true)
+  context.subscriptions.push(registerCommand('caw.prevContributor', function() {
+    try {
+      CAWWorkspace.cycleContribution(-1)
+    } catch (err) {
+      console.error(err)
+    }
   }))
 
-  context.subscriptions.push(registerCommand('CAW.nextContribution', function(...rest) {
+  context.subscriptions.push(registerCommand('caw.nextContribution', function(...rest) {
     logger.log('COMMAND: nextContribution request received', rest)
   }))
 
-  context.subscriptions.push(registerCommand('CAW.prevContribution', function(...rest) {
+  context.subscriptions.push(registerCommand('caw.prevContribution', function(...rest) {
     logger.log('COMMAND: prevContribution request received', rest)
   }))
 
-  context.subscriptions.push(registerCommand('CAW.mergeSlice', function(...rest) {
+  context.subscriptions.push(registerCommand('caw.mergeSlice', function(...rest) {
     logger.log('COMMAND: mergeSlice request received', rest)
     // CAWDiffs.mergeSlice()
   }))
 
-  context.subscriptions.push(registerCommand('CAW.mergeAll', function() {
+  context.subscriptions.push(registerCommand('caw.mergeAll', function() {
     logger.log('COMMAND: mergeAll request received')
   }))
 
-  context.subscriptions.push(registerCommand('CAW.openPeerFile', function(wsFolder, fpath, uid) {
-    logger.log('COMMAND: openPeerFile request received', wsFolder, fpath)
+  context.subscriptions.push(registerCommand('caw.openPeerFile', function(wsFolder, fpath, uid) {
     CAWIPC.transmit('repo:vscode-diff', { wsFolder, fpath, uid })
       .then((data: any) => {
         if (data.exists) {
@@ -58,22 +66,22 @@ function setupCommands(context: vscode.ExtensionContext) {
       })
   }))
 
-  context.subscriptions.push(registerCommand('CAW.openDiff', function(/* resourceUri, cdir, cfile, title */) {
+  context.subscriptions.push(registerCommand('caw.openDiff', function(/* resourceUri, cdir, cfile, title */) {
     logger.log('COMMAND: openDiff request received')
     // TODO: open diffs
   }))
 
-  context.subscriptions.push(registerCommand('CAW.refresh', function() {
+  context.subscriptions.push(registerCommand('caw.refresh', function() {
     logger.log('COMMAND: refresh request received')
     // TODO: refresh diffs
   }))
 
-  context.subscriptions.push(registerCommand('CAW.openFile', function({ resourceUri }, ...rest) {
+  context.subscriptions.push(registerCommand('caw.openFile', function({ resourceUri }, ...rest) {
     logger.log('COMMAND: openFile request received', resourceUri, rest)
     vscode.commands.executeCommand('vscode.open', resourceUri)
   }))
 
-  context.subscriptions.push(registerCommand('CAW.selectRange', function() {
+  context.subscriptions.push(registerCommand('caw.selectRange', function() {
     logger.log('COMMAND: selectRange request received')
     // TODO: select a diff range (slice)
   }))

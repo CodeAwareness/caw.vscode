@@ -4,12 +4,14 @@
 import * as vscode from 'vscode'
 import { basename } from 'path'
 
+import type { TProject } from './caw.store'
+
 import logger from './logger'
 
 import CAWRepository from './caw.repo'
 import CAWStore from './caw.store'
 
-async function addProject(project: any) {
+async function addProject(project: TProject) {
   logger.info('SCM addProject', project)
   const root = project.root
   const name = basename(root)
