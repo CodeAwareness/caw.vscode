@@ -3,7 +3,7 @@
   "displayName": "Code Awareness",
   "description": "Low noise collaboration.",
   "icon": "media/icons/caw-logo.png",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "CodeAwareness",
   "author": "Mark Vasile",
   "repository": "https://github.com/CodeAwareness/cA.vscode",

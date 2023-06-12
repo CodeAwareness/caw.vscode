@@ -6,7 +6,7 @@ const cawConfig = vscode.workspace.getConfiguration('codeAwareness')
 
 // TODO: find a way to detect DEV vs PROD execution mode, so we don't have to keep on switching DEBUG on and off in the config.
 // To work in dev-mode set DEBUG to true. This will trigger loading the webpanel from localhost instead of codeawareness.com
-const DEBUG = true
+const DEBUG = false
 
 // Dev mode when you have CodeAwareness VSCode Panel running locally; please configure local nginx.
 const PORT_LOCAL = 8885
