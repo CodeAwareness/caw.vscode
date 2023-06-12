@@ -35,14 +35,6 @@ function setupCommands(context: vscode.ExtensionContext) {
     }
   }))
 
-  context.subscriptions.push(registerCommand('caw.nextContribution', function(...rest) {
-    logger.log('COMMAND: nextContribution request received', rest)
-  }))
-
-  context.subscriptions.push(registerCommand('caw.prevContribution', function(...rest) {
-    logger.log('COMMAND: prevContribution request received', rest)
-  }))
-
   context.subscriptions.push(registerCommand('caw.mergeSlice', function(...rest) {
     logger.log('COMMAND: mergeSlice request received', rest)
     // CAWDiffs.mergeSlice()

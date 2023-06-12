@@ -13,9 +13,9 @@ import CAWSCM from './caw.scm'
 import CAWIPC from './caw.ipc'
 import CAWPanel from '@/lib/caw.panel'
 import CAWTDP from '@/lib/caw.tdp'
-import { Position, Range /*, CodeActionTriggerKind */} from 'vscode'
+import { Position, Range /*, CodeActionTriggerKind */ } from 'vscode'
 
-// TODO: this doesn't quite work.
+// TODO: this doesn't quite work...
 const isWindows = !!process.env.ProgramFiles
 
 // Sync actions from LS are defined here
@@ -101,7 +101,7 @@ function refreshActiveFile() {
     })
 }
 
-export type TContribBlock = {
+export type TDiffBlock = {
   range: {
     line: number
     len: number
@@ -113,7 +113,7 @@ export type TContribBlock = {
 function cycleContribution(direction: number) {
   if (!CAWStore.activeTextEditor) { console.log('no active text editor'); return }
 
-  CAWIPC.transmit<TContribBlock>('repo:cycle-contrib', {
+  CAWIPC.transmit<TDiffBlock>('repo:cycle-contrib', {
     cid: CAWIPC.guid,
     origin: CAWStore.activeProject.origin,
     fpath: CAWStore.activeTextEditor.document.uri.path,
@@ -126,20 +126,24 @@ function cycleContribution(direction: number) {
       const editor = CAWStore.activeTextEditor
       if (!data?.range || !editor) return
       const start = new Position((data.range.line || 1) - 1, 0)
-      const end = editor.document.lineAt((data.range.line || 1) - 1).range.end
+      const end = editor.document.lineAt((data.range.line + data.range.len)).range.end
       const content = data.range.content.join('\n') // TODO: what about Windows platform?
 
-      editor.edit(editBuilder => {
-        if (data.replaceLen && !data.range.len) {
-          const insStart = new Position(data.range.line, 0)
-          editBuilder.insert(insStart, content + '\n')
-        } else if (!data.replaceLen) {
-          const delEnd = new Position((data.range.line || 1) + data.range.len - 1, 0)
-          editBuilder.delete(new Range(start, delEnd))
-        } else {
-          editBuilder.replace(new Range(start, end), content)
-        }
-      })
+      editor
+        .edit(editBuilder => {
+          if (data.replaceLen && !data.range.len) {
+            const insStart = new Position(data.range.line, 0)
+            editBuilder.insert(insStart, content + '\n')
+          } else if (!data.replaceLen) {
+            const delEnd = new Position((data.range.line || 1) + data.range.len - 1, 0)
+            editBuilder.delete(new Range(start, delEnd))
+          } else {
+            editBuilder.replace(new Range(start, end), content)
+          }
+        })
+        .then(applied => {
+          // if (applied) refreshActiveFile()
+        })
     })
 }
 

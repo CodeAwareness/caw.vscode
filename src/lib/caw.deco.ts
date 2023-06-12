@@ -107,18 +107,13 @@ function doInsert(uri: string) {
   if (!project || !editor) return
   const fpath = uri.substr(project.root.length + 1)
   logger.log('DECO: doInsert (project, uri, fpath)', project, uri, fpath)
-  if (!project || !project.changes || !project.changes[fpath]) {
+  if (!project?.changes || !project.changes[fpath]) {
     return setDecorations({ editor, ranges: [] })
   }
-  const alines: Record<string, any> = project.changes[fpath].alines
-  if (!alines) return
-  logger.log('DECO: doInsert linesHash', alines)
-  const linesHash = Object.keys(alines)
-    .reduce((acc: Record<string, number>, sha: string) => {
-      alines[sha].map((line: number) => (acc[line] = 1))
-      return acc
-    }, {})
-  const lines = Object.keys(linesHash)
+  console.log(`changes for ${fpath}`, project.changes)
+  const lines: number[] = project.changes[fpath].alines
+  if (!lines) return
+  logger.log('DECO: doInsert linesHash', lines)
   const ranges = lines.map(l => [[l, 0], [l, 256]])
   setDecorations({ editor, ranges })
 }
