@@ -73,8 +73,8 @@ const CAWDocumentContentProvider = {
   provideTextDocumentContent(relativePath: string) {
     // @ts-ignore
     const [, wsName, uri] = /([^/]+)\/(.+)$/.exec(relativePath.path)
-    const { tmpDir, selectedContributor } = CAWStore
-    const ctId = selectedContributor.user
+    const { tmpDir, selectedPeer } = CAWStore
+    const ctId = selectedPeer.user
     const userDir = path.join(tmpDir, ctId.toString(), wsName)
     const peerFile = path.join(userDir, config.EXTRACT_REPO_DIR, uri)
     // logger.info('CodeAwareness: cawDocumentContentProvider uri', relativePath.path, 'peerFile', peerFile)

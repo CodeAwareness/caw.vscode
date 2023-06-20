@@ -26,20 +26,12 @@
         "title": "%extension.toggle%"
       },
       {
-        "command": "caw.nextContributor",
-        "title": "%extension.nextContributor%"
+        "command": "caw.nextPeer",
+        "title": "%extension.nextPeer%"
       },
       {
-        "command": "caw.prevContributor",
-        "title": "%extension.prevContributor%"
-      },
-      {
-        "command": "caw.nextContribution",
-        "title": "%extension.nextContribution%"
-      },
-      {
-        "command": "caw.prevContribution",
-        "title": "%extension.prevContribution%"
+        "command": "caw.prevPeer",
+        "title": "%extension.prevPeer%"
       },
       {
         "command": "caw.mergeSlice",
@@ -82,12 +74,12 @@
         "mac": "shift+f12"
       },
       {
-        "command": "caw.nextContributor",
+        "command": "caw.nextPeer",
         "key": "ctrl+alt+]",
         "mac": "cmd+alt+]"
       },
       {
-        "command": "caw.prevContributor",
+        "command": "caw.prevPeer",
         "key": "ctrl+alt+[",
         "mac": "cmd+alt+["
       },
@@ -115,19 +107,11 @@
           "when": "config.caw.enabled"
         },
         {
-          "command": "caw.nextContributor",
+          "command": "caw.nextPeer",
           "when": "config.caw.enabled"
         },
         {
-          "command": "caw.prevContributor",
-          "when": "config.caw.enabled"
-        },
-        {
-          "command": "caw.nextContribution",
-          "when": "config.caw.enabled"
-        },
-        {
-          "command": "caw.prevContribution",
+          "command": "caw.prevPeer",
           "when": "config.caw.enabled"
         },
         {

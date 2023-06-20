@@ -19,17 +19,17 @@ function setupCommands(context: vscode.ExtensionContext) {
     // TODO: highlight a range (slice)
   }))
 
-  context.subscriptions.push(registerCommand('caw.nextContributor', function() {
+  context.subscriptions.push(registerCommand('caw.nextPeer', function() {
     try {
-      CAWWorkspace.cycleContribution(1)
+      CAWWorkspace.cycleBlock(1)
     } catch (err) {
       console.error(err)
     }
   }))
 
-  context.subscriptions.push(registerCommand('caw.prevContributor', function() {
+  context.subscriptions.push(registerCommand('caw.prevPeer', function() {
     try {
-      CAWWorkspace.cycleContribution(-1)
+      CAWWorkspace.cycleBlock(-1)
     } catch (err) {
       console.error(err)
     }

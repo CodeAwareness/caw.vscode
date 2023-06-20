@@ -17,7 +17,7 @@ export type TProject = {
   branches: Array<string>
   head: string
   cSHA: string
-  contributors: Array<any> // TODO
+  peers: Array<any> // TODO
   activePath: string
   line: number
   changes: Record<string, any>
@@ -42,13 +42,13 @@ export type TChanges = {
   k?: string, // the peer file url (stored on S3 or something)
 }
 
-export type TContributor = {
+export type TPeer = {
   diffDir: string, // the temp folder where the file is extracted
   diff: string, // filename only of the current diff
   lupd: Date, // date of last file update
   origin: string, // repo url
-  email: string, // contributor email
-  avatar: string, // profile pic of this contributor
+  email: string, // peer email
+  avatar: string, // profile pic of this peer
   user: string, // user ID
   _id: string, // contribution ID
 }
@@ -97,7 +97,7 @@ export const CAWStore = {
   activeTextEditor: null as TCAWEditor | null,
   activeProject: undefined as any,
   projects: [] as any[], // [{ repo, scIndex, root }]
-  selectedContributor: undefined as any,
+  selectedPeer: undefined as any,
 
   doc: undefined as any | undefined, // active document (specific doc format for Atom, VSCode)
   line: 0, // cursor line nr in document

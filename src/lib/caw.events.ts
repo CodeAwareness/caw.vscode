@@ -90,13 +90,13 @@ eventsTable['branch:refresh'] = (data: any) => {
   // TODO: refresh branches using git and display in CAWPanel
 }
 
-eventsTable['contrib:select'] = (contrib: any) => {
+eventsTable['peer:select'] = (peer: any) => {
   const fpath = CAWStore.activeTextEditor?.document?.uri?.path
   if (!fpath) return
   const cid = CAWIPC.guid
   const origin = CAWStore.activeProject.origin
   const doc = CAWStore.activeTextEditor?.document.getText()
-  CAWIPC.transmit<TDiffResponse>('repo:diff-contrib', { origin, fpath, cid, contrib, doc })
+  CAWIPC.transmit<TDiffResponse>('repo:diff-peer', { origin, fpath, cid, peer, doc })
     .then((info) => {
       const peerFileUri = vscode.Uri.file(info.peerFile)
       const userFileUri = vscode.Uri.file(fpath)
@@ -105,7 +105,7 @@ eventsTable['contrib:select'] = (contrib: any) => {
     })
 }
 
-eventsTable['contrib:unselect'] = () => {
+eventsTable['peer:unselect'] = () => {
   CAWEditor.closeDiffEditor()
 }
 

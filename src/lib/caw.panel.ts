@@ -13,6 +13,8 @@ import CAWEvents from './caw.events'
 import CAWWorkspace from './caw.workspace'
 import CAWEditor from './caw.editor'
 
+import type { TDiffBlock } from './caw.workspace'
+
 let panelColumn: vscode.ViewColumn = vscode.ViewColumn.Two
 
 function getPanel() {
@@ -166,7 +168,7 @@ function didChangeViewState(state: any) {
 }
 
 /************************************************************************************
- * update contributor information
+ * update peer information
  *
  * We have to find a way to avoid opening a file in the same window group as the webview.
  * From what I could find, VSCode does not provide any means to doing that,
@@ -182,6 +184,10 @@ function updateProject(project: any) {
   return project
 }
 
+function selectPeer(block: TDiffBlock) {
+  postMessage({ command: 'selectPeer', data: block })
+}
+
 const CAWPanel = {
   createPanel,
   didChangeViewState,
@@ -189,6 +195,7 @@ const CAWPanel = {
   getPanel,
   hasPanel,
   postMessage,
+  selectPeer,
   toggle,
   updateProject,
 }

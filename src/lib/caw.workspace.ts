@@ -110,10 +110,10 @@ export type TDiffBlock = {
   replaceLen: number
 }
 
-function cycleContribution(direction: number) {
+function cycleBlock(direction: number) {
   if (!CAWStore.activeTextEditor) { console.log('no active text editor'); return }
 
-  CAWIPC.transmit<TDiffBlock>('repo:cycle-contrib', {
+  CAWIPC.transmit<TDiffBlock>('repo:cycle-block', {
     cid: CAWIPC.guid,
     origin: CAWStore.activeProject.origin,
     fpath: CAWStore.activeTextEditor.document.uri.path,
@@ -128,6 +128,7 @@ function cycleContribution(direction: number) {
       const start = new Position((data.range.line || 1) - 1, 0)
       const end = editor.document.lineAt((data.range.line + data.range.len)).range.end
       const content = data.range.content.join('\n') // TODO: what about Windows platform?
+      CAWPanel.selectPeer(data)
 
       editor
         .edit(editBuilder => {
@@ -153,7 +154,7 @@ function cycleContribution(direction: number) {
 const CAWWorkspace = {
   addProject,
   closeTextDocument,
-  cycleContribution,
+  cycleBlock,
   dispose,
   highlight,
   init,

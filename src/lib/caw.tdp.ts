@@ -28,8 +28,8 @@ export class TDItem extends TreeItem {
     if (command) this.command = command
     this.folder = folder
     this.fpath = fpath
-    this.tooltip = '' // TODO: maybe show a list of names of contributors for this item
-    this.description = '' // TODO: maybe show the number of contributors changing this file / folder
+    this.tooltip = '' // TODO: maybe show a list of names of peers for this item
+    this.description = '' // TODO: maybe show the number of peers changing this file / folder
   }
 }
 
@@ -123,7 +123,7 @@ const TDP = {
    * register file into the TDP
    *
    * DESIGN:
-   * We're adding files to the CAW repository, but the user may have multiple repositories open, and we need to show diffs coresponding to multiple contributors.
+   * We're adding files to the CAW repository, but the user may have multiple repositories open, and we need to show diffs coresponding to multiple peers.
    * Our CAW repository looks like this (where searchLib, microPost are just examples of repo names)
 
    * searchLib -> aliceId -> [ services/utils.js, main.js ]
