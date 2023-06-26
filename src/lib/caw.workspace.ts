@@ -13,7 +13,8 @@ import CAWSCM from './caw.scm'
 import CAWIPC from './caw.ipc'
 import CAWPanel from '@/lib/caw.panel'
 import CAWTDP from '@/lib/caw.tdp'
-import { Position, Range /*, CodeActionTriggerKind */ } from 'vscode'
+import { commands, Position, Range /*, CodeActionTriggerKind */ } from 'vscode'
+import CAWDeco from './caw.deco'
 
 // TODO: this doesn't quite work...
 const isWindows = !!process.env.ProgramFiles
@@ -25,6 +26,7 @@ const actionTable: Record<string, any> = {
 
 function init(data?: any) {
   console.log('Workspace: init', data)
+  // commands.getCommands().then(console.log) // TODO: thousands of commands available
   if (data?.user) {
     CAWStore.user = data.user
     CAWStore.tokens = data.tokens
@@ -110,42 +112,61 @@ export type TDiffBlock = {
   replaceLen: number
 }
 
-function cycleBlock(direction: number) {
-  if (!CAWStore.activeTextEditor) { console.log('no active text editor'); return }
+let isCycling = false
 
-  CAWIPC.transmit<TDiffBlock>('repo:cycle-block', {
-    cid: CAWIPC.guid,
-    origin: CAWStore.activeProject.origin,
-    fpath: CAWStore.activeTextEditor.document.uri.path,
-    doc: CAWStore.activeTextEditor.document.getText(),
-    line: CAWStore.activeTextEditor.selections[0].active.line + 1,
-    direction,
-  })
+function cycleBlock(direction: number) {
+  if (!CAWStore.activeTextEditor) {
+    console.log('no active text editor')
+    return
+  }
+
+  const fpath = CAWStore.activeTextEditor.document.uri.path
+  const doc = CAWStore.activeTextEditor.document.getText()
+  const origin = CAWStore.activeProject.origin
+  const cid = CAWIPC.guid
+  const editor = CAWStore.activeTextEditor
+
+  const promise = Promise.resolve()
+  const line = CAWStore.activeTextEditor.selections[0].active.line + 1
+  if (isCycling) promise.then(() => commands.executeCommand('undo'))
+
+  isCycling = true
+  let block: any
+  return promise
+    .then(() => CAWIPC.transmit<TDiffBlock>('repo:cycle-block', { cid, origin, fpath, doc, line, direction }))
     .then(data => {
       console.log('CYCLE RESPONSE', data)
-      const editor = CAWStore.activeTextEditor
-      if (!data?.range || !editor) return
-      const start = new Position((data.range.line || 1) - 1, 0)
-      const end = editor.document.lineAt((data.range.line + data.range.len)).range.end
-      const content = data.range.content.join('\n') // TODO: what about Windows platform?
-      CAWPanel.selectPeer(data)
+      block = data
+      if (!block?.range || !editor) return
+      CAWPanel.selectPeer(block)
 
+      return CAWDeco.flashLines(editor, block.range.line, block.range.len, block.replaceLen)
+    })
+    .then(() => {
+      const start = new Position((block.range.line || 1) - 1, 0)
+      const end = editor.document.lineAt((block.range.line + block.range.len)).range.end
+      const content = block.range.content.join('\n') // TODO: what about Windows platform?
       editor
         .edit(editBuilder => {
-          if (data.replaceLen && !data.range.len) {
-            const insStart = new Position(data.range.line, 0)
+          if (block.replaceLen && !block.range.len) {
+            const insStart = new Position(block.range.line, 0)
             editBuilder.insert(insStart, content + '\n')
-          } else if (!data.replaceLen) {
-            const delEnd = new Position((data.range.line || 1) + data.range.len - 1, 0)
+          } else if (!block.replaceLen) {
+            const delEnd = new Position((block.range.line || 1) + block.range.len - 1, 0)
             editBuilder.delete(new Range(start, delEnd))
           } else {
             editBuilder.replace(new Range(start, end), content)
           }
         })
         .then(applied => {
-          // if (applied) refreshActiveFile()
+          console.log('changes applied?', applied)
+          if (applied) refreshActiveFile()
         })
     })
+}
+
+function docChanged() {
+  isCycling = false
 }
 
 /************************************************************************************
@@ -156,6 +177,7 @@ const CAWWorkspace = {
   closeTextDocument,
   cycleBlock,
   dispose,
+  docChanged,
   highlight,
   init,
   refreshActiveFile,

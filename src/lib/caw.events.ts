@@ -73,7 +73,8 @@ eventsTable['branch:select'] = (branch: string) => {
   const fpath = CAWStore.activeProject.activePath
   if (!fpath) return
   const origin = CAWStore.activeProject.origin
-  CAWIPC.transmit('repo:diff-branch', { origin, branch, fpath })
+  const cid = CAWIPC.guid
+  CAWIPC.transmit('repo:diff-branch', { origin, branch, fpath, cid })
     .then((info: any) => {
       const peerFileUri = vscode.Uri.file(info.peerFile)
       const userFileUri = vscode.Uri.file(info.userFile)
@@ -101,7 +102,7 @@ eventsTable['peer:select'] = (peer: any) => {
       const peerFileUri = vscode.Uri.file(info.peerFile)
       const userFileUri = vscode.Uri.file(fpath)
       // logger.info('OPEN DIFF with', fpath, info)
-      vscode.commands.executeCommand('vscode.diff', userFileUri, peerFileUri, info.title, { viewColumn: 1, preserveFocus: true })
+      vscode.commands.executeCommand('vscode.diff', peerFileUri, userFileUri, info.title, { viewColumn: 1, preserveFocus: true })
     })
 }
 

@@ -170,16 +170,10 @@ function didChangeViewState(state: any) {
 /************************************************************************************
  * update peer information
  *
- * We have to find a way to avoid opening a file in the same window group as the webview.
- * From what I could find, VSCode does not provide any means to doing that,
- * so I'm instead using this trick, of moving the code to the left.
- * (sorry for those people with portrait monitors... I'll figure something out later)
- *
  * @param data Object - the project (received from VSCode API)
  *
  ************************************************************************************/
 function updateProject(project: any) {
-  console.log('UPDATE PANEL with project', project)
   postMessage({ command: 'setProject', data: project })
   return project
 }

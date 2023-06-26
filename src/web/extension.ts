@@ -148,6 +148,13 @@ function setupWatchers(context: vscode.ExtensionContext) {
   }))
 
   /************************************************************************************
+   * User changing text in the activeTextEditor
+   ************************************************************************************/
+  subscriptions.push(vscode.workspace.onDidChangeTextDocument((/* event */) => {
+    CAWWorkspace.docChanged()
+  }))
+
+  /************************************************************************************
    * User switching to a different file
    ************************************************************************************/
   vscode.window.onDidChangeActiveTextEditor((editor: vscode.TextEditor | undefined) => {

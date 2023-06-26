@@ -124,8 +124,28 @@ function clear() {
   setDecorations({ editor, ranges: [] })
 }
 
+function flashLines(editor: vscode.TextEditor, line: number, len: number, replaceLen: number) {
+  return new Promise(resolve => {
+    const rangeBefore = new vscode.Range(
+      new vscode.Position(line, 0),
+      new vscode.Position(line + len, 180),
+    )
+    const rangeAfter = new vscode.Range(
+      new vscode.Position(line, 0),
+      new vscode.Position(line + replaceLen, 180),
+    )
+    editor.setDecorations(peerDecorationType, [rangeBefore])
+    setTimeout(() => {
+      editor.setDecorations(peerDecorationType, [])
+      editor.setDecorations(changeDecorationType, [rangeAfter])
+      resolve(null)
+    }, 1000)
+  })
+}
+
 const CAWDeco = {
   clear,
+  flashLines,
   insertDecorations,
 }
 
