@@ -15,17 +15,14 @@ class IPC {
   public retryInterval = 2000 // retry connecting every 2 seconds
   public maxRetries = Infinity
 
-  private guid = ''
   private retriesRemaining = Infinity
   private explicitlyDisconnected = false
   private ipcBuffer = '' as string
   private path = ''
-  private resetTimer = 0
 
   constructor(guid: string) {
     // Note: originally I wrote this IPC using WebSockets over local https, only to find out at the end of my toil that VSCode has WebSockets in dev mode only.
     let path = this.path = this.socketRoot + this.appspace + (guid || id)
-    this.guid = guid
   }
 
   connect(callback?: any) {
@@ -40,13 +37,11 @@ class IPC {
 
     socket.on('error', err => {
       console.log('LS: socket error: ', err)
-      if (this.resetTimer++ > 10) this.pubsub.emit('reset')
     })
 
     socket.on('connect', () => {
       console.log('LS: socket connected', this.path)
       this.retriesRemaining = this.maxRetries
-      this.resetTimer = 0
       if (callback) callback()
     })
 
@@ -56,6 +51,7 @@ class IPC {
 
     socket.on('ready', () => {
       console.log('LS: Socket ready')
+      this.pubsub.emit('connected')
     })
 
     socket.on('timeout', (e: any) => {

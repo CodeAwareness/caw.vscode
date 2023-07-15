@@ -27,7 +27,9 @@ const CAWIPC = {
 
   init: async function(): Promise<void> {
     ipcClient.pubsub.removeAllListeners()
-    ipcCatalog.connect(() => {
+    ipcCatalog.connect()
+    ipcCatalog.pubsub.on('connected', () => {
+      console.log('IPC CLIENT SOCKET READY')
       ipcCatalog.emit(JSON.stringify({ action: 'clientId', data: guid })) // add this client to the list of clients managed by the local service
       initServer()
         .then(() => CAWIPC.transmit('auth:info')) // ask for existing auth info, if any

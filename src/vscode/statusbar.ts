@@ -1,6 +1,7 @@
 import { window, StatusBarAlignment } from 'vscode'
 
 let statusBarItem: any = null
+let pulse = 0
 
 export const CAWStatusbar = {
 
@@ -10,13 +11,13 @@ export const CAWStatusbar = {
       statusBarItem.show()
     }
 
-    CAWStatusbar.working('loading...')
+    CAWStatusbar.working('loading...') // TODO: this doesn't work. Is it an older API?
     CAWStatusbar.live()
   },
 
   working: (workingMsg = 'Working on it...') => {
-    statusBarItem.text = `$(pulse) ${workingMsg}`
-    statusBarItem.tooltip = 'In case if it takes long time, try to close all browser window.'
+    statusBarItem.text = `${pulse++} ...`
+    statusBarItem.tooltip = 'In case if it takes long time, check if your Code Awareness local service is running.'
   },
 
   live: () => {
