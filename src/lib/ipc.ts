@@ -4,13 +4,14 @@ import { EventEmitter } from 'node:events'
 
 const id = os.hostname()
 const delimiter = '\f'
+const isWindows = os.platform() === 'win32' 
 
 class IPC {
   // Use this pubsub to listen for responses to your emits
   public pubsub = new EventEmitter()
   public socket = null as Socket | null
   public appspace = 'caw.'
-  public socketRoot = '/var/tmp/'
+  public socketRoot = isWindows ? '\\\\.\\pipe\\' : '/var/tmp/'
   public retryInterval = 2000 // retry connecting every 2 seconds
   public maxRetries = Infinity
 
@@ -25,11 +26,6 @@ class IPC {
     // Note: originally I wrote this IPC using WebSockets over local https, only to find out at the end of my toil that VSCode has WebSockets in dev mode only.
     let path = this.path = this.socketRoot + this.appspace + (guid || id)
     this.guid = guid
-    if (process.platform === 'win32' && !path.startsWith('\\\\.\\pipe\\')) {
-      path = path.replace(/^\//, '')
-      path = path.replace(/\//g, '-')
-      this.path = `\\\\.\\pipe\\${path}`
-    }
   }
 
   connect(callback?: any) {

@@ -198,7 +198,6 @@
     "run-in-browser": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. ."
   },
   "devDependencies": {
-    "@types/axios": "^0.14.0",
     "@types/jest": "^29.2.2",
     "@types/lodash": "^4.14.188",
     "@types/mocha": "^10.0.0",

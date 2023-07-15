@@ -1,7 +1,10 @@
 import process from 'process'
 import vscode from 'vscode'
-// TODO: move some/all these into VSCode extension configuration instead
+import os from 'os'
 
+const isWindows = os.platform() === 'win32' 
+
+// TODO: move some/all these into VSCode extension configuration instead
 const cawConfig = vscode.workspace.getConfiguration('codeAwareness')
 
 /* eslint-disable-next-line */
@@ -17,10 +20,10 @@ const CAW_SCHEMA = 'codeAwareness'
 const SERVER_VERSION = 'v1'
 
 // Where to load the Web Panel from
-const EXT_URL = DEBUG ? `https://127.0.0.1:${PORT_LOCAL}` : 'https://vscode.codeawareness.com' // CAW Webview server
+const EXT_URL = DEBUG && !isWindows ? `https://127.0.0.1:${PORT_LOCAL}` : 'https://vscode.codeawareness.com' // CAW Webview server
 
 // Where to post requests to
-const API_URL = DEBUG ? `https://127.0.0.1:${PORT_LOCAL}/api/${SERVER_VERSION}` : `https://api.codeawareness.com/${SERVER_VERSION}`
+const API_URL = DEBUG && !isWindows ? `https://127.0.0.1:${PORT_LOCAL}/api/${SERVER_VERSION}` : `https://api.codeawareness.com/${SERVER_VERSION}`
 
 // Add this extension to the catalog of clients on CodeAwareness Local Service.
 const CATALOG: string = cawConfig.get('catalog') || 'catalog'

@@ -3,6 +3,7 @@
  **********************/
 import * as vscode from 'vscode'
 import * as path from 'node:path'
+import os from 'os'
 
 import config from '@/config'
 import logger from './logger'
@@ -16,6 +17,7 @@ import CAWEditor from './caw.editor'
 import type { TDiffBlock } from './caw.workspace'
 
 let panelColumn: vscode.ViewColumn = vscode.ViewColumn.Two
+const isWindows = os.platform() === 'win32' 
 
 function getPanel() {
   return CAWStore.panel
@@ -86,7 +88,7 @@ function toggle(context: vscode.ExtensionContext) {
 
   if (!panel.webview) return
 
-  if (config.DEBUG) getWebviewContentLocal(panel.webview) // DEV
+  if (config.DEBUG && !isWindows) getWebviewContentLocal(panel.webview) // DEV
   else getWebviewContent(panel.webview) // PRODUCTION
 
   CAWEditor.focusTextEditor()
@@ -115,12 +117,11 @@ function getWebviewContent(webview: vscode.Webview) {
     <title>CodeAwareness VSCode panel</title>
     <meta http-equiv="Content-Security-Policy" content="default-src ${cspSource}; style-src ${cspSource} 'unsafe-inline'; img-src ${cspSource} ${mediaSource}; script-src 'nonce-${nonce}';">
     <script defer="defer" nonce="${nonce}" src="https://vscode.codeawareness.com/runtime.js"></script>
-    <script defer="defer" nonce="${nonce}" src="https://vscode.codeawareness.com/706.js?t=${new Date().valueOf()}"></script>
+    <script defer="defer" nonce="${nonce}" src="https://vscode.codeawareness.com/358.js?t=${new Date().valueOf()}"></script>
     <script defer="defer" nonce="${nonce}" src="https://vscode.codeawareness.com/main.js?t=${new Date().valueOf()}"></script>
     <link nonce="${nonce}" href="https://vscode.codeawareness.com/main.css" rel="stylesheet"></head>
     <body>
       <h1 id="panelLoading">Loading...</h1>
-      <script defer nonce="${nonce}" src="https://vscode.codeawareness.com/main.js?t=${new Date().valueOf()}"></script>
     </body></html>`
 }
 
