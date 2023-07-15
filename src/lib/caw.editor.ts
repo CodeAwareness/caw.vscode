@@ -84,9 +84,10 @@ function closeDiffEditor() {
       tryingToClose = true
       return setTimeout(closeDiffEditor, 100)
     } else {
+      // vscode.commands.getCommands().then(console.log)
       /*
-      commands.executeCommand( 'workbench.action.focusNextGroup')
-      commands.executeCommand( 'workbench.action.focusPreviousGroup')
+      vscode.commands.executeCommand('workbench.action.focusNextGroup')
+      vscode.commands.executeCommand('workbench.action.focusPreviousGroup')
       */
     }
     tryingToClose = false
