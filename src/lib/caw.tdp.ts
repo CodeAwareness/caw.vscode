@@ -60,14 +60,15 @@ const TDP = {
   },
 
   addPeerWorkspace: (wsFolder: vscode.WorkspaceFolder) => {
-    const fpath = wsFolder.uri?.path
+    const fpath = wsFolder.uri.fsPath
+    console.log('TDP: addPeerWorkspace', wsFolder, fpath)
     folders[fpath] = wsFolder.name
     CAWStore.peerFS[fpath] = {}
     return TDP
   },
 
   removePeerWorkspace: (wsFolder: vscode.WorkspaceFolder) => {
-    const fPath = wsFolder.uri.path
+    const fPath = wsFolder.uri.fsPath
     delete folders[fPath]
     delete CAWStore.peerFS[fPath]
     logger.log('TDP: removePeerWorkspace', fPath)

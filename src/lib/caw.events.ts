@@ -3,6 +3,7 @@
  **************************************************************/
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as vscode from 'vscode'
+import path from 'node:path'
 
 import type { TAuth } from './caw.store'
 
@@ -70,11 +71,8 @@ eventsTable['auth:logout'] = () => {
 }
 
 eventsTable['branch:select'] = (branch: string) => {
-  const fpath = CAWStore.activeProject.activePath
-  if (!fpath) return
-  const origin = CAWStore.activeProject.origin
   const cid = CAWIPC.guid
-  CAWIPC.transmit('repo:diff-branch', { origin, branch, fpath, cid })
+  CAWIPC.transmit('repo:diff-branch', { branch, cid })
     .then((info: any) => {
       const peerFileUri = vscode.Uri.file(info.peerFile)
       const userFileUri = vscode.Uri.file(info.userFile)
@@ -92,15 +90,17 @@ eventsTable['branch:refresh'] = (data: any) => {
 }
 
 eventsTable['peer:select'] = (peer: any) => {
-  const fpath = CAWStore.activeTextEditor?.document?.uri?.path
+  const activeProject = CAWStore.activeProject
+  const { origin } = activeProject
+  const fpath = activeProject.activePath
   if (!fpath) return
   const cid = CAWIPC.guid
-  const origin = CAWStore.activeProject.origin
   const doc = CAWStore.activeTextEditor?.document.getText()
   CAWIPC.transmit<TDiffResponse>('repo:diff-peer', { origin, fpath, cid, peer, doc })
     .then((info) => {
       const peerFileUri = vscode.Uri.file(info.peerFile)
-      const userFileUri = vscode.Uri.file(fpath)
+      // Note: thanks to smart node:path for figuring out how to join Windows and *nix paths together.
+      const userFileUri = vscode.Uri.file(path.join(activeProject.root, fpath))
       // logger.info('OPEN DIFF with', fpath, info)
       vscode.commands.executeCommand('vscode.diff', peerFileUri, userFileUri, info.title, { viewColumn: 1, preserveFocus: true })
     })

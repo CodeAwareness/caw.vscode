@@ -159,6 +159,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
    ************************************************************************************/
   vscode.window.onDidChangeActiveTextEditor((editor: vscode.TextEditor | undefined) => {
     if (!editor) return
+    console.log('ActiveTextEditor changed', editor.document.fileName)
     CAWEditor.setActiveEditor(editor as TCAWEditor)
     CAWWorkspace.refreshActiveFile()
   })

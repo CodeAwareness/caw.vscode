@@ -16,8 +16,7 @@ export type TCAWEditor = vscode.TextEditor & {
 }
 
 const getSelectedLine = (editor: TCAWEditor) => editor._selections && editor._selections[0].active.line
-const getEditorDocPath = (editor: TCAWEditor) => editor?.document.uri.path
-const getEditorDocFileName = (editor: TCAWEditor) => editor?.document.fileName
+const getEditorDocFileName = (editor?: TCAWEditor) => (editor || CAWStore.activeTextEditor)?.document.fileName
 
 const closeActiveEditor = () => {
   return vscode.commands.executeCommand('workbench.action.closeActiveEditor')
@@ -93,7 +92,7 @@ function closeDiffEditor() {
     tryingToClose = false
     const fileName = getEditorDocFileName(editor)
     try {
-      if (fileName.toLowerCase().includes(tmpDir.toLowerCase())) closeActiveEditor()
+      if (fileName?.toLowerCase().includes(tmpDir.toLowerCase())) closeActiveEditor()
     } catch {}
 
     return true
@@ -114,7 +113,7 @@ function focusTextEditor() {
 const CAWEditor = {
   closeDiffEditor,
   focusTextEditor,
-  getEditorDocPath,
+  getEditorDocFileName,
   getSelectedLine,
   getSelections,
   setActiveEditor,

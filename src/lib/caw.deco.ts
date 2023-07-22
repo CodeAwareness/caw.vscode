@@ -10,12 +10,12 @@ import * as _ from 'lodash'
 import { CAWStore } from './caw.store'
 import logger from './logger'
 import CAWPanel from './caw.panel'
+import { crossPlatform } from './caw.workspace'
 
-let lastUri: string
+let lastPath: string
 // TODO: make 2000 wait time into a configurable value
 const insertAfterSomeTime = _.throttle(doInsert, 500, { trailing: true })
 const insertThenWaitSomeTime = _.throttle(doInsert, 500, { leading: true })
-const getEditorDocPath = (editor: vscode.TextEditor) => editor?.document.uri.path
 
 type TEditorRanges = {
   editor: vscode.TextEditor
@@ -90,28 +90,29 @@ function setDecorations(options: TEditorRanges) {
 function insertDecorations(leading?: boolean) {
   const editor = CAWStore.activeTextEditor
   if (!editor) return
-  const uri = getEditorDocPath(editor)
-  logger.log('DECO: (leading, uri, lastUri)', leading, uri, lastUri)
-  if (uri !== lastUri) {
+  const activePath = CAWStore.activeProject.activePath
+  if (!activePath) return
+  logger.log('DECO: (leading, activePath, lastPath)', leading, activePath, lastPath)
+  if (activePath !== lastPath) {
     insertThenWaitSomeTime.cancel()
     insertAfterSomeTime.cancel()
   }
-  if (leading) insertThenWaitSomeTime(uri)
-  else insertAfterSomeTime(uri)
-  lastUri = uri
+  if (leading) insertThenWaitSomeTime(activePath)
+  else insertAfterSomeTime(activePath)
+  lastPath = activePath
 }
 
-function doInsert(uri: string) {
+function doInsert(fpath: string) {
   const project = CAWStore.activeProject
   const editor = CAWStore.activeTextEditor
+  const cpPath = crossPlatform(fpath)
   if (!project || !editor) return
-  const fpath = uri.substr(project.root.length + 1)
-  logger.log('DECO: doInsert (project, uri, fpath)', project, uri, fpath)
-  if (!project?.changes || !project.changes[fpath]) {
+  logger.log('DECO: doInsert (project, fpath)', project, cpPath)
+  if (!project?.changes || !project.changes[cpPath]) {
     return setDecorations({ editor, ranges: [] })
   }
   console.log(`changes for ${fpath}`, project.changes)
-  const lines: number[] = project.changes[fpath].alines
+  const lines: number[] = project.changes[cpPath].alines
   if (!lines) return
   logger.log('DECO: doInsert linesHash', lines)
   const ranges = lines.map(l => [[l, 0], [l, 256]])

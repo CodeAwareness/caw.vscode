@@ -23,7 +23,7 @@ async function addProject(project: TProject) {
 }
 
 function removeProject(wsFolder: any) {
-  const folder: string = wsFolder.uri ? wsFolder.uri.path : wsFolder.toString()
+  const folder: string = wsFolder.uri ? wsFolder.uri.fsPath : wsFolder.toString()
   const project = CAWStore.projects.filter(m => m.root === folder)[0]
   logger.info('SCM removeProject wsFolder', folder, project)
   if (!project) return

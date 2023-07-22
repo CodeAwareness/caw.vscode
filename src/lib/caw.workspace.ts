@@ -16,9 +16,6 @@ import CAWTDP from '@/lib/caw.tdp'
 import { commands, Position, Range /*, CodeActionTriggerKind */ } from 'vscode'
 import CAWDeco from './caw.deco'
 
-// TODO: this doesn't quite work...
-const isWindows = !!process.env.ProgramFiles
-
 // Sync actions from LS are defined here
 const actionTable: Record<string, any> = {
   refresh: refreshActiveFile,
@@ -85,6 +82,7 @@ function addProject(project: TProject) {
   logger.log('WORKSPACE: addProject', project)
   CAWSCM.addProject(project)
   CAWTDP.addProject(project)
+  if (~CAWStore.projects.findIndex(el => el.root === project.root)) CAWStore.projects.push(project)
   CAWStore.activeProject = project
   return project
 }
@@ -92,8 +90,9 @@ function addProject(project: TProject) {
 function refreshActiveFile() {
   console.log('refreshing active file')
   if (!CAWStore.activeTextEditor) { console.log('no active text editor'); return }
+  const fpath = CAWEditor.getEditorDocFileName()
 
-  return CAWIPC.transmit<TProject>('repo:active-path', { fpath: CAWStore.activeTextEditor.document.uri.path, cid: CAWIPC.guid, doc: CAWStore.activeTextEditor.document.getText() })
+  return CAWIPC.transmit<TProject>('repo:active-path', { fpath, cid: CAWIPC.guid, doc: CAWStore.activeTextEditor.document.getText() })
     .then(addProject)
     .then(CAWEditor.updateDecorations)
     .then(CAWPanel.updateProject)
@@ -120,7 +119,7 @@ function cycleBlock(direction: number) {
     return
   }
 
-  const fpath = CAWStore.activeTextEditor.document.uri.path
+  const fpath = CAWStore.activeProject.activePath
   const doc = CAWStore.activeTextEditor.document.getText()
   const origin = CAWStore.activeProject.origin
   const cid = CAWIPC.guid
@@ -168,6 +167,12 @@ function cycleBlock(direction: number) {
 function docChanged() {
   isCycling = false
 }
+
+
+export function crossPlatform(fpath: string) {
+  return fpath?.replace(/\\/g, '/')
+}
+
 
 /************************************************************************************
  * Export module
