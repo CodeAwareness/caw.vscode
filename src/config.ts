@@ -2,19 +2,15 @@ import process from 'process'
 import vscode from 'vscode'
 import os from 'os'
 
-const isWindows = os.platform() === 'win32'
-
 // TODO: move some/all these into VSCode extension configuration instead
 const cawConfig = vscode.workspace.getConfiguration('codeAwareness')
 
 /* eslint-disable-next-line */
 const DEBUG = false // TODO: how to determine if we're running inside an extension host or as an installed extension
 
-const LOCAL_CAW = true
+const LOCAL_WEB = false // Code Awareness web panel for Visual Studio Code
 
-const LOCAL_WEB = false
-
-const LOCAL_API = false
+const LOCAL_API = false // Code Awareness API
 
 // Dev mode when you have CodeAwareness VSCode Panel running locally; please configure local nginx.
 const PORT_LOCAL = 8885
@@ -44,6 +40,7 @@ export default {
   DEBUG,
   EXTRACT_REPO_DIR,
   LOCAL_WEB,
+  LOCAL_API,
   LOG_LEVEL,
   PIPE_CATALOG,
   PORT_LOCAL,
