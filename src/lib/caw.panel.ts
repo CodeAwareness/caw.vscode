@@ -17,7 +17,7 @@ import CAWEditor from './caw.editor'
 import type { TDiffBlock } from './caw.workspace'
 
 let panelColumn: vscode.ViewColumn = vscode.ViewColumn.Two
-const isWindows = os.platform() === 'win32' 
+const isWindows = os.platform() === 'win32'
 
 function getPanel() {
   return CAWStore.panel
@@ -88,11 +88,10 @@ function toggle(context: vscode.ExtensionContext) {
 
   if (!panel.webview) return
 
-  if (config.DEBUG && !isWindows) getWebviewContentLocal(panel.webview) // DEV
+  if (config.LOCAL_WEB && !isWindows) getWebviewContentLocal(panel.webview) // DEV
   else getWebviewContent(panel.webview) // PRODUCTION
 
   CAWEditor.focusTextEditor()
-  console.log('VSCODE will setup IPC with panel loaded from:', config.EXT_URL)
   CAWEvents.setup(panel.webview, context)
   panel.onDidDispose(dispose, undefined, context.subscriptions)
   panel.onDidChangeViewState((state: vscode.WindowState) => CAWPanel.didChangeViewState(state), undefined, context.subscriptions)
@@ -109,6 +108,7 @@ function getNonce() {
 }
 
 function getWebviewContent(webview: vscode.Webview) {
+  console.log('VSCODE will setup IPC with panel loaded from codeawareness.com')
   const nonce = getNonce()
   const cspSource = 'https://vscode.codeawareness.com https://api.codeawareness.com'
   const mediaSource = 'https://vscode.codeawareness.com'
@@ -126,6 +126,7 @@ function getWebviewContent(webview: vscode.Webview) {
 }
 
 async function getWebviewContentLocal(webview: vscode.Webview) {
+  console.log('VSCODE will setup IPC with panel loaded from localhost.')
   const nonce = getNonce()
   const cspSource = 'https://127.0.0.1:8885'
   const mediaSource = 'https://vscode.codeawareness.com'
