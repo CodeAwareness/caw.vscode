@@ -105,17 +105,13 @@ function insertDecorations(leading?: boolean) {
 function doInsert(fpath: string) {
   const project = CAWStore.activeProject
   const editor = CAWStore.activeTextEditor
-  const cpPath = crossPlatform(fpath)
-  if (!project || !editor) return
-  logger.log('DECO: doInsert (project, fpath)', project, cpPath)
-  if (!project?.changes || !project.changes[cpPath]) {
+  if (!project || !editor || project.activePath !== fpath) return // Note: if the user switches to a different file quickly, we don't want to insert the wrong decorations from previously opened file
+  logger.log('DECO: doInsert (fpath, highlights)', fpath, project.hl)
+
+  if (!project?.hl) {
     return setDecorations({ editor, ranges: [] })
   }
-  console.log(`changes for ${fpath}`, project.changes)
-  const lines: number[] = project.changes[cpPath].alines
-  if (!lines) return
-  logger.log('DECO: doInsert linesHash', lines)
-  const ranges = lines.map(l => [[l, 0], [l, 256]])
+  const ranges = project.hl.map((l: number) => [[l, 0], [l, 255]])
   setDecorations({ editor, ranges })
 }
 

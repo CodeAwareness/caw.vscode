@@ -142,7 +142,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
       .then(CAWEditor.updateDecorations)
       .then(CAWPanel.updateProject)
       .then((project: any) => {
-        Object.keys(project.changes).map(CAWTDP.addFile(project.root))
+        project.tree?.map(CAWTDP.addFile(project.root))
         CAWTDP.refresh()
       })
   }))

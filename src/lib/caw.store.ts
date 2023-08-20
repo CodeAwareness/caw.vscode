@@ -9,18 +9,19 @@ import { TCAWEditor } from '@/lib/caw.editor'
 import CAWIPC from '@/lib/caw.ipc'
 
 export type TProject = {
-  name: string
-  root: string
-  origin: string
-  repo: string
-  branch: string
-  branches: Array<string>
-  head: string
-  cSHA: string
-  peers: Array<any> // TODO
-  activePath: string
-  line: number
-  changes: Record<string, any>
+  name: string                  // TODO
+  root: string                  // local absolute path of this repo
+  origin: string                // repo origin (github, gitlab, etc)
+  repo: string                  // TODO
+  branch: string                // local active branch name
+  branches: Array<string>       // list of branches
+  head: string                  // local head SHA value
+  cSHA: string                  // common SHA value among peers
+  activePath: string            // active file path
+  line: number                  // cursor line
+  peers: Array<any>             // TODO
+  changes: Record<string, any>  // change list for the current (active) file
+  hl: Array<number>             // highlights for the current (active) file
 }
 
 export type TDiffRange = {
