@@ -88,7 +88,7 @@ function addProject(project: TProject) {
 }
 
 function refreshActiveFile() {
-  console.log('refreshing active file')
+  console.log('refreshing active file', CAWStore.activeTextEditor?.document.fileName)
   if (!CAWStore.activeTextEditor) { console.log('no active text editor'); return }
   const fpath = CAWEditor.getEditorDocFileName()
 

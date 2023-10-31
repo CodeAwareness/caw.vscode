@@ -24,6 +24,10 @@ export type TDiffResponse = {
   fpath: string
 }
 
+export type TContextResponse = {
+  citems: any
+}
+
 /**
  * This is the VSCode <--> VSCode Webview Events module
  */
@@ -108,6 +112,26 @@ eventsTable['peer:select'] = (peer: any) => {
 
 eventsTable['peer:unselect'] = () => {
   CAWEditor.closeDiffEditor()
+}
+
+eventsTable['context:add'] = (context: string) => {
+  const activeProject = CAWStore.activeProject
+  const fpath = path.join(activeProject.root, activeProject.activePath)
+  if (!fpath) return
+  const cid = CAWIPC.guid
+  const selections = CAWStore.activeSelections
+  const op = 'add'
+  CAWIPC.transmit<TContextResponse>('context:apply', { fpath, selections, context, op, cid })
+}
+
+eventsTable['context:del'] = (context: string) => {
+  const activeProject = CAWStore.activeProject
+  const fpath = path.join(activeProject.root, activeProject.activePath)
+  if (!fpath) return
+  const cid = CAWIPC.guid
+  const selections = CAWStore.activeSelections
+  const op = 'del'
+  CAWIPC.transmit<TContextResponse>('context:apply', { fpath, selections, context, op, cid })
 }
 
 /************************************************************************************

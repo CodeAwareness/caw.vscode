@@ -176,6 +176,17 @@ function setupWatchers(context: vscode.ExtensionContext) {
   }))
 
   /************************************************************************************
+   * User navigating to a line of code inside the activeTextEditor
+   ************************************************************************************/
+  subscriptions.push(vscode.window.onDidChangeTextEditorSelection(event => {
+    const { selections } = event
+    const fpath = CAWStore.activeTextEditor?.document.fileName
+    CAWStore.activeSelections = selections
+    CAWIPC.transmit('repo:select-lines', { fpath, selections, cid: CAWIPC.guid })
+      .then(CAWPanel.updateContext)
+  }))
+
+  /************************************************************************************
    * initial SCM setup
    ************************************************************************************/
   const folders = vscode.workspace.workspaceFolders as vscode.WorkspaceFolder[]

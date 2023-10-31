@@ -88,7 +88,7 @@ function toggle(context: vscode.ExtensionContext) {
 
   if (!panel.webview) return
 
-  if (config.LOCAL_WEB && !isWindows) getWebviewContentLocal(panel.webview) // DEV
+  if (config.LOCAL_WEB && !isWindows) getWebviewContentTest(panel.webview) // DEV
   else getWebviewContent(panel.webview) // PRODUCTION
 
   CAWEditor.focusTextEditor()
@@ -125,15 +125,19 @@ function getWebviewContent(webview: vscode.Webview) {
     </body></html>`
 }
 
-async function getWebviewContentLocal(webview: vscode.Webview) {
-  console.log('VSCODE will setup IPC with panel loaded from localhost.')
+function getWebviewContentTest(webview: vscode.Webview) {
+  console.log('VSCode will setup IPC with panel loaded from vstest.codeawareness.com')
   const nonce = getNonce()
-  const cspSource = 'https://127.0.0.1:8885'
-  const mediaSource = 'https://vscode.codeawareness.com'
+  const cspSource = 'https://vstest.codeawareness.com https://api.codeawareness.com'
+  const mediaSource = 'https://vstest.codeawareness.com https://vscode.codeawareness.com'
+  // TODO: everytime i publish the CAW Panel it builds a new chunk hash, try to make this pain go away without introducing cache headaches
   webview.html = `<!doctype html><html lang="en"><head><meta charset="UTF-8">
-    <title>CodeAwareness VSCode panel</title>
-    <meta http-equiv="Content-Security-Policy" content="default-src ${cspSource}; style-src ${cspSource} 'unsafe-inline'; img-src ${cspSource} ${mediaSource}; script-src 'nonce-${nonce}' 'unsafe-eval';">
-    <script defer="defer" nonce="${nonce}" src="https://127.0.0.1:8885/main.js?t=${new Date().valueOf()}"></script>
+    <title>CodeAwareness vstest panel</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src ${cspSource}; style-src ${cspSource} 'unsafe-inline'; img-src ${cspSource} ${mediaSource}; script-src 'nonce-${nonce}';">
+    <script defer="defer" nonce="${nonce}" src="https://vstest.codeawareness.com/runtime.js"></script>
+    <script defer="defer" nonce="${nonce}" src="https://vstest.codeawareness.com/358.js?t=${new Date().valueOf()}"></script>
+    <script defer="defer" nonce="${nonce}" src="https://vstest.codeawareness.com/main.js?t=${new Date().valueOf()}"></script>
+    <link nonce="${nonce}" href="https://vstest.codeawareness.com/main.css" rel="stylesheet"></head>
     <body>
       <h1 id="panelLoading">Loading...</h1>
     </body></html>`
@@ -181,6 +185,12 @@ function updateProject(project: any) {
   return project
 }
 
+function updateContext(contextItems: any) {
+  console.log('UPDATE CONTEXT', contextItems)
+  postMessage({ command: 'setContext', data: contextItems })
+  return contextItems
+}
+
 function selectPeer(block: TDiffBlock) {
   postMessage({ command: 'selectPeer', data: block })
 }
@@ -194,6 +204,7 @@ const CAWPanel = {
   postMessage,
   selectPeer,
   toggle,
+  updateContext,
   updateProject,
 }
 

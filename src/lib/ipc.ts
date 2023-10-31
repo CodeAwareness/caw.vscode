@@ -97,7 +97,6 @@ class IPC {
       events.map(event => {
         const message = JSON.parse(event)
         const { action, body, err } = message
-        console.log('LS: detected event', action, body, err)
         this.pubsub.emit(action, body || err)
       })
 

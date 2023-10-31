@@ -90,6 +90,8 @@ export type TUser = {
   avatar: string,
 }
 
+export type TSelection = vscode.Selection
+
 export const CAWStore = {
   activeContext: {
     uri: '',
@@ -97,6 +99,7 @@ export const CAWStore = {
   },
   activeTextEditor: null as TCAWEditor | null,
   activeProject: undefined as any,
+  activeSelections: [] as readonly TSelection[],
   projects: [] as any[], // [{ repo, scIndex, root }]
   selectedPeer: undefined as any,
 

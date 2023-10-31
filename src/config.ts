@@ -6,9 +6,9 @@ import os from 'os'
 const cawConfig = vscode.workspace.getConfiguration('codeAwareness')
 
 /* eslint-disable-next-line */
-const DEBUG = false // TODO: how to determine if we're running inside an extension host or as an installed extension
+const DEBUG = true // TODO: how to determine if we're running inside an extension host or as an installed extension
 
-const LOCAL_WEB = false // Code Awareness web panel for Visual Studio Code
+const LOCAL_WEB = true // Code Awareness web panel for Visual Studio Code
 
 const LOCAL_API = false // Code Awareness API
 

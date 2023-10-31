@@ -3,7 +3,7 @@
   "displayName": "Code Awareness",
   "description": "Low noise collaboration.",
   "icon": "media/icons/caw-logo.png",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "publisher": "CodeAwareness",
   "author": "Mark Vasile",
   "repository": "https://github.com/CodeAwareness/cA.vscode",
@@ -232,6 +232,7 @@
     "webpack-cli": "^4.10.0"
   },
   "dependencies": {
+    "@changesets/cli": "^2.26.2",
     "lodash": "^4.17.21",
     "process": "^0.11.10",
     "vscode-nls": "^5.2.0"
