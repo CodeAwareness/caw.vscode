@@ -130,7 +130,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
   subscriptions.push(vscode.window.onDidChangeActiveColorTheme(e => {
     CAWStore.colorTheme = e.kind
     const data = { colorTheme: e.kind }
-    CAWPanel.postMessage({ command: 'setColorTheme', data })
+    CAWPanel.postMessage({ command: 'setup:color-theme', data })
   }))
 
   /************************************************************************************

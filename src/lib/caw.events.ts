@@ -17,24 +17,13 @@ import CAWPanel from './caw.panel'
 import CAWIPC from './caw.ipc'
 import CAWWorkspace from './caw.workspace'
 
-export type TDiffResponse = {
-  title: string
-  extractDir: string
-  peerFile: string
-  fpath: string
-}
-
-export type TContextResponse = {
-  citems: any
-}
-
 /**
  * This is the VSCode <--> VSCode Webview Events module
  */
 function init() {
   CAWStore.colorTheme = vscode.window.activeColorTheme.kind
   const data = { colorTheme: CAWStore.colorTheme }
-  CAWPanel.postMessage({ command: 'setColorTheme', data })
+  CAWPanel.postMessage({ command: 'setup:color-theme', data })
 }
 
 // TODO: do we still need a short ID anywhere?
@@ -55,8 +44,8 @@ const eventsTable: Record<string, any> = {}
 eventsTable['webview:loaded'] = () => {
   console.log('Will init webview with GUID', CAWIPC.guid)
   init()
-  postBack('wssGuid')(CAWIPC.guid)
-  postBack('authInfo')({ user: CAWStore.user, tokens: CAWStore.tokens })
+  postBack('setup:wss-guid')(CAWIPC.guid)
+  postBack('auth:info')({ user: CAWStore.user, tokens: CAWStore.tokens })
 }
 
 eventsTable['auth:login'] = (data: TAuth) => {
@@ -93,6 +82,13 @@ eventsTable['branch:refresh'] = (data: any) => {
   // TODO: refresh branches using git and display in CAWPanel
 }
 
+export type TDiffResponse = {
+  title: string
+  extractDir: string
+  peerFile: string
+  fpath: string
+}
+
 eventsTable['peer:select'] = (peer: any) => {
   const activeProject = CAWStore.activeProject
   const { origin } = activeProject
@@ -114,6 +110,29 @@ eventsTable['peer:unselect'] = () => {
   CAWEditor.closeDiffEditor()
 }
 
+export type TLineContext = {
+  line: number
+  context: Array<string>
+}
+
+export type TProjectContext = {
+  file: string
+  context: Array<string>
+}
+
+export type TContextResponse = {
+  fileContext: {
+    _id: string
+    user: string
+    repo: string
+    file: string
+    lines: Array<TLineContext>
+    updatedAt: string
+    createdAt?: string
+  }
+  projectContext: Array<TProjectContext>
+}
+
 eventsTable['context:add'] = (context: string) => {
   const activeProject = CAWStore.activeProject
   const fpath = path.join(activeProject.root, activeProject.activePath)
@@ -122,6 +141,9 @@ eventsTable['context:add'] = (context: string) => {
   const selections = CAWStore.activeSelections
   const op = 'add'
   CAWIPC.transmit<TContextResponse>('context:apply', { fpath, selections, context, op, cid })
+    .then(res => {
+      postBack('context:update')(res)
+    })
 }
 
 eventsTable['context:del'] = (context: string) => {
@@ -132,6 +154,9 @@ eventsTable['context:del'] = (context: string) => {
   const selections = CAWStore.activeSelections
   const op = 'del'
   CAWIPC.transmit<TContextResponse>('context:apply', { fpath, selections, context, op, cid })
+    .then(res => {
+      postBack('context:update')(res)
+    })
 }
 
 /************************************************************************************

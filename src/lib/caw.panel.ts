@@ -180,19 +180,17 @@ function didChangeViewState(state: any) {
  *
  ************************************************************************************/
 function updateProject(project: any) {
-  console.log('UPDATE PROJECT', project)
-  postMessage({ command: 'setProject', data: project })
+  postMessage({ command: 'repo:project', data: project })
   return project
 }
 
 function updateContext(contextItems: any) {
-  console.log('UPDATE CONTEXT', contextItems)
-  postMessage({ command: 'setContext', data: contextItems })
+  postMessage({ command: 'context:update', data: contextItems })
   return contextItems
 }
 
 function selectPeer(block: TDiffBlock) {
-  postMessage({ command: 'selectPeer', data: block })
+  postMessage({ command: 'peer:select', data: block })
 }
 
 const CAWPanel = {
