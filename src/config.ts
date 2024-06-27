@@ -8,9 +8,9 @@ const cawConfig = vscode.workspace.getConfiguration('codeAwareness')
 /* eslint-disable-next-line */
 const DEBUG = true // TODO: how to determine if we're running inside an extension host or as an installed extension
 
-const LOCAL_WEB = true // Code Awareness web panel for Visual Studio Code
+const LOCAL_API = true // Code Awareness API
 
-const LOCAL_API = false // Code Awareness API
+const LOCAL_PANEL = true // VSCode webview panel
 
 // Dev mode when you have CodeAwareness VSCode Panel running locally; please configure local nginx.
 const PORT_LOCAL = 8885
@@ -22,7 +22,10 @@ const CAW_SCHEMA = 'codeAwareness'
 const SERVER_VERSION = 'v1'
 
 // Where to post requests to
-const API_URL = LOCAL_API ? `https://127.0.0.1:${PORT_LOCAL}/api/${SERVER_VERSION}` : `https://api.codeawareness.com/${SERVER_VERSION}`
+const API_URL = LOCAL_API ? `https://lc.codeawareness.com:${PORT_LOCAL}` : `https://api.codeawareness.com`
+
+// VSCode panel webview location
+const PANEL_URL = LOCAL_PANEL ? `https://lc.codeawareness.com:${PORT_LOCAL}` : `https://vscode.codeawareness.com`
 
 // Add this extension to the catalog of clients on CodeAwareness Local Service.
 const CATALOG: string = cawConfig.get('catalog') || 'catalog'
@@ -39,9 +42,10 @@ export default {
   CAW_SCHEMA,
   DEBUG,
   EXTRACT_REPO_DIR,
-  LOCAL_WEB,
   LOCAL_API,
+  LOCAL_PANEL,
   LOG_LEVEL,
+  PANEL_URL,
   PIPE_CATALOG,
   PORT_LOCAL,
   SERVER_VERSION,

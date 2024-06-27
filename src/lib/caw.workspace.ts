@@ -50,7 +50,7 @@ function setupTempFiles() {
 }
 
 function setupSync() {
-  CAWIPC.ipcClient.emit(JSON.stringify({ action: 'sync:setup', data: { cid: CAWIPC.guid } })) // don't use transmit, as that will overwrite the response handler
+  CAWIPC.ipcClient.emit(JSON.stringify({ action: 'sync:setup', data: { caw: CAWIPC.guid } })) // don't use transmit, as that will overwrite the response handler
   CAWIPC.ipcClient.pubsub.on('res:sync:setup', syncGardener)
 }
 
@@ -92,7 +92,7 @@ function refreshActiveFile() {
   if (!CAWStore.activeTextEditor) { console.log('no active text editor'); return }
   const fpath = CAWEditor.getEditorDocFileName()
 
-  return CAWIPC.transmit<TProject>('repo:active-path', { fpath, cid: CAWIPC.guid, doc: CAWStore.activeTextEditor.document.getText() })
+  return CAWIPC.transmit<TProject>('repo:active-path', { fpath, caw: CAWIPC.guid, doc: CAWStore.activeTextEditor.document.getText() })
     .then(addProject)
     .then(CAWEditor.updateDecorations)
     .then(CAWPanel.updateProject)
@@ -122,7 +122,7 @@ function cycleBlock(direction: number) {
   const fpath = CAWStore.activeProject.activePath
   const doc = CAWStore.activeTextEditor.document.getText()
   const origin = CAWStore.activeProject.origin
-  const cid = CAWIPC.guid
+  const caw = CAWIPC.guid
   const editor = CAWStore.activeTextEditor
 
   const promise = Promise.resolve()
@@ -132,7 +132,7 @@ function cycleBlock(direction: number) {
   isCycling = true
   let block: any
   return promise
-    .then(() => CAWIPC.transmit<TDiffBlock>('repo:cycle-block', { cid, origin, fpath, doc, line, direction }))
+    .then(() => CAWIPC.transmit<TDiffBlock>('repo:cycle-block', { caw, origin, fpath, doc, line, direction }))
     .then(data => {
       console.log('CYCLE RESPONSE', data)
       block = data

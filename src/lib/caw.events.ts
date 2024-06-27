@@ -64,8 +64,8 @@ eventsTable['auth:logout'] = () => {
 }
 
 eventsTable['branch:select'] = (branch: string) => {
-  const cid = CAWIPC.guid
-  CAWIPC.transmit('repo:diff-branch', { branch, cid })
+  const caw = CAWIPC.guid
+  CAWIPC.transmit('repo:diff-branch', { branch, caw })
     .then((info: any) => {
       const peerFileUri = vscode.Uri.file(info.peerFile)
       const userFileUri = vscode.Uri.file(info.userFile)
@@ -94,13 +94,14 @@ eventsTable['peer:select'] = (peer: any) => {
   const { origin } = activeProject
   const fpath = activeProject.activePath
   if (!fpath) return
-  const cid = CAWIPC.guid
+  const caw = CAWIPC.guid
   const doc = CAWStore.activeTextEditor?.document.getText()
-  CAWIPC.transmit<TDiffResponse>('repo:diff-peer', { origin, fpath, cid, peer, doc })
+  CAWIPC.transmit<TDiffResponse>('repo:diff-peer', { origin, fpath, caw, peer, doc })
     .then((info) => {
       const peerFileUri = vscode.Uri.file(info.peerFile)
       // Note: thanks to smart node:path for figuring out how to join Windows and *nix paths together.
       const userFileUri = vscode.Uri.file(path.join(activeProject.root, fpath))
+      console.log('PEER DIFF', fpath, peerFileUri, userFileUri)
       // logger.info('OPEN DIFF with', fpath, info)
       vscode.commands.executeCommand('vscode.diff', peerFileUri, userFileUri, info.title, { viewColumn: 1, preserveFocus: true })
     })
@@ -137,10 +138,10 @@ eventsTable['context:add'] = (context: string) => {
   const activeProject = CAWStore.activeProject
   const fpath = path.join(activeProject.root, activeProject.activePath)
   if (!fpath) return
-  const cid = CAWIPC.guid
+  const caw = CAWIPC.guid
   const selections = CAWStore.activeSelections
   const op = 'add'
-  CAWIPC.transmit<TContextResponse>('context:apply', { fpath, selections, context, op, cid })
+  CAWIPC.transmit<TContextResponse>('context:apply', { fpath, selections, context, op, caw })
     .then(res => {
       postBack('context:update')(res)
     })
@@ -150,10 +151,10 @@ eventsTable['context:del'] = (context: string) => {
   const activeProject = CAWStore.activeProject
   const fpath = path.join(activeProject.root, activeProject.activePath)
   if (!fpath) return
-  const cid = CAWIPC.guid
+  const caw = CAWIPC.guid
   const selections = CAWStore.activeSelections
   const op = 'del'
-  CAWIPC.transmit<TContextResponse>('context:apply', { fpath, selections, context, op, cid })
+  CAWIPC.transmit<TContextResponse>('context:apply', { fpath, selections, context, op, caw })
     .then(res => {
       postBack('context:update')(res)
     })

@@ -138,7 +138,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
    ************************************************************************************/
   subscriptions.push(vscode.workspace.onDidSaveTextDocument(doc => {
     // TODO: some throttle mechanism to make sure we're only sending at most once per some configured interval
-    CAWIPC.transmit('repo:file-saved', { fpath: doc.fileName, doc: doc.getText(), cid: CAWIPC.guid })
+    CAWIPC.transmit('repo:file-saved', { fpath: doc.fileName, doc: doc.getText(), caw: CAWIPC.guid })
       .then(CAWEditor.updateDecorations)
       .then(CAWPanel.updateProject)
       .then((project: any) => {
@@ -182,7 +182,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
     const { selections } = event
     const fpath = CAWStore.activeTextEditor?.document.fileName
     CAWStore.activeSelections = selections
-    CAWIPC.transmit('repo:select-lines', { fpath, selections, cid: CAWIPC.guid })
+    CAWIPC.transmit('repo:select-lines', { fpath, selections, caw: CAWIPC.guid })
       .then(CAWPanel.updateContext)
   }))
 

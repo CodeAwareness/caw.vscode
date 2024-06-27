@@ -88,7 +88,7 @@ function toggle(context: vscode.ExtensionContext) {
 
   if (!panel.webview) return
 
-  if (config.LOCAL_WEB && !isWindows) getWebviewContentTest(panel.webview) // DEV
+  if (config.LOCAL_PANEL && !isWindows) getWebviewContentTest(panel.webview) // DEV
   else getWebviewContent(panel.webview) // PRODUCTION
 
   CAWEditor.focusTextEditor()
@@ -108,36 +108,34 @@ function getNonce() {
 }
 
 function getWebviewContent(webview: vscode.Webview) {
-  console.log('VSCODE will setup IPC with panel loaded from codeawareness.com')
+  console.log('VSCODE (live) will setup IPC with panel loaded from codeawareness.com')
   const nonce = getNonce()
-  const cspSource = 'https://vscode.codeawareness.com https://api.codeawareness.com'
-  const mediaSource = 'https://vscode.codeawareness.com'
+  const cspSource = `${config.PANEL_URL} ${config.API_URL}`
+  const mediaSource = config.PANEL_URL
+  console.log('SECURITY', cspSource, mediaSource)
   // TODO: everytime i publish the CAW Panel it builds a new chunk hash, try to make this pain go away without introducing cache headaches
   webview.html = `<!doctype html><html lang="en"><head><meta charset="UTF-8">
     <title>CodeAwareness VSCode panel</title>
     <meta http-equiv="Content-Security-Policy" content="default-src ${cspSource}; style-src ${cspSource} 'unsafe-inline'; img-src ${cspSource} ${mediaSource}; script-src 'nonce-${nonce}';">
-    <script defer="defer" nonce="${nonce}" src="https://vscode.codeawareness.com/runtime.js"></script>
-    <script defer="defer" nonce="${nonce}" src="https://vscode.codeawareness.com/358.js?t=${new Date().valueOf()}"></script>
-    <script defer="defer" nonce="${nonce}" src="https://vscode.codeawareness.com/main.js?t=${new Date().valueOf()}"></script>
-    <link nonce="${nonce}" href="https://vscode.codeawareness.com/main.css" rel="stylesheet"></head>
+    <script defer="defer" nonce="${nonce}" src="${config.PANEL_URL}/runtime.js"></script>
+    <script defer="defer" nonce="${nonce}" src="${config.PANEL_URL}/889.js?t=${new Date().valueOf()}"></script>
+    <script defer="defer" nonce="${nonce}" src="${config.PANEL_URL}/main.js?t=${new Date().valueOf()}"></script>
+    <link nonce="${nonce}" href="${config.PANEL_URL}/main.css" rel="stylesheet"></head>
     <body>
       <h1 id="panelLoading">Loading...</h1>
     </body></html>`
 }
 
 function getWebviewContentTest(webview: vscode.Webview) {
-  console.log('VSCode will setup IPC with panel loaded from vstest.codeawareness.com')
+  console.log(`VSCode (test) will setup IPC with panel loaded from ${config.PANEL_URL}`)
   const nonce = getNonce()
-  const cspSource = 'https://vstest.codeawareness.com https://api.codeawareness.com'
-  const mediaSource = 'https://vstest.codeawareness.com https://vscode.codeawareness.com'
+  const cspSource = `${config.PANEL_URL} ${config.API_URL} https://vscode.codeawareness.com`
+  const mediaSource = config.PANEL_URL
   // TODO: everytime i publish the CAW Panel it builds a new chunk hash, try to make this pain go away without introducing cache headaches
   webview.html = `<!doctype html><html lang="en"><head><meta charset="UTF-8">
     <title>CodeAwareness vstest panel</title>
-    <meta http-equiv="Content-Security-Policy" content="default-src ${cspSource}; style-src ${cspSource} 'unsafe-inline'; img-src ${cspSource} ${mediaSource}; script-src 'nonce-${nonce}';">
-    <script defer="defer" nonce="${nonce}" src="https://vstest.codeawareness.com/runtime.js"></script>
-    <script defer="defer" nonce="${nonce}" src="https://vstest.codeawareness.com/358.js?t=${new Date().valueOf()}"></script>
-    <script defer="defer" nonce="${nonce}" src="https://vstest.codeawareness.com/main.js?t=${new Date().valueOf()}"></script>
-    <link nonce="${nonce}" href="https://vstest.codeawareness.com/main.css" rel="stylesheet"></head>
+    <meta http-equiv="Content-Security-Policy" content="default-src ${cspSource}; style-src ${cspSource} 'unsafe-inline'; img-src ${cspSource} ${mediaSource}; script-src 'nonce-${nonce}' 'unsafe-eval';">
+    <script defer="defer" nonce="${nonce}" src="${config.PANEL_URL}/main.js?t=${new Date().valueOf()}"></script>
     <body>
       <h1 id="panelLoading">Loading...</h1>
     </body></html>`
