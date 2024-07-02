@@ -6,11 +6,11 @@ import os from 'os'
 const cawConfig = vscode.workspace.getConfiguration('codeAwareness')
 
 /* eslint-disable-next-line */
-const DEBUG = true // TODO: how to determine if we're running inside an extension host or as an installed extension
+const DEBUG = false // TODO: how to determine if we're running inside an extension host or as an installed extension
 
-const LOCAL_API = true // Code Awareness API
+const LOCAL_API = false // Code Awareness API
 
-const LOCAL_PANEL = true // VSCode webview panel
+const LOCAL_PANEL = false // VSCode webview panel
 
 // Dev mode when you have CodeAwareness VSCode Panel running locally; please configure local nginx.
 const PORT_LOCAL = 8885

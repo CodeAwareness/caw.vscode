@@ -49,19 +49,17 @@ function setupTempFiles() {
     })
 }
 
+// setupSync is used to receive refresh requests from the local service
 function setupSync() {
   CAWIPC.ipcClient.emit(JSON.stringify({ action: 'sync:setup', data: { caw: CAWIPC.guid } })) // don't use transmit, as that will overwrite the response handler
-  CAWIPC.ipcClient.pubsub.on('res:sync:setup', syncGardener)
+  CAWIPC.ipcClient.pubsub.on('res:sync:setup', (data: any) => {
+    const action = data?.action
+    if (actionTable[action]) actionTable[action](data)
+  })
 }
 
 function closeTextDocument(params: any) {
   console.log('WORKSPACE: closeTextDocument', params)
-}
-
-function syncGardener(data: any) {
-  if (!data) return
-  const action = data.action
-  if (actionTable[action]) actionTable[action](data)
 }
 
 /************************************************************************************
