@@ -8,8 +8,6 @@ import * as path from 'node:path'
 import { CAWStore } from './caw.store'
 import logger from './logger'
 
-const dataChangeEvent = new EventEmitter()
-
 let folders: Record<string, any> = {}
 
 type WS_TREE_TYPE = {
@@ -53,50 +51,52 @@ const toTDItem = ({ folder, tree, fpath }: WS_TREE_TYPE) => (key: string) => {
 /**
  * TreeDataProvider
  */
-const TDP = {
-  addProject: (project: any) => {
-    vscode.workspace.workspaceFolders?.map(TDP.addPeerWorkspace)
-    return project
-  },
-
-  addPeerWorkspace: (wsFolder: vscode.WorkspaceFolder) => {
+class TDP implements vscode.TreeDataProvider<TDItem> {
+  addPeerWorkspace(wsFolder: vscode.WorkspaceFolder) {
     const fpath = wsFolder.uri.fsPath
-    console.log('TDP: addPeerWorkspace', wsFolder, fpath)
+    logger.log('TDP: addPeerWorkspace', wsFolder, fpath)
     folders[fpath] = wsFolder.name
-    CAWStore.peerFS[fpath] = {}
-    return TDP
-  },
+    CAWStore.peerFS[fpath.toLowerCase()] = {}
+    return this
+  }
 
-  removePeerWorkspace: (wsFolder: vscode.WorkspaceFolder) => {
+  dispose() {
+    CAWStore.peerFS = {}
+    folders = {}
+  }
+
+  clearWorkspace() {
+    CAWStore.peerFS = {}
+    folders = {}
+  }
+
+  removePeerWorkspace(wsFolder: vscode.WorkspaceFolder) {
     const fPath = wsFolder.uri.fsPath
     delete folders[fPath]
-    delete CAWStore.peerFS[fPath]
+    delete CAWStore.peerFS[fPath.toLowerCase()]
     logger.log('TDP: removePeerWorkspace', fPath)
-    TDP.refresh()
-  },
+    this.refresh()
+  }
 
-  clearWorkspace: () => {
-    folders = {}
-  },
-
-  provideTextDocumentContent: (/* uri: vscode.Uri, token: vscode.CancellationToken */): vscode.ProviderResult<string> => {
+  provideTextDocumentContent(/* uri: vscode.Uri, token: vscode.CancellationToken */) {
     // TODO: provide text document content; do we still need this?
     return 'TEST'
-  },
+  }
 
-  getTreeItem: (el: vscode.TreeItem): vscode.TreeItem => {
+  getTreeItem(el: vscode.TreeItem) {
     return el
-  },
+  }
 
   // theoretically we should only get files, not any empty folders, due to the way diffs are being managed (empty folders are ignored)
-  getChildren: (el: TDItem): Thenable<TDItem[]> => {
+  getChildren(el: TDItem): Thenable<TDItem[]> {
     if (!folders) return Promise.resolve([])
     if (!el) return Promise.resolve(makeWSItems())
     const { peerFS } = CAWStore
-    const { fpath, folder } = el
+    const fpath = el.fpath.replace(/\\/g, '/')
+    const folder = el.folder.replace(/\\/g, '/')
     // eslint-disable-next-line no-useless-escape
     const parts = fpath.split(/[\\\/]/).filter((a: string) => a)
-    const tree = parts.reduce((acc: any, p: string) => acc[p], peerFS[folder])
+    const tree = parts.reduce((acc: any, p: string) => acc[p], peerFS[folder.toLowerCase()])
     if (!tree) return Promise.resolve([])
 
     try {
@@ -110,15 +110,14 @@ const TDP = {
     function makeWSItems() {
       return Object.keys(folders).map(folder => toTDItem({ folder, tree: {}, fpath: '' })(folders[folder]))
     }
-  },
+  }
 
-  _onDidChangeTreeData: dataChangeEvent.event,
-  onDidChangeTreeData: dataChangeEvent.event,
+  private _onDidChangeTreeData: vscode.EventEmitter<void | TDItem | TDItem[] | undefined | null> = new vscode.EventEmitter<TDItem | undefined | null | void>()
+  readonly onDidChangeTreeData: vscode.Event<void | TDItem | TDItem[] | undefined | null> = this._onDidChangeTreeData.event
 
-  refresh: (): any => {
-    /* @ts-ignore */
-    dataChangeEvent.fire(undefined)
-  },
+  refresh() {
+    this._onDidChangeTreeData.fire()
+  }
 
   /************************************************************************************
    * register file into the TDP
@@ -133,19 +132,21 @@ const TDP = {
 
    * When we're adding files from downloaded diffs, we store them in this format, and we combine all the file paths into a list for VSCode Source Control Manager.
    ************************************************************************************/
-  addFile: (folder: string) => (fpath: string) => {
-    const parts = fpath.split('/').filter(a => a)
-    let prevObj = CAWStore.peerFS[folder]
-    if (!prevObj) prevObj = {}
-    CAWStore.peerFS[folder] = prevObj
-    let leaf
-    for (const name of parts) {
-      if (!prevObj[name]) prevObj[name] = {}
-      leaf = { name, prevObj }
-      prevObj = prevObj[name]
+  addFile(folder: string) {
+    return (fpath: string) => {
+      const parts = fpath.split('/').filter(a => a)
+      let prevObj = CAWStore.peerFS[folder.toLowerCase()]
+      if (!prevObj) prevObj = {}
+      CAWStore.peerFS[folder.toLowerCase()] = prevObj
+      let leaf
+      for (const name of parts) {
+        if (!prevObj[name]) prevObj[name] = {}
+        leaf = { name, prevObj }
+        prevObj = prevObj[name]
+      }
+      if (leaf) leaf.prevObj[leaf.name] = 1
     }
-    if (leaf) leaf.prevObj[leaf.name] = 1
-  },
+  }
 }
 
-export default TDP
+export default new TDP()

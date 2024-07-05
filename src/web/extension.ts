@@ -95,8 +95,9 @@ function setupWatchers(context: vscode.ExtensionContext) {
   const { subscriptions } = context
   CAWTDP.clearWorkspace()
   vscode.workspace.workspaceFolders?.map(wsFolder => subscriptions.push(
-    vscode.window.registerTreeDataProvider(SCM_PEER_FILES_VIEW, CAWTDP.addPeerWorkspace(wsFolder))
+    CAWTDP.addPeerWorkspace(wsFolder)
   ))
+  vscode.window.registerTreeDataProvider(SCM_PEER_FILES_VIEW, CAWTDP)
   // TODO: SCM files
   subscriptions.push(
     /* @ts-ignore */
@@ -112,7 +113,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
     logger.info('CodeAwareness: onDidChangeWorkspaceFolders (events)', e)
     try {
       e.added.forEach(wsFolder => {
-        vscode.window.registerTreeDataProvider(SCM_PEER_FILES_VIEW, CAWTDP.addPeerWorkspace(wsFolder))
+        CAWTDP.addPeerWorkspace(wsFolder)
       })
       e.removed.forEach(wsFolder => {
         CAWTDP.removePeerWorkspace(wsFolder)
@@ -182,8 +183,11 @@ function setupWatchers(context: vscode.ExtensionContext) {
     const { selections } = event
     const fpath = CAWStore.activeTextEditor?.document.fileName
     CAWStore.activeSelections = selections
+    // TODO: rethink the context update; we're disabling it for now
+    /*
     CAWIPC.transmit('repo:select-lines', { fpath, selections, caw: CAWIPC.guid })
       .then(CAWPanel.updateContext)
+      */
   }))
 
   /************************************************************************************
