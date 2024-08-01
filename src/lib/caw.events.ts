@@ -179,8 +179,9 @@ function processAPI(id: string, key: string, data: any): void {
   logger.info('EVENTS processAPI', key, data)
   CAWIPC.transmit(key, data)
     .then(data => {
-      const body = typeof data === 'string' ? JSON.parse(data) : data
-      postBack(`res:${key}`, id)(body)
+      const obj = typeof data === 'string' ? JSON.parse(data) : data
+      postBack(`res:${key}`, id)(obj)
+      if (eventsTable[key]) eventsTable[key](obj)
     })
     .catch(err => {
       const obj = typeof err === 'string' ? JSON.parse(err) : err
@@ -197,12 +198,12 @@ function setup(webview: any, context: any) {
     (message: any) => {
       switch (message.command) {
         case 'api':
-          // system events to sync day>ta between editor and webview
+          // system events to sync data between editor and webview (API calls)
           processAPI(message.id, message.key, message.data)
           break
 
         case 'event':
-          // system events to sync data between editor and webview
+          // system events to sync data between editor and webview (clicks, selects, etc)
           processSystemEvent(message.key, message.data)
           break
 
