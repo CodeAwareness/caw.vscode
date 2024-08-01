@@ -4,14 +4,14 @@ import { EventEmitter } from 'node:events'
 
 const id = os.hostname()
 const delimiter = '\f'
-const isWindows = os.platform() === 'win32' 
+const isWindows = os.platform() === 'win32'
 
 class IPC {
   // Use this pubsub to listen for responses to your emits
   public pubsub = new EventEmitter()
   public socket = null as Socket | null
   public appspace = 'caw.'
-  public socketRoot = isWindows ? '\\\\.\\pipe\\' : '/var/tmp/'
+  public socketRoot = isWindows ? '\\\\.\\pipe\\' : os.tmpdir()
   public retryInterval = 2000 // retry connecting every 2 seconds
   public maxRetries = Infinity
 
