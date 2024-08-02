@@ -93,6 +93,7 @@ Honestly I've never had so much headache with any software before. It's been utt
      * 2. c:\Folder\Sub\fileName.ext
      * 3. /c:/Folder/Sub/fileName.ext
      * 4. /C:/Folder/Sub/fileName.ext
+     * 5. C:\\Folder\\Sub\\fileName.ext
 
 At the time of writing this, I'm close to wanting to start my own code editor project. However, VSCode is a beloved editor with a huge audience, so I'm doing my best to contain my frustrations. Any donations you may be inclined to send my way will be used for therapy.
 
