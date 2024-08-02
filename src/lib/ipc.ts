@@ -93,8 +93,8 @@ class IPC {
       }
 
       const events = this.ipcBuffer.split(delimiter)
-      events.pop()
       events.map(event => {
+        if (!event) return
         const message = JSON.parse(event)
         const { action, body, err } = message
         this.pubsub.emit(action, body || err)
