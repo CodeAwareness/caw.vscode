@@ -78,6 +78,7 @@ class TDP implements vscode.TreeDataProvider<TDItem> {
     this.refresh()
   }
 
+  // TODO: provide relativePath in the arguments
   provideTextDocumentContent(/* uri: vscode.Uri, token: vscode.CancellationToken */) {
     // TODO: provide text document content; do we still need this?
     return 'TEST'

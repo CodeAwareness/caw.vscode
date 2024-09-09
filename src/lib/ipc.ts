@@ -1,4 +1,5 @@
 import os from 'os'
+import path from 'node:path'
 import net, { Socket } from 'net'
 import { EventEmitter } from 'node:events'
 
@@ -22,7 +23,7 @@ class IPC {
 
   constructor(guid: string) {
     // Note: originally I wrote this IPC using WebSockets over local https, only to find out at the end of my toil that VSCode has WebSockets in dev mode only.
-    let path = this.path = this.socketRoot + this.appspace + (guid || id)
+    this.path = path.join(this.socketRoot, this.appspace + (guid || id))
   }
 
   connect(callback?: any) {

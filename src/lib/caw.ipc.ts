@@ -13,7 +13,7 @@ const shortid = () => {
   return new Date().valueOf().toString() // we run multiple editors, yes, but we run them as a user on a local computer, so this is fine.
 }
 
-/* We send a GUID with every requests, such that multiple instances of VSCode can work independently;
+/* We send a GUID with every request, such that multiple instances of VSCode can work independently;
  * TODO: perhaps allow different users logged into different VSCode instances? IS THIS SECURE? (it will require rewriting some of the local service)
  */
 const guid = shortid()
