@@ -27,6 +27,7 @@ const CAWIPC = {
 
   init: async function(): Promise<void> {
     ipcClient.pubsub.removeAllListeners()
+    // ipcClient.pubsub.on('brdc:auth:login', (body) => processBroadcast('auth:login, body))    // process successful response
     ipcCatalog.connect()
     ipcCatalog.pubsub.on('connected', () => {
       console.log('IPC CLIENT SOCKET READY')

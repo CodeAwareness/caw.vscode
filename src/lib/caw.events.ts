@@ -53,6 +53,7 @@ eventsTable['auth:login'] = (data: TAuth) => {
   CAWStore.user = data?.user
   CAWStore.tokens = data?.tokens
   if (data?.user) {
+    postBack('auth:info')({ user: data.user, tokens: data.tokens })
     CAWWorkspace.refreshActiveFile()
     CAWWorkspace.setupSync()
   }
@@ -171,8 +172,8 @@ function processSystemEvent(key: string, data: any): void {
 
 /************************************************************************************
  * @param string - id: a unique ID to keep the req-res correlation.
- * For example, key can be: `auth:info:1kG9`.
  * @param string - key: the event key, indicating an action to be taken,
+ * For example, key can be: `auth:info:1kG9`.
  * @param object - data: the data to be processed inside the action
  ************************************************************************************/
 function processAPI(id: string, key: string, data: any): void {
@@ -221,7 +222,14 @@ function setup(webview: any, context: any) {
   )
 }
 
+function listen() {
+  CAWIPC.ipcClient.pubsub.on('brdc:auth:login', (data: any) => {
+    eventsTable['auth:login'](data)
+  })
+}
+
 const CAWEvents = {
+  listen,
   setup,
 }
 
