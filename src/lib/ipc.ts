@@ -84,7 +84,7 @@ class IPC {
     })
 
     socket.on('data', data => {
-      // console.log('LS: received data', this.path, data)
+      // console.log('LS: received data', this.path, data.toString().substring(0, 100))
       this.ipcBuffer += data.toString()
 
       if (this.ipcBuffer.indexOf(delimiter) === -1) {

@@ -226,6 +226,10 @@ function listen() {
   CAWIPC.ipcClient.pubsub.on('brdc:auth:login', (data: any) => {
     eventsTable['auth:login'](data)
   })
+
+  CAWIPC.ipcClient.pubsub.on('brdc:peer:select', (data: any) => {
+    eventsTable['peer:select'](data)
+  })
 }
 
 const CAWEvents = {

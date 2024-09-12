@@ -44,15 +44,15 @@ const CAWIPC = {
     return new Promise<T>((resolve, reject) => {
       const handler = (body: any) => {
         console.info('IPC: resolved action', action, body)
-        const data = typeof body === 'string' ? JSON.parse(body) : body
-        resolve(data)
+        const resdata = typeof body === 'string' ? JSON.parse(body) : body
+        resolve(resdata)
       }
       const errHandler = (err: any) => {
         console.info('IPC: socket error', action, err)
-        let data
+        let errdata
         if (typeof err === 'string') {
           try {
-            data = JSON.parse(err)
+            errdata = JSON.parse(err) // TODO
           } catch (err) {
             reject(new Error('Operation failed.'))
           }
