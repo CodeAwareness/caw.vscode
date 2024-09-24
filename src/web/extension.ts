@@ -125,6 +125,21 @@ function setupWatchers(context: vscode.ExtensionContext) {
     }
   }))
 
+  function findSymbolAtPosition(symbols: any, position: vscode.Position): vscode.SymbolInformation | undefined {
+    let currentSymbol: vscode.SymbolInformation | undefined
+
+    console.log('SYMBOLS', symbols)
+    for (const symbol of symbols) {
+      if (symbol.location.range.contains(position)) {
+        if (!currentSymbol || symbol.location.range.start.isAfter(currentSymbol.location.range.start)) {
+          currentSymbol = symbol
+        }
+      }
+    }
+
+    return currentSymbol
+  }
+
   /************************************************************************************
    * Color theme changes
    ************************************************************************************/
@@ -180,14 +195,29 @@ function setupWatchers(context: vscode.ExtensionContext) {
    * User navigating to a line of code inside the activeTextEditor
    ************************************************************************************/
   subscriptions.push(vscode.window.onDidChangeTextEditorSelection(event => {
-    const { selections } = event
+    const { selections, textEditor } = event
+    const { document, selection } = textEditor
+    const currentLine = selection.active.line
+    const currentPosition = new vscode.Position(currentLine, 0)
     const fpath = CAWStore.activeTextEditor?.document.fileName
+
     CAWStore.activeSelections = selections
-    // TODO: rethink the context update; we're disabling it for now
-    /*
-    CAWIPC.transmit('repo:select-lines', { fpath, selections, caw: CAWIPC.guid })
-      .then(CAWPanel.updateContext)
-      */
+    // Get the symbol at the current position
+    vscode.commands.executeCommand('vscode.executeDocumentSymbolProvider', document.uri)
+      .then(symbols => {
+        if (symbols) {
+          console.log('symbols', symbols)
+          const currentSymbol = findSymbolAtPosition(symbols, currentPosition)
+          if (currentSymbol) {
+            const rel = `${currentSymbol.containerName || 'Global'}.${currentSymbol.name}`
+            CAWIPC.transmit('context:select-lines', { fpath, selections, rel, caw: CAWIPC.guid })
+              .then(CAWPanel.updateContext)
+            console.log('REL', rel)
+          } else {
+            // outside boundaries
+          }
+        }
+      })
   }))
 
   /************************************************************************************
