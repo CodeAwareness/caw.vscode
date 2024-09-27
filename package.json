@@ -94,7 +94,7 @@
         {
           "id": "codeAwareness",
           "name": "Peer Diffs",
-          "icon": "media/code.svg",
+          "icon": "media/code.png",
           "contextualTitle": "Files changed at peers.",
           "when": "workbenchState != empty"
         }

@@ -128,7 +128,7 @@ function setupWatchers(context: vscode.ExtensionContext) {
   function findSymbolAtPosition(symbols: any, position: vscode.Position): vscode.SymbolInformation | undefined {
     let currentSymbol: vscode.SymbolInformation | undefined
 
-    console.log('SYMBOLS', symbols)
+    // console.log('SYMBOLS', symbols)
     for (const symbol of symbols) {
       if (symbol.location.range.contains(position)) {
         if (!currentSymbol || symbol.location.range.start.isAfter(currentSymbol.location.range.start)) {

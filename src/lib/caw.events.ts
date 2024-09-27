@@ -45,7 +45,13 @@ eventsTable['webview:loaded'] = () => {
   console.log('Will init webview with GUID', CAWIPC.guid)
   init()
   postBack('setup:wss-guid')(CAWIPC.guid)
-  postBack('auth:info')({ user: CAWStore.user, tokens: CAWStore.tokens })
+  CAWIPC
+    .transmit('auth:info')
+    .then((data: any) => {
+      CAWStore.user = data.user
+      CAWStore.tokens = data.tokens
+      postBack('auth:info')({ user: CAWStore.user, tokens: CAWStore.tokens })
+    })
 }
 
 eventsTable['auth:login'] = (data: TAuth) => {
