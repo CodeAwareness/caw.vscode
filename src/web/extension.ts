@@ -48,6 +48,12 @@ function initCodeAwareness(context: vscode.ExtensionContext) {
   setupCommands(context)
   setupWatchers(context)
   logger.info('CodeAwareness: extension activated (workspaceFolders)', vscode.workspace.workspaceFolders)
+  const disposable = {
+    dispose: () => {
+      CAWIPC.dispose()
+    }
+  }
+  context.subscriptions.push(disposable)
 }
 
 const CAWDocumentContentProvider = {
@@ -128,7 +134,6 @@ function setupWatchers(context: vscode.ExtensionContext) {
   function findSymbolAtPosition(symbols: any, position: vscode.Position): vscode.SymbolInformation | undefined {
     let currentSymbol: vscode.SymbolInformation | undefined
 
-    // console.log('SYMBOLS', symbols)
     for (const symbol of symbols) {
       if (symbol.location.range.contains(position)) {
         if (!currentSymbol || symbol.location.range.start.isAfter(currentSymbol.location.range.start)) {
@@ -206,13 +211,11 @@ function setupWatchers(context: vscode.ExtensionContext) {
     vscode.commands.executeCommand('vscode.executeDocumentSymbolProvider', document.uri)
       .then(symbols => {
         if (symbols) {
-          console.log('symbols', symbols)
           const currentSymbol = findSymbolAtPosition(symbols, currentPosition)
           if (currentSymbol) {
             const rel = `${currentSymbol.containerName || 'Global'}.${currentSymbol.name}`
             CAWIPC.transmit('context:select-lines', { fpath, selections, rel, caw: CAWIPC.guid })
               .then(CAWPanel.updateContext)
-            console.log('REL', rel)
           } else {
             // outside boundaries
           }

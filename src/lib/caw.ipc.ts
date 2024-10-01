@@ -72,6 +72,7 @@ const CAWIPC = {
 
   dispose: function() {
     // TODO: cleanup IPC
+    return this.transmit('auth:disconnect')
   },
 }
 
