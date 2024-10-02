@@ -96,6 +96,10 @@ export type TDiffResponse = {
   fpath: string
 }
 
+eventsTable['context:open-rel'] = (data: any) => {
+  vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(data.sourceFile))
+}
+
 eventsTable['peer:select'] = (peer: any) => {
   const activeProject = CAWStore.activeProject
   const { origin } = activeProject
@@ -239,6 +243,10 @@ function listen() {
 
   CAWIPC.ipcClient.pubsub.on('brdc:branch:select', (data: any) => {
     eventsTable['branch:select'](data?.branch)
+  })
+
+  CAWIPC.ipcClient.pubsub.on('brdc:context:open-rel', (data: any) => {
+    eventsTable['context:open-rel'](data)
   })
 }
 
