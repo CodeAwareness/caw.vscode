@@ -96,8 +96,9 @@ class IPC {
       events.map(event => {
         if (!event) return
         const message = JSON.parse(event)
-        const { action, body, err } = message
-        this.pubsub.emit(action, body || err)
+        const { aid, flow, domain, action, body, err } = message
+        if (aid) this.pubsub.emit(`${flow}:${aid}`, body || err)
+        this.pubsub.emit(`${flow}:${domain}:${action}`, body || err)
       })
 
       this.ipcBuffer = ''

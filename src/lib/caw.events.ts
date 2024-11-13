@@ -187,7 +187,7 @@ function processSystemEvent(key: string, data: any): void {
  * @param object - data: the data to be processed inside the action
  ************************************************************************************/
 function processAPI(id: string, key: string, data: any): void {
-  logger.info('EVENTS processAPI', key, data)
+  logger.info('WebView event (processAPI)', key, data)
   CAWIPC.transmit(key, data)
     .then(data => {
       const obj = typeof data === 'string' ? JSON.parse(data) : data

@@ -109,7 +109,7 @@ function getNonce() {
 }
 
 function getWebviewContent(webview: vscode.Webview) {
-  console.log('VSCODE (live) will setup IPC with panel loaded from codeawareness.com')
+  console.log(`VSCODE (live) will setup IPC with panel loaded from ${config.PANEL_URL} and API calls to ${config.API_URL} `)
   const nonce = getNonce()
   const cspSource = `${config.PANEL_URL} ${config.API_URL}`
   const mediaSource = config.PANEL_URL

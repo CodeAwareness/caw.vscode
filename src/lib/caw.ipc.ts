@@ -9,8 +9,8 @@ import CAWWorkspace from './caw.workspace'
 
 export type TClass<T> = new (...args: any[]) => T
 
-const shortid = () => {
-  return new Date().valueOf().toString() // we run multiple editors, yes, but we run them as a user on a local computer, so this is fine.
+export const shortid = () => {
+  return new Date().valueOf().toString() + Math.random() // we run multiple editors, yes, but we run them as a user on a local computer, so this is fine.
 }
 
 /* We send a GUID with every request, such that multiple instances of VSCode can work independently;
@@ -31,7 +31,7 @@ const CAWIPC = {
     ipcCatalog.connect()
     ipcCatalog.pubsub.on('connected', () => {
       console.log('IPC CLIENT SOCKET READY')
-      ipcCatalog.emit(JSON.stringify({ action: 'clientId', data: guid })) // add this client to the list of clients managed by the local service
+      ipcCatalog.emit(JSON.stringify({ flow: 'req', domain: '*', action: 'clientId', data: guid, caw: guid })) // add this client to the list of clients managed by the local service
       initServer()
         .then(() => CAWIPC.transmit('auth:info')) // ask for existing auth info, if any
         .then(CAWWorkspace.init)
@@ -41,13 +41,22 @@ const CAWIPC = {
 
   /* Transmit an action, and perhaps some data. Recommend a namespacing format for the action, something like `<domain>:<action>`, e.g. `auth:login` or `users:query`. */
   transmit: function<T>(action: string, data?: any) {
+    const domain = (action === 'auth:info') ? '*' : 'code'
+    const flow = 'req'
+    const aid = shortid()
+    const caw = CAWIPC.guid
+
     return new Promise<T>((resolve, reject) => {
       const handler = (body: any) => {
+        ipcClient.pubsub.removeAllListeners(`res:${aid}`)
+        ipcClient.pubsub.removeAllListeners(`err:${aid}`)
         console.info('IPC: resolved action', action, body)
-        const resdata = typeof body === 'string' ? JSON.parse(body) : body
+        const resdata = body.length ? JSON.parse(body) : body
         resolve(resdata)
       }
       const errHandler = (err: any) => {
+        ipcClient.pubsub.removeAllListeners(`res:${aid}`)
+        ipcClient.pubsub.removeAllListeners(`err:${aid}`)
         console.info('IPC: socket error', action, err)
         let errdata
         if (typeof err === 'string') {
@@ -62,11 +71,9 @@ const CAWIPC = {
       }
 
       data = Object.assign(data || {}, { caw: guid })
-      ipcClient.emit(JSON.stringify({ action, data })) // send data to the pipe
-      ipcClient.pubsub.removeAllListeners(`res:${action}`)
-      ipcClient.pubsub.removeAllListeners(`err:${action}`)
-      ipcClient.pubsub.on(`res:${action}`, handler)    // process successful response
-      ipcClient.pubsub.on(`err:${action}`, errHandler) // process error response
+      ipcClient.emit(JSON.stringify({ aid, caw, domain, flow, action, data })) // send data to the pipe
+      ipcClient.pubsub.on(`res:${domain}:${action}`, handler)    // process successful response
+      ipcClient.pubsub.on(`err:${domain}:${action}`, errHandler) // process error response
     })
   },
 

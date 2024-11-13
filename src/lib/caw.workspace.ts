@@ -10,7 +10,7 @@ import { CAWStore, CAWWork } from './caw.store'
 
 import CAWEditor from './caw.editor'
 import CAWSCM from './caw.scm'
-import CAWIPC from './caw.ipc'
+import CAWIPC, { shortid } from './caw.ipc'
 import CAWPanel from '@/lib/caw.panel'
 import CAWTDP from '@/lib/caw.tdp'
 import { commands, Position, Range /*, CodeActionTriggerKind */ } from 'vscode'
@@ -51,10 +51,18 @@ function setupTempFiles() {
 
 // setupSync is used to receive refresh requests from the local service
 function setupSync() {
-  CAWIPC.ipcClient.emit(JSON.stringify({ action: 'sync:setup', data: { caw: CAWIPC.guid } })) // don't use transmit, as that will overwrite the response handler
+  const actionID = shortid()
+  CAWIPC.ipcClient.emit(JSON.stringify({
+    aid: actionID,
+    domain: 'code',
+    flow: 'req',
+    action: 'sync:setup',
+    caw: CAWIPC.guid,
+  })) // don't use transmit, as that will overwrite the response handler
   CAWIPC.ipcClient.pubsub.on('res:sync:setup', (data: any) => {
-    const action = data?.action
-    if (actionTable[action]) actionTable[action](data)
+    if (!data) return
+    const { action, aid } = data
+    if (actionTable[action] && actionID === aid) actionTable[action](data)
   })
 }
 
