@@ -186,8 +186,8 @@ function processSystemEvent(key: string, data: any): void {
  * For example, key can be: `auth:info:1kG9`.
  * @param object - data: the data to be processed inside the action
  ************************************************************************************/
-function processAPI(id: string, key: string, data: any): void {
-  logger.info('WebView event (processAPI)', key, data)
+function localRequest(id: string, key: string, data: any): void {
+  logger.info('WebView event (localRequest)', key, data)
   CAWIPC.transmit(key, data)
     .then(data => {
       const obj = typeof data === 'string' ? JSON.parse(data) : data
@@ -207,10 +207,11 @@ function processAPI(id: string, key: string, data: any): void {
 function setup(webview: any, context: any) {
   webview.onDidReceiveMessage(
     (message: any) => {
+      console.log('From WebPanel:', message)
       switch (message.command) {
-        case 'api':
-          // system events to sync data between editor and webview (API calls)
-          processAPI(message.id, message.key, message.data)
+        case 'localRequest':
+          // requests to send to the local service, e.g. `auth:login`
+          localRequest(message.id, message.key, message.data)
           break
 
         case 'event':
@@ -219,10 +220,12 @@ function setup(webview: any, context: any) {
           break
 
         case 'alert':
+          // errors, warnings
           vscode.window.showErrorMessage(message.text)
           break
 
         case 'notification':
+          // other feedback
           vscode.window.showInformationMessage(localize(message.localeKey, message.text))
           break
       }
@@ -233,19 +236,19 @@ function setup(webview: any, context: any) {
 }
 
 function listen() {
-  CAWIPC.ipcClient.pubsub.on('brdc:auth:login', (data: any) => {
+  CAWIPC.ipcClient.pubsub.on('res:auth:login', (data: any) => {
     eventsTable['auth:login'](data)
   })
 
-  CAWIPC.ipcClient.pubsub.on('brdc:peer:select', (data: any) => {
+  CAWIPC.ipcClient.pubsub.on('res:peer:select', (data: any) => {
     eventsTable['peer:select'](data)
   })
 
-  CAWIPC.ipcClient.pubsub.on('brdc:branch:select', (data: any) => {
+  CAWIPC.ipcClient.pubsub.on('res:branch:select', (data: any) => {
     eventsTable['branch:select'](data?.branch)
   })
 
-  CAWIPC.ipcClient.pubsub.on('brdc:context:open-rel', (data: any) => {
+  CAWIPC.ipcClient.pubsub.on('res:context:open-rel', (data: any) => {
     eventsTable['context:open-rel'](data)
   })
 }

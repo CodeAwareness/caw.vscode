@@ -24,7 +24,9 @@ const SERVER_VERSION = 'v1'
 const API_URL = LOCAL_API ? `https://lc.codeawareness.com:${PORT_LOCAL}` : 'https://api.codeawareness.com'
 
 // VSCode panel webview location
-const PANEL_URL = LOCAL_PANEL ? `https://lc.codeawareness.com:${PORT_LOCAL}` : 'https://vscode.codeawareness.com'
+const PANEL_URL = LOCAL_PANEL ? `https://lc.codeawareness.com:${PORT_LOCAL}` : 'https://ext.codeawareness.com/vscode'
+
+const PROD_MEDIA = 'https://ext.codeawareness.com'
 
 // Add this extension to the catalog of clients on CodeAwareness Local Service.
 const CATALOG: string = cawConfig.get('catalog') || 'catalog'
@@ -47,5 +49,6 @@ export default {
   PANEL_URL,
   PIPE_CATALOG,
   PORT_LOCAL,
+  PROD_MEDIA,
   SERVER_VERSION,
 }

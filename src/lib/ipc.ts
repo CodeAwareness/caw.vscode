@@ -36,40 +36,40 @@ class IPC {
     this.socket = socket
 
     socket.on('error', err => {
-      console.log('LS: socket error: ', err)
+      console.log('IPC: socket error: ', err)
     })
 
     socket.on('connect', () => {
-      console.log('LS: socket connected', this.path)
+      console.log('IPC: socket connected', this.path)
       this.retriesRemaining = this.maxRetries
       if (callback) callback()
     })
 
     socket.on('drain', (e: any) => {
-      console.log('LS: Socket draining', e)
+      console.log('IPC: Socket draining', e)
     })
 
     socket.on('ready', () => {
-      console.log('LS: Socket ready')
+      console.log('IPC: Socket ready')
       this.pubsub.emit('connected')
     })
 
     socket.on('timeout', (e: any) => {
-      console.log('LS: Socket timeout', e)
+      console.log('IPC: Socket timeout', e)
     })
 
     socket.on('end', (e: any) => {
-      console.log('LS: Socket ended', e)
+      console.log('IPC: Socket ended', e)
     })
 
     socket.on('close', (e: any) => {
-      console.log('LS: connection closed', this.path,
+      console.log('IPC: connection closed', this.path,
         this.retriesRemaining, 'tries remaining of', this.maxRetries,
         e
       )
 
       if (this.retriesRemaining < 1 || this.explicitlyDisconnected) {
-        console.log('LS: connection failed. Exceeded the maximum retries.', this.path)
+        console.log('IPC: connection failed. Exceeded the maximum retries.', this.path)
         socket.destroy()
         return
       }
@@ -84,11 +84,11 @@ class IPC {
     })
 
     socket.on('data', data => {
-      // console.log('LS: received data', this.path, data.toString().substring(0, 100))
+      // console.log('IPC: received data', this.path, data.toString().substring(0, 100))
       this.ipcBuffer += data.toString()
 
       if (this.ipcBuffer.indexOf(delimiter) === -1) {
-        console.log('LS: Messages are pretty large, is this really necessary?')
+        console.log('IPC: Messages are pretty large, is this really necessary?')
         return
       }
 
@@ -96,8 +96,8 @@ class IPC {
       events.map(event => {
         if (!event) return
         const message = JSON.parse(event)
-        const { aid, flow, domain, action, data, err } = message
-        if (aid) this.pubsub.emit(`${flow}:${aid}`, data || err)
+        const { flow, domain, action, data, err } = message
+        console.log('IPC: Will emit', flow, domain, action, data)
         this.pubsub.emit(`${flow}:${domain}:${action}`, data || err)
       })
 
@@ -107,10 +107,10 @@ class IPC {
 
   emit(message: string) {
     if (!this.socket) {
-      console.log('LS: cannot dispatch event. No socket for', this.path)
+      console.log('IPC: cannot dispatch event. No socket for', this.path)
       return
     }
-    console.log('LS: dispatching event to ', this.path, ' : ', message.substring(0, 256))
+    console.log('IPC: dispatching event to ', this.path, ' : ', message.substring(0, 256))
     this.socket.write(message + delimiter)
   }
 }

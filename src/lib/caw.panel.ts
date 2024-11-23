@@ -109,15 +109,16 @@ function getNonce() {
 }
 
 function getWebviewContent(webview: vscode.Webview) {
-  console.log(`VSCODE (live) will setup IPC with panel loaded from ${config.PANEL_URL} and API calls to ${config.API_URL} `)
+  console.log(`VSCODE (live) will setup IPC with panel loaded from ${config.PANEL_URL}`)
   const nonce = getNonce()
-  const cspSource = `${config.PANEL_URL} ${config.API_URL}`
-  const mediaSource = config.PANEL_URL
-  console.log('SECURITY', cspSource, mediaSource)
+  const cspSource = config.PROD_MEDIA
+  const mediaSource = config.PROD_MEDIA
+  console.log('SECURITY META', cspSource, mediaSource)
   // TODO: everytime i publish the CAW Panel it builds a new chunk hash, try to make this pain go away without introducing cache headaches
+  // TODO: replace unsafe-inline styles with nonce or hashes
   webview.html = `<!doctype html><html lang="en"><head><meta charset="UTF-8">
     <title>CodeAwareness VSCode panel</title>
-    <meta http-equiv="Content-Security-Policy" content="default-src ${cspSource}; style-src ${cspSource} 'unsafe-inline'; img-src ${cspSource} ${mediaSource}; script-src 'nonce-${nonce}';">
+    <meta http-equiv="Content-Security-Policy" content="default-src ${cspSource}; style-src ${cspSource} 'unsafe-inline'; img-src ${mediaSource}; script-src 'nonce-${nonce}';">
     <script defer="defer" nonce="${nonce}" src="${config.PANEL_URL}/runtime.js"></script>
     <script defer="defer" nonce="${nonce}" src="${config.PANEL_URL}/889.js?t=${new Date().valueOf()}"></script>
     <script defer="defer" nonce="${nonce}" src="${config.PANEL_URL}/main.js?t=${new Date().valueOf()}"></script>

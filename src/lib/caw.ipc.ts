@@ -27,7 +27,6 @@ const CAWIPC = {
 
   init: async function(): Promise<void> {
     ipcClient.pubsub.removeAllListeners()
-    // ipcClient.pubsub.on('brdc:auth:login', (body) => processBroadcast('auth:login, body))    // process successful response
     ipcCatalog.connect()
     ipcCatalog.pubsub.on('connected', () => {
       console.log('IPC CLIENT SOCKET READY')
@@ -39,9 +38,9 @@ const CAWIPC = {
     })
   },
 
-  /* Transmit an action, and perhaps some data. Recommend a namespacing format for the action, something like `<domain>:<action>`, e.g. `auth:login` or `users:query`. */
+  /* Transmit an action, and perhaps some data. */
   transmit: function<T>(action: string, data?: any) {
-    const domain = (action === 'auth:info') ? '*' : 'code'
+    const domain = (['auth:info', 'auth:login'].includes(action)) ? '*' : 'code'
     const flow = 'req'
     const aid = shortid()
     const caw = CAWIPC.guid
@@ -50,30 +49,25 @@ const CAWIPC = {
       const handler = (body: any) => {
         ipcClient.pubsub.removeAllListeners(`res:${aid}`)
         ipcClient.pubsub.removeAllListeners(`err:${aid}`)
-        console.info('IPC: resolved action', action, body)
+        console.info('CAWIPC: resolved action', action, body)
         const resdata = body.length ? JSON.parse(body) : body
         resolve(resdata)
       }
       const errHandler = (err: any) => {
         ipcClient.pubsub.removeAllListeners(`res:${aid}`)
         ipcClient.pubsub.removeAllListeners(`err:${aid}`)
-        console.info('IPC: socket error', action, err)
-        let errdata
+        console.info('CAWIPC: socket error', action, err)
         if (typeof err === 'string') {
-          try {
-            errdata = JSON.parse(err) // TODO
-          } catch (err) {
-            reject(new Error('Operation failed.'))
-          }
+          // eslint-disable-next-line prefer-promise-reject-errors
+          reject({ err })
         } else {
           reject(err)
         }
       }
 
-      data = Object.assign(data || {}, { caw: guid })
-      ipcClient.emit(JSON.stringify({ aid, caw, domain, flow, action, data })) // send data to the pipe
       ipcClient.pubsub.on(`res:${domain}:${action}`, handler)    // process successful response
       ipcClient.pubsub.on(`err:${domain}:${action}`, errHandler) // process error response
+      ipcClient.emit(JSON.stringify({ aid, caw, domain, flow, action, data })) // send data to the pipe
     })
   },
 
