@@ -106,8 +106,7 @@ eventsTable['peer:select'] = (peer: any) => {
   const fpath = activeProject.activePath
   if (!fpath) return
   const caw = CAWIPC.guid
-  const doc = CAWStore.activeTextEditor?.document.getText()
-  CAWIPC.transmit<TDiffResponse>('repo:diff-peer', { origin, fpath, caw, peer, doc })
+  CAWIPC.transmit<TDiffResponse>('repo:diff-peer', { origin, fpath, caw, peer })
     .then((info) => {
       const peerFileUri = vscode.Uri.file(info.peerFile)
       // Note: thanks to smart node:path for figuring out how to join Windows and *nix paths together.
@@ -236,21 +235,11 @@ function setup(webview: any, context: any) {
 }
 
 function listen() {
-  CAWIPC.ipcClient.pubsub.on('res:auth:login', (data: any) => {
-    eventsTable['auth:login'](data)
-  })
-
-  CAWIPC.ipcClient.pubsub.on('res:peer:select', (data: any) => {
-    eventsTable['peer:select'](data)
-  })
-
-  CAWIPC.ipcClient.pubsub.on('res:branch:select', (data: any) => {
-    eventsTable['branch:select'](data?.branch)
-  })
-
-  CAWIPC.ipcClient.pubsub.on('res:context:open-rel', (data: any) => {
-    eventsTable['context:open-rel'](data)
-  })
+  CAWIPC.ipcClient.pubsub.on('res:*:auth:login', eventsTable['auth:login'])
+  CAWIPC.ipcClient.pubsub.on('res:code:active-path', eventsTable['peer:select'])
+  CAWIPC.ipcClient.pubsub.on('res:code:peer:select', eventsTable['peer:select'])
+  CAWIPC.ipcClient.pubsub.on('res:code:branch:select', eventsTable['branch:select'])
+  CAWIPC.ipcClient.pubsub.on('res:code:context:open-rel', eventsTable['context:open-rel'])
 }
 
 const CAWEvents = {
