@@ -16,7 +16,7 @@ export const CAWStatusbar = {
   },
 
   working: (workingMsg = 'Working on it...') => {
-    statusBarItem.text = `${pulse++} ...`
+    statusBarItem.text = `${pulse++} ${workingMsg}...`
     statusBarItem.tooltip = 'In case if it takes long time, check if your Code Awareness local service is running.'
   },
 

@@ -2,7 +2,7 @@
  * VSCode Tree Data Provider
  ***************************/
 import * as vscode from 'vscode'
-import { EventEmitter, TreeItem, TreeItemCollapsibleState } from 'vscode'
+import { TreeItem, TreeItemCollapsibleState } from 'vscode'
 import * as path from 'node:path'
 
 import { CAWStore } from './caw.store'
@@ -103,7 +103,7 @@ class TDP implements vscode.TreeDataProvider<TDItem> {
     try {
       return Promise.resolve(Object.keys(tree).map(toTDItem({ folder, tree, fpath })))
     } catch (err) {
-      console.log('TDP: err (fpath, folder, parts, tree)', err, fpath, folder, parts, tree)
+      logger.log('TDP: err (fpath, folder, parts, tree)', err, fpath, folder, parts, tree)
     }
 
     return Promise.resolve([])

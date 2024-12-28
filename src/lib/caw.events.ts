@@ -26,14 +26,6 @@ function init() {
   CAWPanel.postMessage({ command: 'setup:color-theme', data })
 }
 
-// TODO: do we still need a short ID anywhere?
-const shortid = () => {
-  const n = String.fromCharCode(Math.floor(Math.random() * 10 + 48))
-  const l = String.fromCharCode(Math.floor(Math.random() * 26 + 97))
-  const c = String.fromCharCode(Math.floor(Math.random() * 26 + 65))
-  return l + c + n + new Date().valueOf().toString()
-}
-
 const postBack = (command: string, id?: string) => (data: any) => {
   CAWPanel.postMessage({ command, id, data })
 }
@@ -42,7 +34,7 @@ const postBack = (command: string, id?: string) => (data: any) => {
 const eventsTable: Record<string, any> = {}
 
 eventsTable['webview:loaded'] = () => {
-  console.log('Will init webview with GUID', CAWIPC.guid)
+  logger.log('Will init webview with GUID', CAWIPC.guid)
   init()
   postBack('setup:wss-guid')(CAWIPC.guid)
   CAWIPC
@@ -85,7 +77,7 @@ eventsTable['branch:unselect'] = () => {
   CAWEditor.closeDiffEditor()
 }
 
-eventsTable['branch:refresh'] = (data: any) => {
+eventsTable['branch:refresh'] = (/* data: any */) => {
   // TODO: refresh branches using git and display in CAWPanel
 }
 
@@ -111,7 +103,7 @@ eventsTable['peer:select'] = (peer: any) => {
       const peerFileUri = vscode.Uri.file(info.peerFile)
       // Note: thanks to smart node:path for figuring out how to join Windows and *nix paths together.
       const userFileUri = vscode.Uri.file(path.join(activeProject.root, fpath))
-      console.log('PEER DIFF', fpath, peerFileUri, userFileUri)
+      logger.log('PEER DIFF', fpath, peerFileUri, userFileUri)
       // logger.info('OPEN DIFF with', fpath, info)
       vscode.commands.executeCommand('vscode.diff', peerFileUri, userFileUri, info.title, { viewColumn: 1, preserveFocus: true })
     })
@@ -206,7 +198,7 @@ function localRequest(id: string, key: string, data: any): void {
 function setup(webview: any, context: any) {
   webview.onDidReceiveMessage(
     (message: any) => {
-      console.log('From WebPanel:', message)
+      logger.log('From WebPanel:', message)
       switch (message.command) {
         case 'localRequest':
           // requests to send to the local service, e.g. `auth:login`

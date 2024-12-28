@@ -31,7 +31,6 @@ const PROD_MEDIA = 'https://ext.codeawareness.com'
 // Add this extension to the catalog of clients on CodeAwareness Local Service.
 const CATALOG: string = cawConfig.get('catalog') || 'catalog'
 const PIPE_CATALOG = CATALOG + (DEBUG ? '_dev' : '')
-console.log('PIPE_CATALOG', PIPE_CATALOG)
 
 const LOG_LEVEL = process.env.LOG_LEVEL || 'debug' // ['verbose', 'debug', 'error']
 

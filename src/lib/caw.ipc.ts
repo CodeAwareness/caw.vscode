@@ -3,6 +3,7 @@
  ******************************************************************/
 import IPC from '@/lib/ipc'
 import config from '@/config'
+import logger from './logger'
 import { CAWStatusbar } from '@/vscode/statusbar'
 
 import CAWWorkspace from './caw.workspace'
@@ -29,7 +30,7 @@ const CAWIPC = {
     ipcClient.pubsub.removeAllListeners()
     ipcCatalog.connect()
     ipcCatalog.pubsub.on('connected', () => {
-      console.log('IPC CLIENT SOCKET READY')
+      logger.log('IPC CLIENT SOCKET READY')
       ipcCatalog.emit(JSON.stringify({ flow: 'req', domain: '*', action: 'clientId', data: guid, caw: guid })) // add this client to the list of clients managed by the local service
       initServer()
         .then(() => CAWIPC.transmit('auth:info')) // ask for existing auth info, if any
@@ -49,14 +50,14 @@ const CAWIPC = {
       const handler = (body: any) => {
         ipcClient.pubsub.removeAllListeners(`res:${aid}`)
         ipcClient.pubsub.removeAllListeners(`err:${aid}`)
-        console.info('CAWIPC: resolved action', action, body)
+        logger.info('CAWIPC: resolved action', action, body)
         const resdata = body.length ? JSON.parse(body) : body
         resolve(resdata)
       }
       const errHandler = (err: any) => {
         ipcClient.pubsub.removeAllListeners(`res:${aid}`)
         ipcClient.pubsub.removeAllListeners(`err:${aid}`)
-        console.info('CAWIPC: socket error', action, err)
+        logger.info('CAWIPC: socket error', action, err)
         if (typeof err === 'string') {
           // eslint-disable-next-line prefer-promise-reject-errors
           reject({ err })

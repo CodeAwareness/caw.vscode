@@ -4,8 +4,10 @@
 import * as vscode from 'vscode'
 import { config as nlsConfig, MessageFormat as nlsMessageFormat } from 'vscode-nls'
 
+import logger from './logger'
+
 function getLocale() {
-  console.log('vscode locale', vscode.env?.language)
+  logger.log('vscode locale', vscode.env?.language)
   /* @ts-ignore */
   return vscode.env.language || 'en'
 }

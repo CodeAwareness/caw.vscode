@@ -10,7 +10,6 @@ import * as _ from 'lodash'
 import { CAWStore } from './caw.store'
 import logger from './logger'
 import CAWPanel from './caw.panel'
-import { crossPlatform } from './caw.workspace'
 
 let lastPath: string
 // TODO: make 2000 wait time into a configurable value

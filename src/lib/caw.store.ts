@@ -7,6 +7,7 @@ import * as vscode from 'vscode'
 
 import { TCAWEditor } from '@/lib/caw.editor'
 import CAWIPC from '@/lib/caw.ipc'
+import logger from './logger'
 
 export type TProject = {
   name: string                  // TODO
@@ -119,7 +120,7 @@ export const CAWStore = {
   ws: undefined as typeof CAWIPC | undefined,
 
   clear: () => {
-    console.log('STORE CLEAR')
+    logger.log('STORE CLEAR')
     CAWStore.tokens = undefined as unknown as TTokens
     CAWStore.user = undefined as unknown as TUser
     CAWStore.panel = undefined
@@ -131,7 +132,7 @@ export const CAWStore = {
   },
 
   reset: () => {
-    console.log('STORE RESET')
+    logger.log('STORE RESET')
     CAWStore.peerFS = {}
     CAWStore.doc = undefined
     CAWStore.line = 0

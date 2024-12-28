@@ -22,8 +22,8 @@ const actionTable: Record<string, any> = {
 }
 
 function init(data?: any) {
-  console.log('Workspace: init', data)
-  // commands.getCommands().then(console.log) // TODO: thousands of commands available
+  logger.log('Workspace: init', data)
+  // commands.getCommands().then(logger.log) // TODO: thousands of commands available
   if (data?.user) {
     CAWStore.user = data.user
     CAWStore.tokens = data.tokens
@@ -67,7 +67,7 @@ function setupSync() {
 }
 
 function closeTextDocument(params: any) {
-  console.log('WORKSPACE: closeTextDocument', params)
+  logger.log('WORKSPACE: closeTextDocument', params)
 }
 
 /************************************************************************************
@@ -94,8 +94,8 @@ function addProject(project: TProject) {
 }
 
 function refreshActiveFile() {
-  console.log('refreshing active file', CAWStore.activeTextEditor?.document.fileName)
-  if (!CAWStore.activeTextEditor) { console.log('no active text editor'); return }
+  logger.log('refreshing active file', CAWStore.activeTextEditor?.document.fileName)
+  if (!CAWStore.activeTextEditor) { logger.log('no active text editor'); return }
   const fpath = CAWEditor.getEditorDocFileName()
 
   return CAWIPC.transmit<TProject>('repo:active-path', { fpath, caw: CAWIPC.guid, doc: CAWStore.activeTextEditor.document.getText() })
@@ -121,7 +121,7 @@ let isCycling = false
 
 function cycleBlock(direction: number) {
   if (!CAWStore.activeTextEditor) {
-    console.log('no active text editor')
+    logger.log('no active text editor')
     return
   }
 
@@ -140,7 +140,7 @@ function cycleBlock(direction: number) {
   return promise
     .then(() => CAWIPC.transmit<TDiffBlock>('repo:cycle-block', { caw, origin, fpath, doc, line, direction }))
     .then(data => {
-      console.log('CYCLE RESPONSE', data)
+      logger.log('CYCLE RESPONSE', data)
       block = data
       if (!block?.range || !editor) return
       CAWPanel.selectPeer(block)
@@ -164,7 +164,7 @@ function cycleBlock(direction: number) {
           }
         })
         .then(applied => {
-          console.log('changes applied?', applied)
+          logger.log('changes applied?', applied)
           if (applied) refreshActiveFile()
         })
     })
@@ -174,11 +174,9 @@ function docChanged() {
   isCycling = false
 }
 
-
 export function crossPlatform(fpath: string) {
   return fpath?.replace(/\\/g, '/')
 }
-
 
 /************************************************************************************
  * Export module

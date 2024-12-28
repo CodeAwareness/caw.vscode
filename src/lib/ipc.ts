@@ -3,6 +3,8 @@ import path from 'node:path'
 import net, { Socket } from 'net'
 import { EventEmitter } from 'node:events'
 
+import logger from './logger'
+
 const id = os.hostname()
 const delimiter = '\f'
 const isWindows = os.platform() === 'win32'
@@ -36,40 +38,40 @@ class IPC {
     this.socket = socket
 
     socket.on('error', err => {
-      console.log('IPC: socket error: ', err)
+      logger.log('IPC: socket error: ', err)
     })
 
     socket.on('connect', () => {
-      console.log('IPC: socket connected', this.path)
+      logger.log('IPC: socket connected', this.path)
       this.retriesRemaining = this.maxRetries
       if (callback) callback()
     })
 
     socket.on('drain', (e: any) => {
-      console.log('IPC: Socket draining', e)
+      logger.log('IPC: Socket draining', e)
     })
 
     socket.on('ready', () => {
-      console.log('IPC: Socket ready')
+      logger.log('IPC: Socket ready')
       this.pubsub.emit('connected')
     })
 
     socket.on('timeout', (e: any) => {
-      console.log('IPC: Socket timeout', e)
+      logger.log('IPC: Socket timeout', e)
     })
 
     socket.on('end', (e: any) => {
-      console.log('IPC: Socket ended', e)
+      logger.log('IPC: Socket ended', e)
     })
 
     socket.on('close', (e: any) => {
-      console.log('IPC: connection closed', this.path,
+      logger.log('IPC: connection closed', this.path,
         this.retriesRemaining, 'tries remaining of', this.maxRetries,
         e
       )
 
       if (this.retriesRemaining < 1 || this.explicitlyDisconnected) {
-        console.log('IPC: connection failed. Exceeded the maximum retries.', this.path)
+        logger.log('IPC: connection failed. Exceeded the maximum retries.', this.path)
         socket.destroy()
         return
       }
@@ -84,11 +86,11 @@ class IPC {
     })
 
     socket.on('data', data => {
-      // console.log('IPC: received data', this.path, data.toString().substring(0, 100))
+      // logger.log('IPC: received data', this.path, data.toString().substring(0, 100))
       this.ipcBuffer += data.toString()
 
       if (this.ipcBuffer.indexOf(delimiter) === -1) {
-        console.log('IPC: Messages are pretty large, is this really necessary?')
+        logger.log('IPC: Messages are pretty large, is this really necessary?')
         return
       }
 
@@ -97,7 +99,7 @@ class IPC {
         if (!event) return
         const message = JSON.parse(event)
         const { flow, domain, action, data, err } = message
-        console.log('IPC: Will emit', flow, domain, action, data)
+        logger.log('IPC: Will emit', flow, domain, action, data)
         this.pubsub.emit(`${flow}:${domain}:${action}`, data || err)
       })
 
@@ -107,10 +109,10 @@ class IPC {
 
   emit(message: string) {
     if (!this.socket) {
-      console.log('IPC: cannot dispatch event. No socket for', this.path)
+      logger.log('IPC: cannot dispatch event. No socket for', this.path)
       return
     }
-    console.log('IPC: dispatching event to ', this.path, ' : ', message.substring(0, 256))
+    logger.log('IPC: dispatching event to ', this.path, ' : ', message.substring(0, 256))
     this.socket.write(message + delimiter)
   }
 }

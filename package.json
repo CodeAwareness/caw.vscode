@@ -1,9 +1,9 @@
 {
   "name": "code-awareness",
   "displayName": "Code Awareness",
-  "description": "Low noise collaboration.",
+  "description": "Universal collaboration platform.",
   "icon": "media/icons/caw-logo.png",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "publisher": "CodeAwareness",
   "author": "Mark Vasile",
   "repository": "https://github.com/CodeAwareness/cA.vscode",

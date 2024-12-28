@@ -30,6 +30,7 @@ function logLevel(type: string) {
   const nothing = (_?: any) => {}
 
   return function(...args: any[]) {
+    if (!config.DEBUG) return
     let log
     switch (type) {
       case 'info':
