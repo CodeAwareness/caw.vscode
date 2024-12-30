@@ -8,6 +8,7 @@ import * as vscode from 'vscode'
 import * as _ from 'lodash'
 
 import { CAWStore } from './caw.store'
+import config from '@/config'
 import logger from './logger'
 import CAWPanel from './caw.panel'
 
@@ -77,13 +78,13 @@ function setDecorations(options: TEditorRanges) {
     )
   })
 
-  // We don't insert line / range highlights when the panel is closed, to allow for more zen focus mode
+  // If not explicitly configured by the user, we don't insert line / range highlights when the panel is closed, to allow for more zen focus mode
   // TODO: make this configurable by the user
   const isPanelOpen = !!CAWPanel.hasPanel()
   // logger.info('setDecorations ranges', ranges, isPanelOpen)
-  editor.setDecorations(changeDecorationType, isPanelOpen ? vsRanges : [])
+  editor.setDecorations(changeDecorationType, isPanelOpen || config.HIGHLIGHT_WHILE_CLOSED ? vsRanges : [])
   editor.setDecorations(rulerDecorationType, vsRanges)
-  if (!isPanelOpen) editor.setDecorations(mergeDecorationType, [])
+  if (!isPanelOpen && ! config.HIGHLIGHT_WHILE_CLOSED) editor.setDecorations(mergeDecorationType, [])
 }
 
 function insertDecorations(leading?: boolean) {

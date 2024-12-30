@@ -30,6 +30,7 @@ const PROD_MEDIA = 'https://ext.codeawareness.com'
 
 // Add this extension to the catalog of clients on CodeAwareness Local Service.
 const CATALOG: string = cawConfig.get('catalog') || 'catalog'
+const HIGHLIGHT_WHILE_CLOSED: boolean = cawConfig.get('highlight_while_closed') || false
 const PIPE_CATALOG = CATALOG + (DEBUG ? '_dev' : '')
 
 const LOG_LEVEL = process.env.LOG_LEVEL || 'debug' // ['verbose', 'debug', 'error']
@@ -42,6 +43,7 @@ export default {
   CAW_SCHEMA,
   DEBUG,
   EXTRACT_REPO_DIR,
+  HIGHLIGHT_WHILE_CLOSED,
   LOCAL_API,
   LOCAL_PANEL,
   LOG_LEVEL,
