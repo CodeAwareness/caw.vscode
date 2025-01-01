@@ -3,7 +3,7 @@
   "displayName": "Code Awareness",
   "description": "Universal collaboration platform.",
   "icon": "media/icons/caw-logo.png",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "publisher": "CodeAwareness",
   "author": "Mark Vasile",
   "repository": "https://github.com/CodeAwareness/caw.vscode",
@@ -15,23 +15,23 @@
     "SCM Providers"
   ],
   "keywords": [
-		"universal context",
+    "universal context",
     "collaboration"
-	],
+  ],
   "extensionKind": [
-		"workspace"
-	],
+    "workspace"
+  ],
   "activationEvents": [
     "onStartupFinished"
   ],
   "main": "./dist/web/extension.js",
   "browser": "./dist/web/extension.js",
   "capabilities": {
-		"virtualWorkspaces": {
-			"supported": false,
-			"description": "Using Code Awareness is not currently possible in virtual workspaces."
-		}
-	},
+    "virtualWorkspaces": {
+      "supported": false,
+      "description": "Using Code Awareness is not currently possible in virtual workspaces."
+    }
+  },
   "contributes": {
     "commands": [
       {

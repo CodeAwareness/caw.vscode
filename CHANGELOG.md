@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.0.9
+
+Minor fix for IPC communication.
+
 ### 1.0.8
 
 Launch of Muninn and Huginn system. You now have a separate application where you can see the context for your work, without having to open the Code Awareness panel in VSCode. You can keep the Code Awareness Muninn application open on one monitor while working with VSCode on another monitor.
