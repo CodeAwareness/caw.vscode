@@ -66,8 +66,12 @@ const CAWIPC = {
         }
       }
 
-      ipcClient.pubsub.on(`res:${domain}:${action}`, handler)    // process successful response
-      ipcClient.pubsub.on(`err:${domain}:${action}`, errHandler) // process error response
+      if (!ipcClient.pubsub.eventNames().includes(`res:${domain}:${action}`)) {
+        ipcClient.pubsub.on(`res:${domain}:${action}`, handler)    // process successful response
+      }
+      if (!ipcClient.pubsub.eventNames().includes(`err:${domain}:${action}`)) {
+        ipcClient.pubsub.on(`err:${domain}:${action}`, errHandler) // process error response
+      }
       ipcClient.emit(JSON.stringify({ aid, caw, domain, flow, action, data })) // send data to the pipe
     })
   },

@@ -6,6 +6,7 @@ const cawConfig = vscode.workspace.getConfiguration('codeAwareness')
 
 /* eslint-disable-next-line */
 const DEBUG = false // TODO: how to determine if we're running inside an extension host or as an installed extension
+const CATALOG_DEV = false
 
 const LOCAL_API = false // Code Awareness API
 
@@ -31,7 +32,7 @@ const PROD_MEDIA = 'https://ext.codeawareness.com'
 // Add this extension to the catalog of clients on CodeAwareness Local Service.
 const CATALOG: string = cawConfig.get('catalog') || 'catalog'
 const HIGHLIGHT_WHILE_CLOSED: boolean = cawConfig.get('highlight_while_closed') || false
-const PIPE_CATALOG = CATALOG + (DEBUG ? '_dev' : '')
+const PIPE_CATALOG = CATALOG + (CATALOG_DEV ? '_dev' : '')
 
 const LOG_LEVEL = process.env.LOG_LEVEL || 'debug' // ['verbose', 'debug', 'error']
 

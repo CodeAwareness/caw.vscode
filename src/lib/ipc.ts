@@ -64,11 +64,8 @@ class IPC {
       logger.log('IPC: Socket ended', e)
     })
 
-    socket.on('close', (e: any) => {
-      logger.log('IPC: connection closed', this.path,
-        this.retriesRemaining, 'tries remaining of', this.maxRetries,
-        e
-      )
+    socket.on('close', (exitCode: any) => {
+      logger.log('IPC: connection closed', this.path, this.retriesRemaining, 'tries remaining of', this.maxRetries, exitCode)
 
       if (this.retriesRemaining < 1 || this.explicitlyDisconnected) {
         logger.log('IPC: connection failed. Exceeded the maximum retries.', this.path)
@@ -99,8 +96,10 @@ class IPC {
         if (!event) return
         const message = JSON.parse(event)
         const { flow, domain, action, data, err } = message
-        logger.log('IPC: Will emit', flow, domain, action, data)
-        this.pubsub.emit(`${flow}:${domain}:${action}`, data || err)
+        if (action) {
+          logger.log('IPC: Will emit', flow, domain, action, data)
+          this.pubsub.emit(`${flow}:${domain}:${action}`, data || err)
+        }
       })
 
       this.ipcBuffer = ''
