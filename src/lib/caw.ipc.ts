@@ -52,12 +52,14 @@ const CAWIPC = {
         ipcClient.pubsub.removeAllListeners(`err:${aid}`)
         logger.info('CAWIPC: resolved action', action, body)
         const resdata = body.length ? JSON.parse(body) : body
+        ipcClient.pubsub.removeListener(`res:${domain}:${action}`, handler)
         resolve(resdata)
       }
       const errHandler = (err: any) => {
         ipcClient.pubsub.removeAllListeners(`res:${aid}`)
         ipcClient.pubsub.removeAllListeners(`err:${aid}`)
         logger.info('CAWIPC: socket error', action, err)
+        ipcClient.pubsub.removeListener(`err:${domain}:${action}`, errHandler)
         if (typeof err === 'string') {
           // eslint-disable-next-line prefer-promise-reject-errors
           reject({ err })
@@ -66,12 +68,8 @@ const CAWIPC = {
         }
       }
 
-      if (!ipcClient.pubsub.eventNames().includes(`res:${domain}:${action}`)) {
-        ipcClient.pubsub.on(`res:${domain}:${action}`, handler)    // process successful response
-      }
-      if (!ipcClient.pubsub.eventNames().includes(`err:${domain}:${action}`)) {
-        ipcClient.pubsub.on(`err:${domain}:${action}`, errHandler) // process error response
-      }
+      ipcClient.pubsub.on(`res:${domain}:${action}`, handler)    // process successful response
+      ipcClient.pubsub.on(`err:${domain}:${action}`, errHandler) // process error response
       ipcClient.emit(JSON.stringify({ aid, caw, domain, flow, action, data })) // send data to the pipe
     })
   },
