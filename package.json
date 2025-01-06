@@ -1,9 +1,9 @@
 {
   "name": "vscode-huggin",
   "displayName": "Code Awareness",
-  "description": "Universal collaboration platform.",
+  "description": "Universal context platform.",
   "icon": "media/icons/caw-logo.png",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "publisher": "CodeAwareness",
   "author": "Mark Vasile",
   "repository": "https://github.com/CodeAwareness/caw.vscode",

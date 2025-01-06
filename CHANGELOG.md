@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.0.10
+
+Minor fix for IPC communication.
+
 ### 1.0.9
 
 Minor fix for IPC communication.
