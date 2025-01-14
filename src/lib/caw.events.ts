@@ -50,12 +50,15 @@ eventsTable['auth:login'] = (data: TAuth) => {
   init()
   CAWStore.user = data?.user
   CAWStore.tokens = data?.tokens
+  CAWWorkspace.init(data)
+  postBack('auth:info')({ user: data.user, tokens: data.tokens })
   if (data?.user) {
-    postBack('auth:info')({ user: data.user, tokens: data.tokens })
     CAWWorkspace.refreshActiveFile()
     CAWWorkspace.setupSync()
   }
 }
+
+eventsTable['auth:info'] = eventsTable['auth:login']
 
 eventsTable['auth:logout'] = () => {
   CAWStore.clear()

@@ -93,7 +93,6 @@ function toggle(context: vscode.ExtensionContext) {
 
   CAWEditor.focusTextEditor()
   CAWEvents.setup(panel.webview, context)
-  CAWEvents.listen()
   panel.onDidDispose(dispose, undefined, context.subscriptions)
   panel.onDidChangeViewState((state: vscode.WindowState) => CAWPanel.didChangeViewState(state), undefined, context.subscriptions)
   return true

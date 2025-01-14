@@ -15,6 +15,7 @@ import CAWPanel from '@/lib/caw.panel'
 import CAWTDP from '@/lib/caw.tdp'
 import { commands, Position, Range /*, CodeActionTriggerKind */ } from 'vscode'
 import CAWDeco from './caw.deco'
+import CAWEvents from './caw.events'
 
 // Sync actions from LS are defined here
 const actionTable: Record<string, any> = {
@@ -28,6 +29,9 @@ function init(data?: any) {
     CAWStore.user = data.user
     CAWStore.tokens = data.tokens
     setupSync() // TODO: when we restart LS the client reconnects but we lose the sync (and it seems auth:info returns undefined?)
+    CAWWorkspace.refreshActiveFile()
+  } else {
+    CAWEvents.listen()
   }
   return setupTempFiles()
 }
