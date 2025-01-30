@@ -132,7 +132,7 @@ export const CAWStore = {
   },
 
   reset: () => {
-    logger.log('STORE RESET')
+    logger.log('Store Reset')
     CAWStore.peerFS = {}
     CAWStore.doc = undefined
     CAWStore.line = 0

@@ -52,7 +52,6 @@ class IPC {
     })
 
     socket.on('ready', () => {
-      logger.log('IPC: Socket ready')
       this.pubsub.emit('connected')
     })
 
@@ -96,8 +95,8 @@ class IPC {
         if (!event) return
         const message = JSON.parse(event)
         const { flow, domain, action, data, err } = message
-        if (action) {
-          logger.log('IPC: Will emit', flow, domain, action, data)
+        if (action && ['res', 'err'].includes(flow)) {
+          logger.info(`IPC: resolved ${domain}:${action} with ${flow}`, data || err)
           this.pubsub.emit(`${flow}:${domain}:${action}`, data || err)
         }
       })

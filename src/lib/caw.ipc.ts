@@ -30,7 +30,6 @@ const CAWIPC = {
     ipcClient.pubsub.removeAllListeners()
     ipcCatalog.connect()
     ipcCatalog.pubsub.on('connected', () => {
-      logger.log('IPC CLIENT SOCKET READY')
       ipcCatalog.emit(JSON.stringify({ flow: 'req', domain: '*', action: 'clientId', data: guid, caw: guid })) // add this client to the list of clients managed by the local service
       initServer()
         .then(() => CAWIPC.transmit('auth:info')) // ask for existing auth info, if any
@@ -48,16 +47,11 @@ const CAWIPC = {
 
     return new Promise<T>((resolve, reject) => {
       const handler = (body: any) => {
-        ipcClient.pubsub.removeAllListeners(`res:${aid}`)
-        ipcClient.pubsub.removeAllListeners(`err:${aid}`)
-        logger.info('CAWIPC: resolved action', action, body)
         const resdata = body.length ? JSON.parse(body) : body
         ipcClient.pubsub.removeListener(`res:${domain}:${action}`, handler)
         resolve(resdata)
       }
       const errHandler = (err: any) => {
-        ipcClient.pubsub.removeAllListeners(`res:${aid}`)
-        ipcClient.pubsub.removeAllListeners(`err:${aid}`)
         logger.info('CAWIPC: socket error', action, err)
         ipcClient.pubsub.removeListener(`err:${domain}:${action}`, errHandler)
         if (typeof err === 'string') {
@@ -68,9 +62,13 @@ const CAWIPC = {
         }
       }
 
+      ipcClient.pubsub.removeAllListeners(`res:${aid}`)
+      ipcClient.pubsub.removeAllListeners(`err:${aid}`)
       ipcClient.pubsub.on(`res:${domain}:${action}`, handler)    // process successful response
       ipcClient.pubsub.on(`err:${domain}:${action}`, errHandler) // process error response
-      ipcClient.emit(JSON.stringify({ aid, caw, domain, flow, action, data })) // send data to the pipe
+      ipcClient.emit(JSON.stringify({ flow, domain, action, data, aid, caw })) // send data to the pipe
+
+      setTimeout(reject, 20000) // Reject if not handled within 20 secon
     })
   },
 

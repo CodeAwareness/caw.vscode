@@ -13,6 +13,7 @@ export type TCAWEditor = vscode.TextEditor & {
   _documentData: any
   _selections: Array<any>
   _visibleRanges: Array<any>
+  diffInformation: any
 }
 
 const getSelectedLine = (editor: TCAWEditor) => editor._selections && editor._selections[0].active.line

@@ -57,11 +57,11 @@ function setupTempFiles() {
 function setupSync() {
   const actionID = shortid()
   CAWIPC.ipcClient.emit(JSON.stringify({
-    aid: actionID,
-    domain: 'code',
     flow: 'req',
+    domain: 'code',
     action: 'sync:setup',
     caw: CAWIPC.guid,
+    aid: actionID,
   })) // don't use transmit, as that will overwrite the response handler
   CAWIPC.ipcClient.pubsub.on('res:sync:setup', (data: any) => {
     if (!data) return
@@ -98,6 +98,7 @@ function addProject(project: TProject) {
 }
 
 function refreshActiveFile() {
+  if (CAWStore.activeTextEditor?.diffInformation) return // this is a diff, not a source file
   logger.log('refreshing active file', CAWStore.activeTextEditor?.document.fileName)
   if (!CAWStore.activeTextEditor) { logger.log('no active text editor'); return }
   const fpath = CAWEditor.getEditorDocFileName()

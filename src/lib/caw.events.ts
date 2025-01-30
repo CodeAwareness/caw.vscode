@@ -53,7 +53,6 @@ eventsTable['auth:login'] = (data: TAuth) => {
   CAWWorkspace.init(data)
   postBack('auth:info')({ user: data.user, tokens: data.tokens })
   if (data?.user) {
-    CAWWorkspace.refreshActiveFile()
     CAWWorkspace.setupSync()
   }
 }
