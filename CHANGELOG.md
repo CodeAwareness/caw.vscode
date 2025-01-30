@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.0.11
+
+Minor fixes for diff windows and some IPC cleanup for efficiency.
+
 ### 1.0.10
 
 Minor fix for IPC communication.
