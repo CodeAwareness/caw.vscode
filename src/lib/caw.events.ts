@@ -228,16 +228,36 @@ function setup(webview: any, context: any) {
   )
 }
 
-function listen() {
-  CAWIPC.ipcClient.pubsub.on('res:*:auth:login', eventsTable['auth:login'])
-  CAWIPC.ipcClient.pubsub.on('res:code:active-path', eventsTable['peer:select'])
-  CAWIPC.ipcClient.pubsub.on('res:code:peer:select', eventsTable['peer:select'])
-  CAWIPC.ipcClient.pubsub.on('res:code:branch:select', eventsTable['branch:select'])
-  CAWIPC.ipcClient.pubsub.on('res:code:context:open-rel', eventsTable['context:open-rel'])
+function processIPC(res: any) {
+  try {
+    const { flow, domain, action, data } = res
+    switch (`${flow}:${domain}:${action}`) {
+      case 'res:code:sync:setup':
+        // TODO
+        break
+      case 'res:*:auth:login':
+        eventsTable['auth:login'](res.data)
+        break
+      case 'res:code:active-path':
+        eventsTable['peer:select'](res.data)
+        break
+      case 'res:code:peer:select':
+        eventsTable['peer:select'](res.data)
+        break
+      case 'res:code:branch:select':
+        eventsTable['branch:select'](res.data)
+        break
+      case 'res:code:context:open-rel':
+        eventsTable['context:open-rel'](res.data)
+        break
+    }
+  } catch (err) {
+    console.error("CAWEvents: Error processing response", err)
+  }
 }
 
 const CAWEvents = {
-  listen,
+  processIPC,
   setup,
 }
 

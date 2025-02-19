@@ -97,7 +97,7 @@ class IPC {
         const { flow, domain, action, data, err } = message
         if (action && ['res', 'err'].includes(flow)) {
           logger.info(`IPC: resolved ${domain}:${action} with ${flow}`, data || err)
-          this.pubsub.emit(`${flow}:${domain}:${action}`, data || err)
+          this.pubsub.emit('response', JSON.stringify({ flow, domain, action, data, err }))
         }
       })
 

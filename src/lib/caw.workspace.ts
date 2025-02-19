@@ -30,8 +30,6 @@ function init(data?: any) {
     CAWStore.tokens = data.tokens
     setupSync() // TODO: when we restart LS the client reconnects but we lose the sync (and it seems auth:info returns undefined?)
     CAWWorkspace.refreshActiveFile()
-  } else {
-    CAWEvents.listen()
   }
   return setupTempFiles()
 }
@@ -63,11 +61,6 @@ function setupSync() {
     caw: CAWIPC.guid,
     aid: actionID,
   })) // don't use transmit, as that will overwrite the response handler
-  CAWIPC.ipcClient.pubsub.on('res:sync:setup', (data: any) => {
-    if (!data) return
-    const { action, aid } = data
-    if (actionTable[action] && actionID === aid) actionTable[action](data)
-  })
 }
 
 function closeTextDocument(params: any) {

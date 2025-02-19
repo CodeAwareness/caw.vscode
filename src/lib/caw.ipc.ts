@@ -7,6 +7,7 @@ import logger from './logger'
 import { CAWStatusbar } from '@/vscode/statusbar'
 
 import CAWWorkspace from './caw.workspace'
+import CAWEvents from './caw.events'
 
 export type TClass<T> = new (...args: any[]) => T
 
@@ -20,6 +21,7 @@ export const shortid = () => {
 const guid = shortid()
 const ipcClient = new IPC(guid) // FIFO pipe for operations
 const ipcCatalog = new IPC(config.PIPE_CATALOG) // the local service watches this file to connect to all clients
+const responseHandlers = new Map<string, Function>()
 
 const CAWIPC = {
   guid,
@@ -36,39 +38,56 @@ const CAWIPC = {
         .then(CAWWorkspace.init)
         .then(CAWStatusbar.init)
     })
+
+    // here we treat only calls made with `transmit(..).then().catch()` 
+    // but we also have an IPC processor inside the caw.events.ts, to respond to events not triggered by VSCode
+    ipcClient.pubsub.on("response", (body: any) => {
+      try {
+        const res = body.length ? JSON.parse(body) : body
+        const { flow, domain, action, data, err } = res
+        const errObj = typeof err === 'string' ? { err } : err
+        const aidRes = `res:${domain}:${action}`
+        const aidErr = `err:${domain}:${action}`
+        CAWEvents.processIPC(res)
+
+        if (responseHandlers.has(aidRes)) {
+          const resolve = responseHandlers.get(aidRes)!
+          responseHandlers.delete(aidRes)
+          responseHandlers.delete(aidErr)
+          resolve(data)
+        } else if (responseHandlers.has(aidErr)) {
+          const reject = responseHandlers.get(aidErr)!
+          responseHandlers.delete(aidRes)
+          responseHandlers.delete(aidErr)
+          reject(data)
+        }
+      } catch (err) {
+        console.error("CAWIPC: Error processing response", err)
+      }
+    })
   },
 
   /* Transmit an action, and perhaps some data. */
-  transmit: function<T>(action: string, data?: any) {
+  transmit: function<T>(action: string, data?: any): Promise<any> {
     const domain = (['auth:info', 'auth:login'].includes(action)) ? '*' : 'code'
     const flow = 'req'
-    const aid = shortid()
+    const aidRes = `res:${domain}:${action}`
+    const aidErr = `err:${domain}:${action}`
     const caw = CAWIPC.guid
 
     return new Promise<T>((resolve, reject) => {
-      const handler = (body: any) => {
-        const resdata = body.length ? JSON.parse(body) : body
-        ipcClient.pubsub.removeListener(`res:${domain}:${action}`, handler)
-        resolve(resdata)
-      }
-      const errHandler = (err: any) => {
-        logger.info('CAWIPC: socket error', action, err)
-        ipcClient.pubsub.removeListener(`err:${domain}:${action}`, errHandler)
-        if (typeof err === 'string') {
-          // eslint-disable-next-line prefer-promise-reject-errors
-          reject({ err })
-        } else {
-          reject(err)
+      responseHandlers.set(aidRes, resolve)
+      responseHandlers.set(aidErr, reject)
+      ipcClient.emit(JSON.stringify({ flow, domain, action, data, caw })) // also send data to the pipe
+
+      // Timeout to reject if no response received
+      setTimeout(() => {
+        if (responseHandlers.has(aidRes) && responseHandlers.has(aidErr)) {
+          responseHandlers.delete(aidRes)
+          responseHandlers.delete(aidErr)
+          reject(new Error(`CAWIPC: Request timed out for ${flow}:${domain}:${action}`))
         }
-      }
-
-      ipcClient.pubsub.removeAllListeners(`res:${aid}`)
-      ipcClient.pubsub.removeAllListeners(`err:${aid}`)
-      ipcClient.pubsub.on(`res:${domain}:${action}`, handler)    // process successful response
-      ipcClient.pubsub.on(`err:${domain}:${action}`, errHandler) // process error response
-      ipcClient.emit(JSON.stringify({ flow, domain, action, data, aid, caw })) // send data to the pipe
-
-      setTimeout(reject, 20000) // Reject if not handled within 20 secon
+      }, 20000)
     })
   },
 

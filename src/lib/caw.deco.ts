@@ -89,9 +89,8 @@ function setDecorations(options: TEditorRanges) {
 
 function insertDecorations(leading?: boolean) {
   const editor = CAWStore.activeTextEditor
-  if (!editor) return
-  const activePath = CAWStore.activeProject.activePath
-  if (!activePath) return
+  if (!editor || !CAWStore.activeProject?.activePath) return
+  const activePath = CAWStore.activeProject?.activePath
   logger.log('DECO: (leading, activePath, lastPath)', leading, activePath, lastPath)
   if (activePath !== lastPath) {
     insertThenWaitSomeTime.cancel()
