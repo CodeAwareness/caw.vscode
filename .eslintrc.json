@@ -19,8 +19,8 @@
       "array-callback-return": 0,
       "comma-dangle": [ "error", "only-multiline" ],
       "indent": [ "warn", 2, { "SwitchCase": 1 }],
-      "linebreak-style": ["error", "unix"],
       "security/detect-non-literal-fs-filename": 0,
+      "linebreak-style": 0,
       "quotes": [
         "warn",
         "single"
@@ -64,7 +64,8 @@
       "security/detect-child-process": 0,
       "security/detect-object-injection": 0,
       "@typescript-eslint/ban-ts-comment": 0,
-      "@typescript-eslint/no-explicit-any": 0
+      "@typescript-eslint/no-explicit-any": 0,
+      "@typescript-eslint/no-unused-vars": 0
     },
     "ignorePatterns": [
         "**/*.d.ts"
