@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.0.14
+
+Compatibility with Windsurf AI
+
 ### 1.0.11
 
 Minor fixes for diff windows and some IPC cleanup for efficiency.
